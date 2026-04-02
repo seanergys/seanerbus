@@ -1,0 +1,32 @@
+version = 1
+
+[[annotations]]
+
+path = [
+   "async/.gitignore",
+   "async/Cargo.lock",
+   "async/Cargo.toml",
+   "async/README.md",
+   "README.md",
+   "client/.gitignore",
+   "client/Cargo.lock",
+   "client/Cargo.toml",
+   "internal_schemas/.gitignore",
+   "internal_schemas/Cargo.lock",
+   "internal_schemas/Cargo.toml",
+   "internal_schemas/schemas/msg.capnp",
+   "msg/.gitignore",
+   "msg/Cargo.lock",
+   "msg/Cargo.toml",
+   "msg/schemas/msg.capnp",
+   "naming_scheme/Cargo.lock",
+   "naming_scheme/Cargo.toml",
+   "naming_scheme/README.md",
+   "naming_scheme/services.json",
+   "server/.gitignore",
+   "server/Cargo.lock",
+   "server/Cargo.toml",
+   "server/README.md"
+   ]
+SPDX-FileCopyrightText = "2026 SEANERGYS Partners <https://seanergys.eu>"
+SPDX-License-Identifier = "MIT"

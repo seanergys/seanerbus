@@ -1,0 +1,2 @@
+target/*
+bindings/rust/msg_capnp.rs
