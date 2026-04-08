@@ -1,0 +1,10 @@
+[package]
+name = "seanerbus_async"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+seanerbus_schemas = {path="../internal_schemas"}
+thiserror = "2.0.18"
+tokio = { version = "1.50.0", features = ["full"] }

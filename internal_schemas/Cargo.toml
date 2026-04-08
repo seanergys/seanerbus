@@ -1,0 +1,19 @@
+[package]
+name = "seanerbus_schemas"
+version = "0.1.0"
+edition = "2024"
+
+include = [
+"bindings/rust/*"
+]
+build = "bindings/rust/build.rs"
+
+[lib]
+path = 'bindings/rust/lib.rs'
+[dependencies]
+capnp = "0.25.2"
+thiserror = "2.0.18"
+uuid = { version = "1.22.0", features = ["v4"] }
+
+[build-dependencies]
+capnpc = "0.25.0"

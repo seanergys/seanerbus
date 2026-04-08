@@ -1,0 +1,14 @@
+[
+    {
+        "uuid": "57499619-8305-44b8-ae52-c75b93d20ff9",
+        "attrs": {"node": "4", "sensor": "freq"}
+    },
+    {
+        "uuid": "c70de76e-2157-43c6-b31d-d9aabebe166a",
+        "attrs": {"node": "5", "sensor": "freq"}
+    },
+    {
+        "uuid": "09011c23-439b-43f3-bfc5-5558c130d094",
+        "attrs": {"node": "6", "sensor": "power"}
+    }
+]
