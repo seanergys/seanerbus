@@ -52,7 +52,7 @@ impl Message {
                 }
 
                 Ok(Message::NamingServiceRequestV1(attrs))
-            },
+            }
             3 => {
                 let reader =
                     capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;

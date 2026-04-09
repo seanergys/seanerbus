@@ -14,25 +14,24 @@ struct Services {
     attrs: HashMap<String, String>,
 }
 
-fn get_matching_addresses(attrs: Vec<(String, String)>, services: &Vec<Services>) -> Vec<Uuid> {
-    let mut services = services.clone();
+fn get_matching_addresses(attrs: Vec<(String, String)>, services: &[Services]) -> Vec<Uuid> {
+    let mut services = services.to_owned();
     for attr in &attrs {
-        services = services
-            .into_iter()
-            .filter(|s| {
+        services
+            .retain(|s| {
                 if let Some(v) = s.attrs.get(&attr.0) {
                     if attr.1 == "*" { true } else { *v == attr.1 }
                 } else {
                     false
                 }
-            })
-            .collect();
+            });
     }
     services.into_iter().map(|s| s.uuid).collect()
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tracing_subscriber::fmt::init();
     let file = std::fs::File::open("services.json")?;
 
     let services: Vec<Services> = serde_json::from_reader(file)?;
@@ -55,10 +54,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                     println!("Resolved To: {:?}", uuids);
                     let (payload_type, payload) =
-                        seanerbus_msg::message::Message::NamingServiceResponseV1(
-                            uuids,
-                        )
-                        .to_capnp()?;
+                        seanerbus_msg::message::Message::NamingServiceResponseV1(uuids)
+                            .to_capnp()?;
                     conn.respond_to(&msg, payload_type, &payload).await?;
                 } else {
                     panic!(
