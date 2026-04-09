@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 use crate::error::ConnectionError;
+use log::trace;
 use seanerbus_schemas::message::Message;
-
 use tokio::io::AsyncWrite;
 use tokio::io::AsyncWriteExt;
 
@@ -32,6 +32,9 @@ impl MessageWriter {
     /// `Message` failed for some reason.
     pub async fn write_message(&mut self, msg: &Message) -> Result<(), ConnectionError> {
         let ser_msg = msg.to_capnp()?;
-        Ok(self.writer.write_all(&ser_msg).await?)
+        trace!("serialized message, serialized size={}", ser_msg.len());
+        self.writer.write_all(&ser_msg).await?;
+        trace!("Wrote mesage to network!");
+        Ok(())
     }
 }

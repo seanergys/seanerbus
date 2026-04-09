@@ -2,15 +2,16 @@
 //
 // SPDX-License-Identifier: MIT
 
+use crate::error::ConnectionError;
+use bytes::{Buf, BytesMut};
+use log::trace;
 use seanerbus_schemas::message::Message;
 use tokio::io::{AsyncRead, AsyncReadExt};
 
-use crate::error::ConnectionError;
 /// Represents a message reader
 pub struct MessageReader {
     reader: Box<dyn AsyncRead + Unpin + std::marker::Send + 'static>,
-    buffer: Vec<u8>,
-    cursor: usize,
+    buffer: BytesMut,
 }
 
 impl MessageReader {
@@ -22,8 +23,7 @@ impl MessageReader {
     {
         MessageReader {
             reader: Box::new(reader),
-            buffer: vec![0; 4096],
-            cursor: 0,
+            buffer: BytesMut::with_capacity(4096),
         }
     }
 
@@ -36,28 +36,32 @@ impl MessageReader {
     /// * `Some(Message)` If a message could be succesfully read.
     pub async fn read_message(&mut self) -> Result<Option<Message>, ConnectionError> {
         loop {
-            if let Some(msg) = Message::from_capnp(&self.buffer) {
-                self.buffer = vec![0; 4096];
-                self.cursor = 0;
+            if let Some((msg, size)) = Message::from_capnp(&self.buffer) {
+                trace!(
+                    "Succesfully parsed message from network, msg_type={:?}, size={}",
+                    msg.dp_type, size
+                );
+                self.buffer.advance(size);
+                trace!(
+                    "Advanced buffer by {}, buffer size is now {}",
+                    size,
+                    self.buffer.len()
+                );
                 return Ok(Some(msg));
             }
+            let n = self.reader.read_buf(&mut self.buffer).await?;
 
-            if self.buffer.len() == self.cursor {
-                self.buffer.resize(self.cursor * 2, 0);
-            }
-
-            let n = self.reader.read(&mut self.buffer[self.cursor..]).await?;
+            trace!("Read {} bytes, buffer size is now {}", n, self.buffer.len());
 
             if 0 == n {
-                if self.cursor == 0 {
+                if self.buffer.is_empty() {
                     return Ok(None);
                 } else {
-                    return Err(ConnectionError::GeneralError(
-                        "connection reset by peer".into(),
-                    ));
+                    return Err(ConnectionError::GeneralError(format!(
+                        "connection reset by peer, but there are still {} bytes left in the buffer",
+                        self.buffer.len()
+                    )));
                 }
-            } else {
-                self.cursor += n;
             }
         }
     }

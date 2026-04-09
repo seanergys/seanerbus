@@ -5,27 +5,27 @@
 use crate::msg_capnp;
 use thiserror::Error;
 
-#[derive (PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug)]
 pub struct ErrorPayload {
     pub error_kind: msg_capnp::error_payload::ErrorKind,
     pub error_str: String,
 }
 
-#[derive (Error, Debug)]
-pub enum ErrorPayloadError
-{
+#[derive(Error, Debug)]
+pub enum ErrorPayloadError {
     #[error("Could not deserialize error payload: {0}!")]
-    CapnpError(#[from] capnp::Error)
+    CapnpError(#[from] capnp::Error),
 }
 
 impl ErrorPayload {
-    pub fn new(kind: msg_capnp::error_payload::ErrorKind, str: String) -> ErrorPayload
-    {
-        ErrorPayload{error_kind: kind, error_str :str}
+    pub fn new(kind: msg_capnp::error_payload::ErrorKind, str: String) -> ErrorPayload {
+        ErrorPayload {
+            error_kind: kind,
+            error_str: str,
+        }
     }
     pub fn from_capnp(data: &[u8]) -> Result<ErrorPayload, ErrorPayloadError> {
-        let reader =
-            capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;
+        let reader = capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;
 
         let msg = reader.get_root::<msg_capnp::error_payload::Reader>()?;
 
@@ -57,20 +57,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn  test_create()
-    {
-        let err1 = ErrorPayload::new(msg_capnp::error_payload::ErrorKind::NoSuchInterface, "no such interface!".to_string());
+    fn test_create() {
+        let err1 = ErrorPayload::new(
+            msg_capnp::error_payload::ErrorKind::NoSuchInterface,
+            "no such interface!".to_string(),
+        );
 
         let foo = err1.to_capnp().expect("Can serialize Error Payload");
         let err2 = ErrorPayload::from_capnp(&foo).expect("Can deserialize Error Payload");
 
-        assert_eq!(err1, err2);www
+        assert_eq!(err1, err2);
+        www
     }
 
     #[test]
 
-    fn test_random_bytes()
-    {
+    fn test_random_bytes() {
         let foo = "I am certainly not a Capnp message";
 
         assert!(matches!(ErrorPayload::from_capnp(foo.as_bytes()), Err(_)));

@@ -484,9 +484,13 @@ dependencies = [
 name = "seanerbus_async"
 version = "0.1.0"
 dependencies = [
+ "bytes",
+ "env_logger",
+ "log",
  "seanerbus_schemas",
  "thiserror",
  "tokio",
+ "tracing",
 ]
 
 [[package]]

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-use std::{collections::HashMap, time::Duration};
+use std::collections::HashMap;
 
 use seanerbus_client::Connection;
 use seanerbus_msg::message::Message;
@@ -44,7 +44,7 @@ async fn resolve(
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
 
-    if (args.len() - 1) % 2 != 0 || args.len() < 3 {
+    if !(args.len() - 1).is_multiple_of(2) || args.len() < 3 {
         println!("USAGE: ./request_test KEY1 VALUE1 [KEY2 VALUE2]...");
         return Ok(());
     }
@@ -63,7 +63,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     for uuid in uuids {
         println!("Subscribing to: {}", uuid);
-        tokio::time::sleep(Duration::from_secs(1)).await;
         conn.subscribe(Address(uuid)).await?;
     }
 

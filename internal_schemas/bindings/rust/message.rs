@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-use uuid::Uuid;
 use crate::error_payload::ErrorPayload;
-use thiserror::Error;
 pub use crate::msg_capnp;
+use thiserror::Error;
+use uuid::Uuid;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum MessageType {
@@ -18,13 +18,12 @@ pub enum MessageType {
 }
 
 #[derive(Error, Debug)]
-pub enum SchemaError
-{
+pub enum SchemaError {
     #[error("Could not serialize Cap'n'Proto message: {0}")]
-    CapnpError(#[from] capnp::Error)
+    CapnpError(#[from] capnp::Error),
 }
 
-#[derive (Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub struct ConnectionId(pub Uuid);
 
 impl std::fmt::Display for ConnectionId {
@@ -47,7 +46,7 @@ impl From<crate::msg_capnp::message::MessageType> for MessageType {
 }
 
 impl From<MessageType> for msg_capnp::message::MessageType {
-   fn from(item: MessageType) -> Self {
+    fn from(item: MessageType) -> Self {
         match item {
             MessageType::Subscribe => msg_capnp::message::MessageType::Subscribe,
             MessageType::Publish => msg_capnp::message::MessageType::Publish,
@@ -83,7 +82,7 @@ impl Message {
     /// * `data`: Buffer with Cap'n'Proto
     ///
     /// Returns Some(Message) if the data is parsable as a Message and None if not.
-    pub fn from_capnp(data: &[u8]) -> Option<Message> {
+    pub fn from_capnp(data: &[u8]) -> Option<(Message, usize)> {
         let reader =
             match capnp::serialize::read_message(data, capnp::message::ReaderOptions::new()) {
                 Ok(r) => r,
@@ -121,17 +120,20 @@ impl Message {
         };
 
         let dp_type = MessageType::from(msg.get_type().unwrap());
-        Some(Message {
-            dp_type,
-            payload_type,
-            payload: payload.to_vec(),
-            address: Address(Uuid::from_u64_pair(
-                address.get_upper(),
-                address.get_lower(),
-            )),
-            to,
-            from,
-        })
+        Some((
+            Message {
+                dp_type,
+                payload_type,
+                payload: payload.to_vec(),
+                address: Address(Uuid::from_u64_pair(
+                    address.get_upper(),
+                    address.get_lower(),
+                )),
+                to,
+                from,
+            },
+            (reader.size_in_words() + 1) * 8,
+        )) // This is always short one word, dont ask me why.
     }
 
     /// Serializes the Message to the Cap'n'Proto format.
@@ -190,41 +192,77 @@ impl Message {
         }
     }
 
-    pub fn subscribe_to_msg(addr: Address) -> Message
-    {
-        Message { dp_type: MessageType::Subscribe, to: None, from: None, address: addr, payload: vec![], payload_type: 0 }
+    pub fn subscribe_to_msg(addr: Address) -> Message {
+        Message {
+            dp_type: MessageType::Subscribe,
+            to: None,
+            from: None,
+            address: addr,
+            payload: vec![],
+            payload_type: 0,
+        }
     }
 
-    pub fn publish_msg(addr: Address, payload_type : u64, payload: &[u8]) -> Message
-    {
-        Message { dp_type: MessageType::Publish, to: None, from: None, address: addr, payload: payload.to_vec(), payload_type: payload_type }
+    pub fn publish_msg(addr: Address, payload_type: u64, payload: &[u8]) -> Message {
+        Message {
+            dp_type: MessageType::Publish,
+            to: None,
+            from: None,
+            address: addr,
+            payload: payload.to_vec(),
+            payload_type,
+        }
     }
 
-    pub fn request_msg(addr : Address, payload_type : u64, payload: &[u8]) -> Message
-    {
-        Message { dp_type: MessageType::Request, to: None, from: None, address: addr, payload: payload.to_vec(), payload_type: payload_type }
+    pub fn request_msg(addr: Address, payload_type: u64, payload: &[u8]) -> Message {
+        Message {
+            dp_type: MessageType::Request,
+            to: None,
+            from: None,
+            address: addr,
+            payload: payload.to_vec(),
+            payload_type,
+        }
     }
 
-    pub fn response_msg(responds_to: &Message, payload_type : u64, payload: &[u8]) -> Message
-    {
-        Message { dp_type: MessageType::Response, to: responds_to.from, from: None, address: responds_to.address, payload: payload.to_vec(), payload_type: payload_type }
+    pub fn response_msg(responds_to: &Message, payload_type: u64, payload: &[u8]) -> Message {
+        Message {
+            dp_type: MessageType::Response,
+            to: responds_to.from,
+            from: None,
+            address: responds_to.address,
+            payload: payload.to_vec(),
+            payload_type,
+        }
     }
 
-    pub fn register_msg(addr: Address) -> Message
-    {
-        Message { dp_type: MessageType::Register, to: None, from: None, address: addr, payload: vec![], payload_type: 0}
+    pub fn register_msg(addr: Address) -> Message {
+        Message {
+            dp_type: MessageType::Register,
+            to: None,
+            from: None,
+            address: addr,
+            payload: vec![],
+            payload_type: 0,
+        }
     }
 }
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
 
     #[test]
-    fn test_create()
-    {
+    fn test_create() {
         let str = "foo";
-        let msg1 = Message{dp_type: MessageType::Error, to: Some(ConnectionId(Uuid::new_v4())), from: Some(ConnectionId(Uuid::new_v4())), address: Address(Uuid::new_v4()), payload : str.as_bytes().to_vec(), payload_type: 42};
+        let msg1 = Message {
+            dp_type: MessageType::Error,
+            to: Some(ConnectionId(Uuid::new_v4())),
+            from: Some(ConnectionId(Uuid::new_v4())),
+            address: Address(Uuid::new_v4()),
+            payload: str.as_bytes().to_vec(),
+            payload_type: 42,
+        };
 
         let foo = msg1.to_capnp().expect("Can serialize message");
         let msg2 = Message::from_capnp(&foo).expect("Can deserialize message");
@@ -233,18 +271,23 @@ mod tests{
     }
 
     #[test]
-    fn test_random_bytes()
-    {
+    fn test_random_bytes() {
         let str = "This is certainly not a Cap'n'Proto message";
 
         assert_eq!(Message::from_capnp(&str.as_bytes()), None);
     }
 
     #[test]
-    fn test_create_empty_addrs()
-    {
+    fn test_create_empty_addrs() {
         let str = "foo";
-        let msg1 = Message{dp_type: MessageType::Error, to: None, from: None, address: Address(Uuid::new_v4()), payload : str.as_bytes().to_vec(), payload_type: 42};
+        let msg1 = Message {
+            dp_type: MessageType::Error,
+            to: None,
+            from: None,
+            address: Address(Uuid::new_v4()),
+            payload: str.as_bytes().to_vec(),
+            payload_type: 42,
+        };
 
         let foo = msg1.to_capnp().expect("Can serialize message");
         let msg2 = Message::from_capnp(&foo).expect("Can deserialize message");
@@ -253,9 +296,13 @@ mod tests{
     }
 
     #[test]
-    fn can_create_error()
-    {
-        let msg_err = Message::create_error(ConnectionId(Uuid::new_v4()), Address(Uuid::new_v4()), msg_capnp::error_payload::ErrorKind::NoSuchInterface, "not an interface");
+    fn can_create_error() {
+        let msg_err = Message::create_error(
+            ConnectionId(Uuid::new_v4()),
+            Address(Uuid::new_v4()),
+            msg_capnp::error_payload::ErrorKind::NoSuchInterface,
+            "not an interface",
+        );
         let foo = msg_err.to_capnp().expect("Can serialize Error message");
         let msg_err2 = Message::from_capnp(&foo).expect("Can deserialize Error message");
 
@@ -265,7 +312,10 @@ mod tests{
 
         let err = ErrorPayload::from_capnp(&msg_err2.payload).expect("Can decode error");
 
-        assert_eq!(err.error_kind, msg_capnp::error_payload::ErrorKind::NoSuchInterface);
+        assert_eq!(
+            err.error_kind,
+            msg_capnp::error_payload::ErrorKind::NoSuchInterface
+        );
         assert_eq!(err.error_str, "not an interface");
     }
 }
