@@ -5,13 +5,11 @@
 Standardized Payloads
 =====================
 
-The actual communication over the dataplane is facilitated through the use of standardized payloads to the publish/subscribe/request and response communication primitives.
+Information is communicated over the dataplane through  standardized payloads encoded in `Cap'n'Proto <https://capnproto.org>`_.
 
-The currently defined payloads and their payloads types are documented in the section `on standardized payloads <msg_capnp.html>`_  as their canonicial Cap'n'Proto format.
+The currently defined payloads and their payloads types are documented in the section `on standardized payloads <msg_capnp.html>`_  as their canonical Cap'n'Proto format.
 
-The `New Payload Types HOWTO <new_msg_type.html>`_ shows how you can define a new payload type.
-
-Additionally, There a convenience Rust/C++/Python payload encoding/decoding libraries.
+The `New Payload HOWTO <new_msg_type.html>`_ shows how you can define a new payload
 
 .. toctree::
    msg_capnp

@@ -21,7 +21,7 @@ pub async fn demux(chan: BrokerChannels, mut rx: mpsc::Receiver<DemuxMsg>) {
                 MessageType::Publish | MessageType::Subscribe => {
                     if let Err(e) = chan.to_pubsub.send(PubSubMsg::IncMsg(msg)).await {
                         debug!(
-                            "pub/sub service died (Reason: {}), following it to Valhallah",
+                            "pub/sub service died (Reason: {}), following it to Valhalla",
                             e
                         );
                         break;
@@ -30,7 +30,7 @@ pub async fn demux(chan: BrokerChannels, mut rx: mpsc::Receiver<DemuxMsg>) {
                 MessageType::Request | MessageType::Register | MessageType::Response => {
                     if let Err(e) = chan.to_reqres.send(ReqResMsg::IncMsg(msg)).await {
                         debug!(
-                            "pub/sub service died (Reason: {}), following it to Valhallah",
+                            "pub/sub service died (Reason: {}), following it to Valhalla",
                             e
                         );
                         break;

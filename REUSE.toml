@@ -11,6 +11,7 @@ path = [
    "client/.gitignore",
    "client/Cargo.lock",
    "client/Cargo.toml",
+   "scenario_tests/README.md",
    "internal_schemas/.gitignore",
    "internal_schemas/Cargo.lock",
    "internal_schemas/Cargo.toml",
@@ -51,7 +52,14 @@ path = [
    "internal/internal_schemas/.gitignore",
    "internal/internal_schemas/schemas/internal.capnp",
    "rust_examples/Cargo.lock",
-   "bindings/python/src/seanerbus/msg/msg.capnp"
+   "bindings/python/src/seanerbus/msg/msg.capnp",
+   ".cspell.json",
+   ".gitignore",
+   "bindings/python/.gitignore",
+   "cli/.gitignore",
+   "database/.gitignore",
+   "project-words.txt",
+   "internal/internal_schemas/bindings/rust/.gitignore"
    ]
 SPDX-FileCopyrightText = "2026 SEANERGYS Partners <https://seanergys.eu>"
 SPDX-License-Identifier = "MIT"

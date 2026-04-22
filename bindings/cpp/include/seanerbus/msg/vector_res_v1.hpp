@@ -60,7 +60,7 @@ public:
     }
 
     /**
-     * Output the Cap'n'Proto encoded data, as ingestecd by the C++ client library
+     * Output the Cap'n'Proto encoded data, as ingested by the C++ client library
      */
     std::pair<uint64_t, std::vector<std::byte>> to_capnp()
     {

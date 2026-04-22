@@ -40,7 +40,7 @@ Message Message::from_msg(::Message::Reader& rd)
 
     auto addr_rd = rd.getAddress();
     res.matching_id = rd.getMatchingId();
-    res.address = Address({ addr_rd.getUpper(), addr_rd.getLower() });
+    res.address = Address(addr_rd.getUpper(), addr_rd.getLower());
 
     if (rd.hasFrom())
     {

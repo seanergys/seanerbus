@@ -26,7 +26,7 @@ impl MessageWriter {
 
     /// Writes a `Message` to the underlying stream.
     ///
-    /// Returns `()` if the `Message` could be succesfully send.
+    /// Returns `()` if the `Message` could be successfully send.
     ///
     /// Returns [`ConnectionError`](seanerbus_async/error/enum.ConnectionError.html) if sending the
     /// `Message` failed for some reason.
@@ -34,7 +34,7 @@ impl MessageWriter {
         let ser_msg = msg.to_capnp()?;
         trace!("serialized message, serialized size={}", ser_msg.len());
         self.writer.write_all(&ser_msg).await?;
-        trace!("Wrote mesage to network!");
+        trace!("Wrote message to network!");
         Ok(())
     }
 }

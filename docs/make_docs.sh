@@ -6,6 +6,9 @@
 
 set -euo pipefail
 
+uv cache clean
+rm -rf .venv
+
 # Generate C++ client library documentation
 cd ../bindings/cpp
 doxygen
@@ -14,3 +17,12 @@ cd ../../docs
 # the sphinx-rustdocgen tends to die randomly.
 rm -rf docs/crates
 uv run sphinx-build sphinx ../public
+rm -rf ../public/rust_msg
+rm -rf ../public/rust_client
+rm -rf ../public/rust_naming
+cd ../msg
+cargo doc --target-dir ../public/rust_msg
+cd ../client
+cargo doc --target-dir ../public/rust_client
+cd ../naming_scheme
+cargo doc --target-dir ../public/rust_naming

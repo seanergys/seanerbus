@@ -8,9 +8,12 @@ import argparse
 import seanerbus.msg
 import seanerbus.client
 import seanerbus.naming
+import seanerbus.time_series
 import asyncio
 import capnp
 import uuid
+
+from modules.db import make_history_timeline, make_history_aggregate
 
 
 def print_msg(msg):
@@ -65,7 +68,7 @@ async def make_subscribe(args):
 
 
 async def make_resolve(args):
-    resolv = {}
+    resolve = {}
     for kv in args.keyvalue:
         kv = kv.split("=")
         if len(kv) != 2:
@@ -73,9 +76,9 @@ async def make_resolve(args):
                 f"{kv}: key=value arguments need to consist of two terms separated by a '=' sign!"
             )
             exit(1)
-        resolv[kv[0]] = kv[1]
-    addrs = await seanerbus.naming.resolve(resolv)
-    print(f"Resolved {resolv} to:")
+        resolve[kv[0]] = kv[1]
+    addrs = await seanerbus.naming.resolve(resolve)
+    print(f"Resolved {resolve} to:")
     for addr in addrs:
         print(f"\t{addr}")
 
@@ -102,7 +105,7 @@ async def make_reg_resolve(args):
     res = await seanerbus.naming.register_resolve(name, addr)
 
     if res.success:
-        print(f"Succesfully registered address {addr} for name {name}")
+        print(f"Successfully registered address {addr} for name {name}")
     else:
         print(f"Registering address {addr} for name {name} failed: {res.errMsg}")
 
@@ -113,7 +116,7 @@ async def make_unreg_resolve(args):
     res = await seanerbus.naming.unregister_resolve(addr)
 
     if res.success:
-        print(f"Succesfully unregistered address {addr}")
+        print(f"Successfully unregistered address {addr}")
     else:
         print(f"Unregistering address {addr} failed: {res.errMsg}")
 
@@ -156,6 +159,34 @@ unreg_resolve_parser = subparsers.add_parser(
 unreg_resolve_parser.add_argument(
     "addr", help="Address to deregister from naming service"
 )
+
+hist_aggr_req_parser = subparsers.add_parser(
+    "history-aggregate", help="Request one aggregate of time-series data"
+)
+hist_aggr_req_parser.add_argument(
+    "addr", help="Address to deregister from naming service"
+)
+hist_aggr_req_parser.add_argument(
+    "-s", "--start", help="Start time for history request"
+)
+hist_aggr_req_parser.add_argument("-e", "--end", help="End time for history request")
+hist_aggr_req_parser.add_argument("-i", "--interval-max", help="Interval Max")
+
+
+hist_timeline_req_parser = subparsers.add_parser(
+    "history-timeline", help="Request a timeline of  time-series data"
+)
+hist_timeline_req_parser.add_argument(
+    "addr", help="Address to deregister from naming service"
+)
+hist_timeline_req_parser.add_argument(
+    "-s", "--start", help="Start time for history request"
+)
+hist_timeline_req_parser.add_argument(
+    "-e", "--end", help="End time for history request"
+)
+hist_timeline_req_parser.add_argument("-i", "--interval-max", help="Interval Max")
+
 args = parser.parse_args()
 
 # print(vars(seanerbus.msg.msg_capnp.MessageTypes))
@@ -176,3 +207,9 @@ if args.cmd == "register-resolve":
 
 if args.cmd == "unregister-resolve":
     asyncio.run(capnp.run(make_unreg_resolve(args)))
+
+if args.cmd == "history-aggregate":
+    asyncio.run(capnp.run(make_history_aggregate(args)))
+
+if args.cmd == "history-timeline":
+    asyncio.run(capnp.run(make_history_timeline(args)))

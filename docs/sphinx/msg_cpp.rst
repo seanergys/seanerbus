@@ -14,6 +14,9 @@ This includes:
 - HelloWorldResV1 A "Hello World" response type, consisting of only a string message.
 - VectorReqV1 A request type containing a vector of float values.
 - VectorResV1 A response type containing a vector of float values.
+
+.. doxygenfunction:: seanerbus::msg::payload_type_to_str
+
 .. doxygenclass:: seanerbus::msg::TimeValueV1
    :project: cpp_seanerbus
    :members:
@@ -40,3 +43,8 @@ This includes:
    :project: cpp_seanerbus
    :members:
 
+.. doxygenclass:: seanerbus::msg::HistoryReqV1
+   :members:
+
+.. doxygenclass:: seanerbus::msg::HistoryResV1
+   :members:

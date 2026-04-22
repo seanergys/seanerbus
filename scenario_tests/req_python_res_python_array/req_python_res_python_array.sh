@@ -15,7 +15,12 @@ echo "server PID is $SERVER_PID"
 
 sleep 1
 
-cd ../contrib/scenario_tests
+cd ../scenario_tests/req_python_res_python_array
+
+uv venv --clear --force
+source .venv/bin/activate
+
+uv pip install -r pyproject.toml
 
 # identity function: f(x)->y with x=y
 timeout 10s python3 response_test_array.py a366335b-52f0-4658-a42b-7e73e83ec91e &

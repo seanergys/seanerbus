@@ -35,7 +35,7 @@ public:
         if (!payload.first == (uint64_t)::MessageTypes::HELLO_WORLD_RES_V1)
         {
             throw std::runtime_error(
-                "Trying to decode someting as HelloWorldResV1 that is not HelloWorldResV1");
+                "Trying to decode something as HelloWorldResV1 that is not HelloWorldResV1");
         }
         capnp::MallocMessageBuilder msg;
 

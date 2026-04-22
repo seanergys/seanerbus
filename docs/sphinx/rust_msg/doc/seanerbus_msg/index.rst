@@ -2,7 +2,5 @@
 ..
 .. SPDX-License-Identifier: MIT
 
-Python Name Resolution Library
-==============================
-
-.. autofunction:: seanerbus.naming.resolve
+Rust Payload Crate
+==================

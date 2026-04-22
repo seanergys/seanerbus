@@ -3,5 +3,5 @@
 // SPDX-License-Identifier: MIT
 
 pub mod error_payload;
-pub mod message;
 pub mod internal_capnp;
+pub mod message;

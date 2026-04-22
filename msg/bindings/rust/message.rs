@@ -215,6 +215,13 @@ impl Message {
                     reader.get_address().unwrap().get_lower(),
                 )))
             }
+
+            MessageTypes::HistoryReqV1 => {
+                todo!("Implement me!");
+            }
+            MessageTypes::HistoryResV1 => {
+                todo!("Implement me!");
+            }
         }
     }
 
