@@ -9,6 +9,7 @@
 #include <seanerbus_schemas/message.hpp>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 extern "C"
 {
@@ -82,7 +83,7 @@ public:
         msg.to_fd_capnp(fd_);
 
         sub_cbs_.emplace(subscribe_to, sub);
-        userdata_.emplace(subscribe_to, userdata);
+        sub_userdata_.emplace(subscribe_to, userdata);
     }
 
     void main_loop()
@@ -94,12 +95,46 @@ public:
             switch (msg.type)
             {
             case ::Message::MessageType::PUBLISH:
-                sub_cbs_.at(msg.address)(msg, userdata_.at(msg.address));
+                sub_cbs_.at(msg.address)(msg, sub_userdata_.at(msg.address));
+                break;
+            case ::Message::MessageType::REQUEST:
+                req_cbs_.at(msg.address)(msg, req_userdata_.at(msg.address));
                 break;
             default:
                 throw std::runtime_error("Unknown msg type!");
             }
         }
+    }
+
+    Message request(Address address, uint64_t payload_type, std::vector<std::byte> payload)
+    {
+        auto msg = seanerbus::Message::request(address, payload_type, payload);
+
+        msg.to_fd_capnp(fd_);
+
+        auto ret_msg = seanerbus::Message::from_fd_capnp(fd_);
+
+        if (msg.type != ::Message::MessageType::RESPONSE)
+        {
+            throw std::runtime_error("Got something else than a response for a request");
+        }
+
+        return msg;
+    }
+
+    void respond_to(Message msg, uint64_t payload_type, std::vector<std::byte> payload)
+    {
+        auto res_msg = seanerbus::Message::response(msg, payload_type, payload);
+        res_msg.to_fd_capnp(fd_);
+    }
+
+    void register_endpoint(Address addr, subscribe_cb cb, void* userdata)
+    {
+        auto reg_msg = seanerbus::Message::register_endpoint(addr);
+        reg_msg.to_fd_capnp(fd_);
+
+        req_cbs_.emplace(addr, cb);
+        req_userdata_.emplace(addr, userdata);
     }
 
     ~Connection()
@@ -111,7 +146,9 @@ private:
     int fd_ = -1;
 
     std::map<Address, subscribe_cb> sub_cbs_;
-    std::map<Address, void*> userdata_;
+    std::map<Address, void*> sub_userdata_;
+    std::map<Address, subscribe_cb> req_cbs_;
+    std::map<Address, void*> req_userdata_;
 };
 } // namespace client
 } // namespace seanerbus

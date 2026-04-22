@@ -5,6 +5,7 @@
 #include <capnp/blob.h>
 #include <capnp/message.h>
 #include <capnp/serialize.h>
+#include <filesystem>
 #include <optional>
 #include <schemas/msg.capnp.h>
 #include <seanerbus_schemas/message.hpp>
@@ -99,6 +100,44 @@ namespace seanerbus
         res.from = std::nullopt;
         res.address = addr;
         res.payload = Payload{ payload_type, payload };
+        return res;
+    }
+
+    Message Message::request(Address addr, uint64_t payload_type, std::vector<std::byte> payload)
+    {
+        Message res;
+
+        res.type = ::Message::MessageType::REQUEST;
+        res.to = std::nullopt;
+        res.from = std::nullopt;
+        res.address = addr;
+        res.payload = Payload{ payload_type, payload };
+        return res;
+    }
+
+    Message Message::response(Message msg, uint64_t payload_type, std::vector<std::byte> payload)
+    {
+        Message res;
+
+        res.type = ::Message::MessageType::RESPONSE;
+        res.to = msg.from;
+        res.from = std::nullopt;
+        res.address = msg.address;
+        res.payload = Payload{ payload_type, payload };
+
+        return res;
+    }
+
+    Message Message::register_endpoint(Address addr)
+    {
+        Message res;
+
+        res.type = ::Message::MessageType::REGISTER;
+        res.to = std::nullopt;
+        res.from = std::nullopt;
+        res.address = addr;
+        res.payload = Payload{ 0, std::vector<std::byte>() };
+
         return res;
     }
 }

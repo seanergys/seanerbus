@@ -58,6 +58,9 @@ class Message
 
         static Message subscribe(Address addr);
         static Message publish(Address addr, uint64_t payload_type, std::vector<std::byte> payload);
+        static Message request(Address addr, uint64_t payload_type, std::vector<std::byte> payload);
+        static Message response(Message msg, uint64_t payload_type, std::vector<std::byte> payload);
+        static Message register_endpoint(Address addr);
 
         ::Message::MessageType type;
         std::optional<ConnectionId> to = std::nullopt;
