@@ -2,11 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include <schemas/msg.capnp.h>
 #include <capnp/blob.h>
-#include <seanerbus_schemas/message.hpp>
 #include <capnp/message.h>
 #include <capnp/serialize.h>
+#include <optional>
+#include <schemas/msg.capnp.h>
+#include <seanerbus_schemas/message.hpp>
 
 namespace seanerbus
 {
@@ -75,6 +76,30 @@ namespace seanerbus
 
     writeMessageToFd(fd, message);
 
+    }
+
+    Message Message::subscribe(Address addr)
+    {
+        Message res;
+
+        res.type = ::Message::MessageType::SUBSCRIBE;
+        res.to = std::nullopt;
+        res.from = std::nullopt;
+        res.address = addr;
+        res.payload = Payload{ 0, std::vector<std::byte>() };
+        return res;
+    }
+
+    Message Message::publish(Address addr, uint64_t payload_type, std::vector<std::byte> payload)
+    {
+        Message res;
+
+        res.type = ::Message::MessageType::PUBLISH;
+        res.to = std::nullopt;
+        res.from = std::nullopt;
+        res.address = addr;
+        res.payload = Payload{ payload_type, payload };
+        return res;
     }
 }
 

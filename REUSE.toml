@@ -23,6 +23,7 @@ path = [
    "naming_scheme/Cargo.toml",
    "naming_scheme/README.md",
    "naming_scheme/services.json",
+   "naming_scheme/.gitignore",
    "server/.gitignore",
    "server/Cargo.lock",
    "server/Cargo.toml",

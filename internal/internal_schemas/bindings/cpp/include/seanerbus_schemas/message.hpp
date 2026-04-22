@@ -56,6 +56,9 @@ class Message
         explicit Message() : address({0,0})
         {}
 
+        static Message subscribe(Address addr);
+        static Message publish(Address addr, uint64_t payload_type, std::vector<std::byte> payload);
+
         ::Message::MessageType type;
         std::optional<ConnectionId> to = std::nullopt;
         std::optional<ConnectionId> from = std::nullopt;

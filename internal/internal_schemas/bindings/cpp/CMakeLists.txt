@@ -31,3 +31,4 @@ target_include_directories(
 	seanerbus_schemas PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
                            "${CMAKE_CURRENT_BINARY_DIR}")
 
+add_library(Seanerbus::internal_schemas ALIAS seanerbus_schemas)
