@@ -28,10 +28,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let payload_msg =
                 seanerbus_msg::message::Message::from_capnp(msg.payload_type, &msg.payload)?;
 
-            if let seanerbus_msg::message::Message::HelloWorldV1Req(str_msg) = payload_msg {
+            if let seanerbus_msg::message::Message::HelloWorldReqV1(str_msg) = payload_msg {
                 println!("Got a HelloWorldV1Req request, msg: {}", str_msg);
 
-                let (payload_type, payload) = seanerbus_msg::message::Message::HelloWorldV1Res(
+                let (payload_type, payload) = seanerbus_msg::message::Message::HelloWorldResV1(
                     format!("Appreciate your \"{}\"", str_msg),
                 )
                 .to_capnp()

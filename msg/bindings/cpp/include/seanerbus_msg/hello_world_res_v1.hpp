@@ -27,7 +27,7 @@ class HelloWorldResV1
 public:
     HelloWorldResV1(std::pair<uint64_t, std::vector<std::byte>> payload)
     {
-        if (!payload.first == (uint64_t)::MessageTypes::HELLO_WORLD_RES)
+        if (!payload.first == (uint64_t)::MessageTypes::HELLO_WORLD_RES_V1)
         {
             throw std::runtime_error(
                 "Trying to decode someting as HelloWorldResV1 that is not HelloWorldResV1");
@@ -58,7 +58,7 @@ public:
         auto res = capnp::messageToFlatArray(msg);
 
         return std::make_pair(
-            (uint64_t)capnp::schemas::MessageTypes_b06630b2cb0c9ce8::HELLO_WORLD_RES,
+            (uint64_t)::MessageTypes::HELLO_WORLD_RES_V1,
             std::vector<std::byte>((std::byte*)res.begin(), (std::byte*)res.end()));
     }
 

@@ -19,7 +19,7 @@ void res_handler(seanerbus::client::Connection& conn, seanerbus::Message msg)
         throw std::runtime_error("Got something else than a request!");
     }
 
-    if (msg.payload.first != (uint64_t)::MessageTypes::HELLO_WORLD_REQ)
+    if (msg.payload.first != (uint64_t)::MessageTypes::HELLO_WORLD_REQ_V1)
     {
         throw std::runtime_error("Got something else than a HelloWorldReqV1!");
     }

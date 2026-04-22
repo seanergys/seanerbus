@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 
     auto msg = conn.request(addr, res);
 
-    if (msg.payload.first != (uint64_t)::MessageTypes::HELLO_WORLD_RES)
+    if (msg.payload.first != (uint64_t)::MessageTypes::HELLO_WORLD_RES_V1)
     {
         std::cerr << "Got unknown return message type!" << std::endl;
         return -1;

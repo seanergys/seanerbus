@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut conn = Connection::new("localhost:5398").await?;
 
-    let (payload_type, payload) = Message::HelloWorldV1Req("Hello World".to_owned())
+    let (payload_type, payload) = Message::HelloWorldReqV1("Hello World".to_owned())
         .to_capnp()
         .unwrap();
 
@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     if msg.dp_type == MessageType::Response {
         let payload = Message::from_capnp(msg.payload_type, &msg.payload).unwrap();
-        if let Message::HelloWorldV1Res(msg) = payload {
+        if let Message::HelloWorldResV1(msg) = payload {
             println!("Got an answer: {}", msg);
         } else {
             panic!(

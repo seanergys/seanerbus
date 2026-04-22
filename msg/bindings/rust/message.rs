@@ -15,8 +15,8 @@ pub enum Message {
     TimeValueV1(u64, f64),
     NamingServiceRequestV1(Vec<(String, String)>),
     NamingServiceResponseV1(Vec<Uuid>),
-    HelloWorldV1Req(String),
-    HelloWorldV1Res(String),
+    HelloWorldReqV1(String),
+    HelloWorldResV1(String),
 }
 
 #[derive(Error, Debug)]
@@ -43,7 +43,7 @@ impl Message {
 
                 Ok(Message::TimeValueV1(reader.get_time(), reader.get_value()))
             }
-            MessageTypes::NamingServiceReq => {
+            MessageTypes::NamingServiceReqV1 => {
                 let reader =
                     capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;
                 let reader = reader.get_root::<naming_service_request_v1::Reader>()?;
@@ -58,7 +58,7 @@ impl Message {
 
                 Ok(Message::NamingServiceRequestV1(attrs))
             }
-            MessageTypes::NamingServiceRes => {
+            MessageTypes::NamingServiceResV1 => {
                 let reader =
                     capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;
                 let reader = reader.get_root::<naming_service_response_v1::Reader>()?;
@@ -71,21 +71,21 @@ impl Message {
                 Ok(Message::NamingServiceResponseV1(attrs))
             }
 
-            MessageTypes::HelloWorldReq => {
+            MessageTypes::HelloWorldReqV1 => {
                 let reader =
                     capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;
                 let reader = reader.get_root::<hello_world_req_v1::Reader>()?;
 
-                Ok(Message::HelloWorldV1Req(
+                Ok(Message::HelloWorldReqV1(
                     reader.get_msg().unwrap().to_str().unwrap().to_owned(),
                 ))
             }
-            MessageTypes::HelloWorldRes => {
+            MessageTypes::HelloWorldResV1 => {
                 let reader =
                     capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;
                 let reader = reader.get_root::<hello_world_req_v1::Reader>()?;
 
-                Ok(Message::HelloWorldV1Res(
+                Ok(Message::HelloWorldResV1(
                     reader.get_msg().unwrap().to_str().unwrap().to_owned(),
                 ))
             }
@@ -129,7 +129,7 @@ impl Message {
                 let mut buffer = vec![];
                 capnp::serialize::write_message(&mut buffer, bld.borrow_inner())?;
 
-                Ok((MessageTypes::NamingServiceReq as u64, buffer))
+                Ok((MessageTypes::NamingServiceReqV1 as u64, buffer))
             }
             Message::NamingServiceResponseV1(uuids) => {
                 let mut bld =
@@ -148,9 +148,9 @@ impl Message {
                 let mut buffer = vec![];
                 capnp::serialize::write_message(&mut buffer, bld.borrow_inner())?;
 
-                Ok((MessageTypes::NamingServiceRes as u64, buffer))
+                Ok((MessageTypes::NamingServiceResV1 as u64, buffer))
             }
-            Message::HelloWorldV1Req(str_msg) => {
+            Message::HelloWorldReqV1(str_msg) => {
                 let mut bld =
                     capnp::message::TypedBuilder::<hello_world_req_v1::Owned>::new_default();
                 let mut msg = bld.init_root();
@@ -160,9 +160,9 @@ impl Message {
                 let mut buffer = vec![];
                 capnp::serialize::write_message(&mut buffer, bld.borrow_inner())?;
 
-                Ok((MessageTypes::HelloWorldReq as u64, buffer))
+                Ok((MessageTypes::HelloWorldReqV1 as u64, buffer))
             }
-            Message::HelloWorldV1Res(str_msg) => {
+            Message::HelloWorldResV1(str_msg) => {
                 let mut bld =
                     capnp::message::TypedBuilder::<hello_world_req_v1::Owned>::new_default();
                 let mut msg = bld.init_root();
@@ -172,7 +172,7 @@ impl Message {
                 let mut buffer = vec![];
                 capnp::serialize::write_message(&mut buffer, bld.borrow_inner())?;
 
-                Ok((MessageTypes::HelloWorldRes as u64, buffer))
+                Ok((MessageTypes::HelloWorldResV1 as u64, buffer))
             }
         }
     }
