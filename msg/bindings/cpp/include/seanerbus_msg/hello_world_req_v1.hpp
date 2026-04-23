@@ -24,12 +24,19 @@ namespace msg
 class HelloWorldReqV1
 {
 public:
-    HelloWorldReqV1(std::byte* buf, size_t size)
+    HelloWorldReqV1(std::pair<uint64_t, std::vector<std::byte>> payload)
     {
+        if (!payload.first == (uint64_t)::MessageTypes::HELLO_WORLD_REQ)
+        {
+            throw std::runtime_error(
+                "Trying to decode a message as a HelloWorldRegV1 that is not a HelloWorldRegV1");
+        }
         capnp::MallocMessageBuilder msg;
 
         capnp::initMessageBuilderFromFlatArrayCopy(
-            kj::ArrayPtr(reinterpret_cast<capnp::word*>(buf), size), msg);
+            kj::ArrayPtr(reinterpret_cast<capnp::word*>(payload.second.data()),
+                         payload.second.size() / sizeof(capnp::word)),
+            msg);
 
         ::HelloWorldReqV1::Reader rd = msg.getRoot<::HelloWorldReqV1>();
 
@@ -51,7 +58,7 @@ public:
         auto res = capnp::messageToFlatArray(msg);
 
         return std::make_pair(
-            (uint64_t)capnp::schemas::MessageTypes_b06630b2cb0c9ce8::HELLO_WORLD_REQ,
+            (uint64_t)::MessageTypes::HELLO_WORLD_REQ,
             std::vector<std::byte>((std::byte*)res.begin(), (std::byte*)res.end()));
     }
 

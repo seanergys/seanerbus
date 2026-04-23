@@ -11,25 +11,6 @@
 #include <schemas/msg.capnp.h>
 #include <unistd.h>
 
-void sub_handler(seanerbus::Message message, void* userdata)
-{
-    // Check the payload type if we are really dealing with a TimeValueV1 message.
-    //
-    // TODO: The name of this enum could be nicer.
-    if (message.payload.payload_type ==
-        (uint64_t)capnp::schemas::MessageTypes_b06630b2cb0c9ce8::TIME_VALUE_V1)
-    {
-        seanerbus::msg::TimeValueV1 v(message.payload.payload.data(),
-                                      message.payload.payload.size());
-
-        std::cout << "time=" << v.time << ", value=" << v.value << std::endl;
-    }
-    else
-    {
-        throw std::runtime_error("Got unexpected message type!");
-    }
-}
-
 int main(int argc, char** argv)
 {
     if (argc != 2)
@@ -50,8 +31,7 @@ int main(int argc, char** argv)
         seanerbus::msg::TimeValueV1 tv{ time, value };
 
         std::cout << "Publishing time=" << time << ", value=" << value << std::endl;
-        auto res = tv.to_capnp();
-        conn.publish(addr, res.first, res.second);
+        conn.publish(addr, tv.to_capnp());
 
         sleep(1);
         time++;

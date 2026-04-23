@@ -74,9 +74,9 @@ public:
         fd_ = sfd;
     }
 
-    void publish(Address publish_to, uint64_t payload_type, std::vector<std::byte> payload)
+    void publish(Address publish_to, std::pair<uint64_t, std::vector<std::byte>> payload)
     {
-        auto msg = seanerbus::Message::publish(publish_to, payload_type, payload);
+        auto msg = seanerbus::Message::publish(publish_to, payload);
         msg.to_fd_capnp(fd_);
     }
 
@@ -110,9 +110,9 @@ public:
         }
     }
 
-    Message request(Address address, uint64_t payload_type, std::vector<std::byte> payload)
+    Message request(Address address, std::pair<uint64_t, std::vector<std::byte>> payload)
     {
-        auto msg = seanerbus::Message::request(address, payload_type, payload);
+        auto msg = seanerbus::Message::request(address, payload);
 
         msg.to_fd_capnp(fd_);
 
@@ -126,9 +126,9 @@ public:
         return ret_msg;
     }
 
-    void respond_to(Message msg, uint64_t payload_type, std::vector<std::byte> payload)
+    void respond_to(Message msg, std::pair<uint64_t, std::vector<std::byte>> payload)
     {
-        auto res_msg = seanerbus::Message::response(msg, payload_type, payload);
+        auto res_msg = seanerbus::Message::response(msg, payload);
         res_msg.to_fd_capnp(fd_);
     }
 

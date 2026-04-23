@@ -19,20 +19,19 @@ void res_handler(seanerbus::client::Connection& conn, seanerbus::Message msg, vo
         throw std::runtime_error("Got something else than a request!");
     }
 
-    if (msg.payload.payload_type != (uint64_t)::MessageTypes::HELLO_WORLD_REQ)
+    if (msg.payload.first != (uint64_t)::MessageTypes::HELLO_WORLD_REQ)
     {
         throw std::runtime_error("Got something else than a HelloWorldReqV1!");
     }
 
-    seanerbus::msg::HelloWorldReqV1 req(msg.payload.payload.data(), msg.payload.payload.size());
+    seanerbus::msg::HelloWorldReqV1 req(msg.payload);
 
     std::cout << "Got incoming HelloWorldReqV1: " << req.str_msg << std::endl;
 
     seanerbus::msg::HelloWorldResV1 res(std::string("Thank you for your \"") + req.str_msg +
                                         std::string("\""));
 
-    auto enc = res.to_capnp();
-    conn.respond_to(msg, enc.first, enc.second);
+    conn.respond_to(msg, res.to_capnp());
 }
 
 int main(int argc, char** argv)

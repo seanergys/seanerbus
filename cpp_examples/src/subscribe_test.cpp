@@ -15,11 +15,9 @@ void sub_handler(seanerbus::client::Connection& conn, seanerbus::Message message
     // Check the payload type if we are really dealing with a TimeValueV1 message.
     //
     // TODO: The name of this enum could be nicer.
-    if (message.payload.payload_type ==
-        (uint64_t)capnp::schemas::MessageTypes_b06630b2cb0c9ce8::TIME_VALUE_V1)
+    if (message.payload.first == (uint64_t)::MessageTypes::TIME_VALUE_V1)
     {
-        seanerbus::msg::TimeValueV1 v(message.payload.payload.data(),
-                                      message.payload.payload.size());
+        seanerbus::msg::TimeValueV1 v(message.payload);
 
         std::cout << "time=" << v.time << ", value=" << v.value << std::endl;
     }
