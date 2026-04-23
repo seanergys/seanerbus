@@ -41,12 +41,11 @@ namespace seanerbus
          res.to = ConnectionId({ to_rd.getUpper(), to_rd.getLower() });
         }
 
-        res.payload.payload_type = rd.getPayloadType();
         auto msg_payload = rd.getPayload();
 
         std::vector<std::byte> payload((std::byte*)msg_payload.begin(),
                                       (std::byte*)msg_payload.end());
-        res.payload.payload = payload;
+        res.payload = std::make_pair(rd.getPayloadType(), payload);
 
         return res;
     }
@@ -75,8 +74,9 @@ namespace seanerbus
     msg_from.setLower(to->u_.lower);
     }
 
-    sub_msg.setPayload(capnp::Data::Reader((const kj::byte*)payload.payload.data(), payload.payload.size()));
-    sub_msg.setPayloadType(payload.payload_type);
+    sub_msg.setPayload(
+        capnp::Data::Reader((const kj::byte*)payload.second.data(), payload.second.size()));
+    sub_msg.setPayloadType(payload.first);
 
     writeMessageToFd(fd, message);
 
@@ -90,11 +90,11 @@ namespace seanerbus
         res.to = std::nullopt;
         res.from = std::nullopt;
         res.address = addr;
-        res.payload = Payload{ 0, std::vector<std::byte>() };
+        res.payload = { 0, std::vector<std::byte>() };
         return res;
     }
 
-    Message Message::publish(Address addr, uint64_t payload_type, std::vector<std::byte> payload)
+    Message Message::publish(Address addr, std::pair<uint64_t, std::vector<std::byte>> payload)
     {
         Message res;
 
@@ -102,11 +102,11 @@ namespace seanerbus
         res.to = std::nullopt;
         res.from = std::nullopt;
         res.address = addr;
-        res.payload = Payload{ payload_type, payload };
+        res.payload = payload;
         return res;
     }
 
-    Message Message::request(Address addr, uint64_t payload_type, std::vector<std::byte> payload)
+    Message Message::request(Address addr, std::pair<uint64_t, std::vector<std::byte>> payload)
     {
         Message res;
 
@@ -114,11 +114,11 @@ namespace seanerbus
         res.to = std::nullopt;
         res.from = std::nullopt;
         res.address = addr;
-        res.payload = Payload{ payload_type, payload };
+        res.payload = payload;
         return res;
     }
 
-    Message Message::response(Message msg, uint64_t payload_type, std::vector<std::byte> payload)
+    Message Message::response(Message msg, std::pair<uint64_t, std::vector<std::byte>> payload)
     {
         Message res;
 
@@ -126,7 +126,7 @@ namespace seanerbus
         res.to = msg.from;
         res.from = std::nullopt;
         res.address = msg.address;
-        res.payload = Payload{ payload_type, payload };
+        res.payload = payload;
 
         return res;
     }
@@ -139,7 +139,7 @@ namespace seanerbus
         res.to = std::nullopt;
         res.from = std::nullopt;
         res.address = addr;
-        res.payload = Payload{ 0, std::vector<std::byte>() };
+        res.payload = { 0, std::vector<std::byte>() };
 
         return res;
     }

@@ -9,11 +9,10 @@ find_package(PkgConfig)
 
 add_subdirectory(lib/fmt)
 
-pkg_check_modules(fmt REQUIRED IMPORTED_TARGET fmt)
 pkg_check_modules(capnp REQUIRED IMPORTED_TARGET capnp)
 
 add_library(seanerbus_schemas "src/message.cpp" "src/error_payload.cpp")
-target_link_libraries(seanerbus_schemas PkgConfig::fmt PkgConfig::capnp fmt::fmt-header-only)
+target_link_libraries(seanerbus_schemas  PkgConfig::capnp fmt::fmt-header-only)
 
 add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/schemas/internal.capnp.c++"

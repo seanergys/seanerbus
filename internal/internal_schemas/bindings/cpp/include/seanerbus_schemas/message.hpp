@@ -95,11 +95,6 @@ struct Address
     }
 };
 
-struct Payload
-{
-    uint64_t payload_type;
-    std::vector<std::byte> payload;
-};
 class Message
 {
     public:
@@ -107,16 +102,17 @@ class Message
         {}
 
         static Message subscribe(Address addr);
-        static Message publish(Address addr, uint64_t payload_type, std::vector<std::byte> payload);
-        static Message request(Address addr, uint64_t payload_type, std::vector<std::byte> payload);
-        static Message response(Message msg, uint64_t payload_type, std::vector<std::byte> payload);
+        static Message publish(Address addr, std::pair<uint64_t, std::vector<std::byte>> payload);
+        static Message request(Address addr, std::pair<uint64_t, std::vector<std::byte>> payload);
+        static Message response(Message msg, std::pair<uint64_t, std::vector<std::byte>> payload);
         static Message register_endpoint(Address addr);
 
         ::Message::MessageType type;
         std::optional<ConnectionId> to = std::nullopt;
         std::optional<ConnectionId> from = std::nullopt;
         Address address = Address(Uuid{0,0});
-        struct Payload payload = Payload{0, std::vector<std::byte>()};
+        std::pair<uint64_t, std::vector<std::byte>> payload =
+            std::pair{ 0, std::vector<std::byte>() };
 
         static Message from_fd_capnp(int fd);
 

@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -24,13 +25,19 @@ namespace msg
 class HelloWorldResV1
 {
 public:
-    HelloWorldResV1(std::byte* buf, size_t size)
+    HelloWorldResV1(std::pair<uint64_t, std::vector<std::byte>> payload)
     {
+        if (!payload.first == (uint64_t)::MessageTypes::HELLO_WORLD_RES)
+        {
+            throw std::runtime_error(
+                "Trying to decode someting as HelloWorldResV1 that is not HelloWorldResV1");
+        }
         capnp::MallocMessageBuilder msg;
 
         capnp::initMessageBuilderFromFlatArrayCopy(
-            kj::ArrayPtr(reinterpret_cast<capnp::word*>(buf), size), msg);
-
+            kj::ArrayPtr(reinterpret_cast<capnp::word*>(payload.second.data()),
+                         payload.second.size() / sizeof(capnp::word)),
+            msg);
         ::HelloWorldResV1::Reader rd = msg.getRoot<::HelloWorldResV1>();
 
         str_msg = rd.getMsg();

@@ -24,16 +24,15 @@ int main(int argc, char** argv)
 
     auto res = seanerbus::msg::HelloWorldReqV1("Hello World").to_capnp();
 
-    auto msg = conn.request(addr, res.first, res.second);
+    auto msg = conn.request(addr, res);
 
-    if (msg.payload.payload_type !=
-        (uint64_t)capnp::schemas::MessageTypes_b06630b2cb0c9ce8::HELLO_WORLD_RES)
+    if (msg.payload.first != (uint64_t)::MessageTypes::HELLO_WORLD_RES)
     {
         std::cerr << "Got unknown return message type!" << std::endl;
         return -1;
     }
 
-    seanerbus::msg::HelloWorldReqV1 result(msg.payload.payload.data(), msg.payload.payload.size());
+    seanerbus::msg::HelloWorldReqV1 result(msg.payload);
 
     std::cout << "Got answer to request: " << result.str_msg << std::endl;
 

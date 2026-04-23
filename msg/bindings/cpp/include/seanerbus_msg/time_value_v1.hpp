@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -23,12 +24,19 @@ namespace msg
 class TimeValueV1
 {
 public:
-    TimeValueV1(std::byte* buf, size_t size)
+    TimeValueV1(std::pair<uint64_t, std::vector<std::byte>> payload)
     {
+        if (!payload.first == (uint64_t)::MessageTypes::TIME_VALUE_V1)
+        {
+            throw std::runtime_error(
+                "Trying to decode a message as a TimeValueV1 that is not a TimeValueV1");
+        }
         capnp::MallocMessageBuilder msg;
 
         capnp::initMessageBuilderFromFlatArrayCopy(
-            kj::ArrayPtr(reinterpret_cast<capnp::word*>(buf), size), msg);
+            kj::ArrayPtr(reinterpret_cast<capnp::word*>(payload.second.data()),
+                         payload.second.size() / sizeof(capnp::word)),
+            msg);
 
         ::TimeValueV1::Reader rd = msg.getRoot<::TimeValueV1>();
 
@@ -57,7 +65,7 @@ public:
     }
 
     uint64_t time;
-    uint64_t value;
+    double value;
 };
 
 } // namespace msg

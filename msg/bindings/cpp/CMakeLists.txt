@@ -7,7 +7,6 @@ project(seanerbus_msg VERSION 0.0.1)
 
 find_package(PkgConfig)
 
-pkg_check_modules(fmt REQUIRED IMPORTED_TARGET fmt)
 pkg_check_modules(capnp REQUIRED IMPORTED_TARGET capnp)
 
 add_library(seanerbus_msg INTERFACE)

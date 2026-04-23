@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-cmake_minimum_required(VERSION 3.111)
+cmake_minimum_required(VERSION 3.11)
 project(seanerbus_client VERSION 0.0.1)
 
 add_subdirectory(../../../internal/internal_schemas/bindings/cpp internal_schemas)
