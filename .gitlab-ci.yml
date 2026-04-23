@@ -1,6 +1,7 @@
 stages:
   - reuse-lint
   - build
+  - build-cpp
   - test
 
 workflow:
@@ -46,6 +47,15 @@ build-linux:
       - server/target/$TARGET/release/seanerbus
     expire_in: 1 week
   allow_failure: false
+
+build-cpp:
+  stage: build
+  script:
+    - apt-get update && apt-get install -y cmake capnproto libcapnp-dev
+    - git submodule update --init --recursive
+    - cd cpp_examples
+    - cmake .
+    - make -j4
 
 test:unit:
   extends: .rust-template
