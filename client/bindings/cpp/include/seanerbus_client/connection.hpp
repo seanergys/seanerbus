@@ -6,10 +6,14 @@
 
 #include <seanerbus_schemas/message.hpp>
 
+#include <functional>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <stdexcept>
 #include <string>
+#include <tuple>
+#include <utility>
 #include <vector>
 
 #include <schemas/internal.capnp.h>
@@ -33,8 +37,6 @@ namespace client
 class Connection
 {
 public:
-    using subscribe_cb = void (*)(Connection&, Message, void*);
-
     Connection(std::string address, std::string port)
     {
         int sfd, s;
@@ -74,20 +76,50 @@ public:
         fd_ = sfd;
     }
 
+    template <class invoke_tuple>
+    static void* executor(Connection& conn, Message msg, void* arg)
+    {
+        invoke_tuple* func_arg = static_cast<invoke_tuple*>(arg);
+
+        // Tuple is unpacked here. Don't ask how.
+        using indices = std::make_index_sequence<std::tuple_size<invoke_tuple>::value - 1>;
+        executor_helper(conn, msg, *func_arg, indices{});
+
+        return nullptr;
+    }
+
+    template <class F, class... Args, size_t... Indices>
+    static void executor_helper(Connection& conn, Message& msg, std::tuple<F, Args...>& t,
+                                std::index_sequence<Indices...> is)
+    {
+        std::invoke(std::move(std::get<0>(t)), conn, msg, std::move(std::get<Indices + 1>(t))...);
+    }
+
     void publish(Address publish_to, std::pair<uint64_t, std::vector<std::byte>> payload)
     {
         auto msg = seanerbus::Message::publish(publish_to, payload);
         msg.to_fd_capnp(fd_);
     }
 
-    void subscribe(Address subscribe_to, subscribe_cb sub, void* userdata)
+    template <class F, class... Args>
+    void subscribe(Address subscribe_to, F&& f, Args&&... args)
     {
         auto msg = seanerbus::Message::subscribe(subscribe_to);
 
+        using invoke_tuple = std::tuple<F, Args...>;
+
         msg.to_fd_capnp(fd_);
 
-        sub_cbs_.emplace(subscribe_to, sub);
-        sub_userdata_.emplace(subscribe_to, userdata);
+        sub_cbs_.emplace(std::piecewise_construct, std::forward_as_tuple(subscribe_to),
+                         std::forward_as_tuple(executor<invoke_tuple>));
+
+        void* data = std::unique_ptr<invoke_tuple>(
+                         new invoke_tuple(invoke_tuple(std::move(f), std::forward<Args>(args)...)))
+                         .release();
+        sub_userdata_.emplace(subscribe_to, data);
+
+        deleters_.emplace(std::piecewise_construct, std::forward_as_tuple(data),
+                          std::forward_as_tuple(deleter<invoke_tuple>));
     }
 
     void main_loop()
@@ -132,27 +164,48 @@ public:
         res_msg.to_fd_capnp(fd_);
     }
 
-    void register_endpoint(Address addr, subscribe_cb cb, void* userdata)
+    template <class F, class... Args>
+    void register_endpoint(Address addr, F f, Args... args)
     {
         auto reg_msg = seanerbus::Message::register_endpoint(addr);
         reg_msg.to_fd_capnp(fd_);
 
-        req_cbs_.emplace(addr, cb);
-        req_userdata_.emplace(addr, userdata);
+        using invoke_tuple = std::tuple<F, Args...>;
+
+        req_cbs_.emplace(std::piecewise_construct, std::forward_as_tuple(addr),
+                         std::forward_as_tuple(executor<invoke_tuple>));
+
+        void* data = std::unique_ptr<invoke_tuple>(
+                         new invoke_tuple(invoke_tuple(std::move(f), std::forward<Args>(args)...)))
+                         .release();
+        req_userdata_.emplace(addr, data);
+
+        deleters_.emplace(data, deleter<invoke_tuple>);
     }
 
     ~Connection()
     {
+        for (auto& elem : deleters_)
+        {
+            elem.second(elem.first);
+        }
         close(fd_);
+    }
+
+    template <class invoke_tuple>
+    static void deleter(void* arg)
+    {
+        std::unique_ptr<invoke_tuple>{ (invoke_tuple*)arg };
     }
 
 private:
     int fd_ = -1;
 
-    std::map<Address, subscribe_cb> sub_cbs_;
+    std::map<Address, void* (*)(Connection&, Message, void*)> sub_cbs_;
     std::map<Address, void*> sub_userdata_;
-    std::map<Address, subscribe_cb> req_cbs_;
+    std::map<Address, void* (*)(Connection&, Message, void*)> req_cbs_;
     std::map<Address, void*> req_userdata_;
+    std::map<void*, void (*)(void*)> deleters_;
 };
 } // namespace client
 } // namespace seanerbus

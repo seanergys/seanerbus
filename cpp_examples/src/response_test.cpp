@@ -12,7 +12,7 @@
 #include <schemas/msg.capnp.h>
 #include <unistd.h>
 
-void res_handler(seanerbus::client::Connection& conn, seanerbus::Message msg, void* userdata)
+void res_handler(seanerbus::client::Connection& conn, seanerbus::Message msg)
 {
     if (msg.type != ::Message::MessageType::REQUEST)
     {
@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 
     auto res = seanerbus::msg::HelloWorldReqV1("Hello World").to_capnp();
 
-    conn.register_endpoint(addr, res_handler, nullptr);
+    conn.register_endpoint(addr, res_handler);
 
     conn.main_loop();
 

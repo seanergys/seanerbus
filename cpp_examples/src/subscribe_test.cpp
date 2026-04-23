@@ -10,7 +10,7 @@
 
 #include <schemas/msg.capnp.h>
 
-void sub_handler(seanerbus::client::Connection& conn, seanerbus::Message message, void* userdata)
+void sub_handler(seanerbus::client::Connection& conn, seanerbus::Message message)
 {
     // Check the payload type if we are really dealing with a TimeValueV1 message.
     //
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     seanerbus::client::Connection conn("localhost", "5398");
 
     // Subscribe to the Address given on the command line.
-    conn.subscribe(seanerbus::Address{ seanerbus::Uuid{ argv[1] } }, sub_handler, nullptr);
+    conn.subscribe(seanerbus::Address{ seanerbus::Uuid{ argv[1] } }, sub_handler);
 
     // Run the main loop, reading for messages.
     conn.main_loop();
