@@ -16,7 +16,7 @@ pub enum ReaderError {
     #[error("Reading a message failed: {0}")]
     ReadFailed(#[from] ConnectionError),
     #[error("Failed to communicate to other SeanerBUS components: {0}")]
-    CommFailed(#[from] SendError::<DemuxMsg>)
+    CommFailed(#[from] SendError<DemuxMsg>),
 }
 
 pub async fn read<Reader>(

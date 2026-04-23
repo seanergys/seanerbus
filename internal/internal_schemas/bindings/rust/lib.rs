@@ -4,4 +4,4 @@
 
 pub mod error_payload;
 pub mod message;
-pub mod msg_capnp;
+pub mod internal_capnp;

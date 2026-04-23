@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 use crate::error_payload::ErrorPayload;
-pub use crate::msg_capnp;
+pub use crate::internal_capnp;
 use thiserror::Error;
 use uuid::Uuid;
 
@@ -32,28 +32,28 @@ impl std::fmt::Display for ConnectionId {
     }
 }
 
-impl From<crate::msg_capnp::message::MessageType> for MessageType {
-    fn from(item: msg_capnp::message::MessageType) -> Self {
+impl From<crate::internal_capnp::message::MessageType> for MessageType {
+    fn from(item: internal_capnp::message::MessageType) -> Self {
         match item {
-            msg_capnp::message::MessageType::Subscribe => MessageType::Subscribe,
-            msg_capnp::message::MessageType::Publish => MessageType::Publish,
-            msg_capnp::message::MessageType::Error => MessageType::Error,
-            msg_capnp::message::MessageType::Request => MessageType::Request,
-            msg_capnp::message::MessageType::Response => MessageType::Response,
-            msg_capnp::message::MessageType::Register => MessageType::Register,
+            internal_capnp::message::MessageType::Subscribe => MessageType::Subscribe,
+            internal_capnp::message::MessageType::Publish => MessageType::Publish,
+            internal_capnp::message::MessageType::Error => MessageType::Error,
+            internal_capnp::message::MessageType::Request => MessageType::Request,
+            internal_capnp::message::MessageType::Response => MessageType::Response,
+            internal_capnp::message::MessageType::Register => MessageType::Register,
         }
     }
 }
 
-impl From<MessageType> for msg_capnp::message::MessageType {
+impl From<MessageType> for internal_capnp::message::MessageType {
     fn from(item: MessageType) -> Self {
         match item {
-            MessageType::Subscribe => msg_capnp::message::MessageType::Subscribe,
-            MessageType::Publish => msg_capnp::message::MessageType::Publish,
-            MessageType::Error => msg_capnp::message::MessageType::Error,
-            MessageType::Response => msg_capnp::message::MessageType::Response,
-            MessageType::Request => msg_capnp::message::MessageType::Request,
-            MessageType::Register => msg_capnp::message::MessageType::Register,
+            MessageType::Subscribe => internal_capnp::message::MessageType::Subscribe,
+            MessageType::Publish => internal_capnp::message::MessageType::Publish,
+            MessageType::Error => internal_capnp::message::MessageType::Error,
+            MessageType::Response => internal_capnp::message::MessageType::Response,
+            MessageType::Request => internal_capnp::message::MessageType::Request,
+            MessageType::Register => internal_capnp::message::MessageType::Register,
         }
     }
 }
@@ -89,7 +89,7 @@ impl Message {
                 Err(_) => return None,
             };
 
-        let msg = match reader.get_root::<msg_capnp::message::Reader>() {
+        let msg = match reader.get_root::<internal_capnp::message::Reader>() {
             Ok(msg) => msg,
             Err(_) => return None,
         };
@@ -140,7 +140,7 @@ impl Message {
     ///@0xccea65a7e11c9c74
     /// Returns the serialized message or an Error if no Serialization could be performed.
     pub fn to_capnp(&self) -> Result<Vec<u8>, SchemaError> {
-        let mut bld = capnp::message::TypedBuilder::<msg_capnp::message::Owned>::new_default();
+        let mut bld = capnp::message::TypedBuilder::<internal_capnp::message::Owned>::new_default();
         let mut msg = bld.init_root();
 
         msg.set_payload(&self.payload);
@@ -174,7 +174,7 @@ impl Message {
     pub fn create_error(
         to: ConnectionId,
         addr: Address,
-        error_kind: msg_capnp::error_payload::ErrorKind,
+        error_kind: internal_capnp::error_payload::ErrorKind,
         error_str: &str,
     ) -> Message {
         Message {
@@ -267,7 +267,7 @@ mod tests {
         let foo = msg1.to_capnp().expect("Can serialize message");
         let msg2 = Message::from_capnp(&foo).expect("Can deserialize message");
 
-        assert_eq!(msg1, msg2);
+        assert_eq!(msg1, msg2.0);
     }
 
     #[test]
@@ -292,7 +292,7 @@ mod tests {
         let foo = msg1.to_capnp().expect("Can serialize message");
         let msg2 = Message::from_capnp(&foo).expect("Can deserialize message");
 
-        assert_eq!(msg1, msg2);
+        assert_eq!(msg1, msg2.0);
     }
 
     #[test]
@@ -300,21 +300,21 @@ mod tests {
         let msg_err = Message::create_error(
             ConnectionId(Uuid::new_v4()),
             Address(Uuid::new_v4()),
-            msg_capnp::error_payload::ErrorKind::NoSuchInterface,
+            internal_capnp::error_payload::ErrorKind::NoSuchInterface,
             "not an interface",
         );
         let foo = msg_err.to_capnp().expect("Can serialize Error message");
         let msg_err2 = Message::from_capnp(&foo).expect("Can deserialize Error message");
 
-        assert_eq!(msg_err, msg_err2);
+        assert_eq!(msg_err, msg_err2.0);
 
-        assert_eq!(msg_err2.dp_type, MessageType::Error);
+        assert_eq!(msg_err2.0.dp_type, MessageType::Error);
 
-        let err = ErrorPayload::from_capnp(&msg_err2.payload).expect("Can decode error");
+        let err = ErrorPayload::from_capnp(&msg_err2.0.payload).expect("Can decode error");
 
         assert_eq!(
             err.error_kind,
-            msg_capnp::error_payload::ErrorKind::NoSuchInterface
+            internal_capnp::error_payload::ErrorKind::NoSuchInterface
         );
         assert_eq!(err.error_str, "not an interface");
     }

@@ -46,7 +46,7 @@ pub async fn req_res(chans: BrokerChannels, mut rx: mpsc::Receiver<ReqResMsg>) {
                             .send(MuxMsg::Forward(Message::create_error(
                                 msg.from.unwrap(),
                                 msg.address,
-                                seanerbus_schemas::msg_capnp::error_payload::ErrorKind::NoSuchInterface,
+                                seanerbus_schemas::internal_capnp::error_payload::ErrorKind::NoSuchInterface,
                                 "requested interface does not exist!",
                             )))
                             .await
