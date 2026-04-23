@@ -6,7 +6,7 @@ fn main() {
     capnpc::CompilerCommand::new()
         .output_path("bindings/rust/")
         .src_prefix("schemas")
-        .file("schemas/msg.capnp")
+        .file("schemas/internal.capnp")
         .run()
         .expect("capnp compiles")
 }

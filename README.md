@@ -4,16 +4,22 @@ This is a prototype implementation of the core transport facilities of the Data-
 
 The purpose of this project is to provide an easy to use, complete and correct implementation of the Data-Plane to the current state discussed in the project to enable rapid design and development of further SEANERGYS components.
 
-**THIS IMPLEMENTATION IS NOT INTENDED FOR PRODUCTION USE**
-
-At no time, any thought was spent on optimizing this implementation for use with massively parallel HPC systems.
-
-
 ## Components of the SeanerBUS
 
 ### `server/`
 
-The server/broker component. Will listen on `localhost:5398` for incoming connections.
+The server/broker component. 
+
+If Rust is installed, it can be started with:
+
+```
+cd server
+cargo res
+# If more debug info is wanted:
+RUST_LOG=trace cargo run
+```
+
+It will listen on `localhost:5398` for incoming connections.
 
 ### `msg/`
 
@@ -23,20 +29,21 @@ This is accompanied by Rust and C++ convenience libraries for creating those mes
 
 ### `client/`
 
-C++ and Rust client libraries for the Data-Plane. Contains additional helpful examples for creating pub/sub and req/res components.
+C++ and Rust client libraries for `req/res` and `pub/sub` with the server.
+
+### `rust_examples/`
+
+Examples using the Rust client library for:
+
+- publishing time-series data
+- subscribing to time-series data
+- requesting a "Hello World" request
+- responding to a "Hello World" request
 
 ### `naming_scheme/`
 
 A prototype of the naming scheme proposed for WP2.
 
-### Data-Plane internal components
+### `internal`
 
-#### `async/`
-
-Rust async [tokio](tokio.rs) wrappers around the underlying TCP connection that produce and consume Data-Plane messages.
-
-Shared code between the client and server libraries.
-
-#### `internal_schemas/`
-
-Internal Cap'n'Proto definitions for the request/response and publish/subscribe messages.
+Internal shared code between the server and client(s)

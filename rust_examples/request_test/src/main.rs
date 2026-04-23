@@ -25,23 +25,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut conn = Connection::new("localhost:5398").await?;
 
-    let (payload_type, payload) = Message::TimeValueV1(0, 0).to_capnp().unwrap();
+    let (payload_type, payload) = Message::HelloWorldV1Req("Hello World".to_owned())
+        .to_capnp()
+        .unwrap();
 
-    let msg = conn.request(Address(Uuid::parse_str(&args[1]).unwrap()), payload_type, &payload).await?;
+    let msg = conn
+        .request(
+            Address(Uuid::parse_str(&args[1]).unwrap()),
+            payload_type,
+            &payload,
+        )
+        .await?;
 
-    if msg.dp_type == MessageType::Response
-    {
-        if let Ok(Message::TimeValueV1(t, v)) = Message::from_capnp(msg.payload_type, &msg.payload)
-        {
-            println!("Got response! time={}, value={}", t, v);
+    if msg.dp_type == MessageType::Response {
+        let payload = Message::from_capnp(msg.payload_type, &msg.payload).unwrap();
+        if let Message::HelloWorldV1Res(msg) = payload {
+            println!("Got an answer: {}", msg);
+        } else {
+            panic!(
+                "Got something else than a Message::TimeValueV1 as a response: {:?}",
+                payload
+            );
         }
-        else
-        {
-            panic!("Got something else than a Message::TimeValueV1 as a response!");
-        }
-    }
-    else
-    {
+    } else {
         panic!("Expected Response to Request, got {:?}", msg.dp_type);
     }
     Ok(())

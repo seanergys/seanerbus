@@ -2,12 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-use crate::msg_capnp;
+use crate::internal_capnp;
 use thiserror::Error;
 
 #[derive(PartialEq, Eq, Debug)]
 pub struct ErrorPayload {
-    pub error_kind: msg_capnp::error_payload::ErrorKind,
+    pub error_kind: internal_capnp::error_payload::ErrorKind,
     pub error_str: String,
 }
 
@@ -18,7 +18,7 @@ pub enum ErrorPayloadError {
 }
 
 impl ErrorPayload {
-    pub fn new(kind: msg_capnp::error_payload::ErrorKind, str: String) -> ErrorPayload {
+    pub fn new(kind: internal_capnp::error_payload::ErrorKind, str: String) -> ErrorPayload {
         ErrorPayload {
             error_kind: kind,
             error_str: str,
@@ -27,7 +27,7 @@ impl ErrorPayload {
     pub fn from_capnp(data: &[u8]) -> Result<ErrorPayload, ErrorPayloadError> {
         let reader = capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;
 
-        let msg = reader.get_root::<msg_capnp::error_payload::Reader>()?;
+        let msg = reader.get_root::<internal_capnp::error_payload::Reader>()?;
 
         Ok(ErrorPayload {
             error_kind: msg.get_error_kind().unwrap(),
@@ -37,7 +37,7 @@ impl ErrorPayload {
 
     pub fn to_capnp(&self) -> Result<Vec<u8>, capnp::Error> {
         let mut bld =
-            capnp::message::TypedBuilder::<msg_capnp::error_payload::Owned>::new_default();
+            capnp::message::TypedBuilder::<internal_capnp::error_payload::Owned>::new_default();
 
         let mut msg = bld.init_root();
 
@@ -59,7 +59,7 @@ mod tests {
     #[test]
     fn test_create() {
         let err1 = ErrorPayload::new(
-            msg_capnp::error_payload::ErrorKind::NoSuchInterface,
+            internal_capnp::error_payload::ErrorKind::NoSuchInterface,
             "no such interface!".to_string(),
         );
 
@@ -67,7 +67,6 @@ mod tests {
         let err2 = ErrorPayload::from_capnp(&foo).expect("Can deserialize Error Payload");
 
         assert_eq!(err1, err2);
-        www
     }
 
     #[test]
