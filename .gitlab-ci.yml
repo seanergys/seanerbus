@@ -1,0 +1,70 @@
+stages:
+  - build
+  - test
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+
+variables:
+  RUST_VERSION: "1.86"
+  CARGO_HOME: "$CI_PROJECT_DIR/.cargo"
+  CARGO_INCREMENTAL: 0
+  DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
+  DOCKER_IMAGE_TAG: $CI_COMMIT_SHA
+  DS_MAX_DEPTH: -1
+
+cache:
+  key: $CI_COMMIT_REF_SLUG
+  paths:
+    - .cargo/
+    - server/target/
+
+.rust-template:
+  image: rust:$RUST_VERSION-slim
+  before_script:
+    # Install system dependencies required for building the Rust application
+    - apt-get update && apt-get install -y capnproto
+
+.build-template:
+  extends: .rust-template
+  stage: build
+  script:
+    - rustup target add $TARGET
+    - cd server
+    - cargo build --release --target $TARGET
+
+build-linux:
+  extends: .build-template
+  variables:
+    TARGET: x86_64-unknown-linux-gnu
+  artifacts:
+    paths:
+      - server/target/$TARGET/release/seanerbus
+    expire_in: 1 week
+  allow_failure: false
+
+test:unit:
+  extends: .rust-template
+  stage: test
+  script:
+    - cd server
+    - cargo test --verbose
+
+test:clippy:
+  extends: .rust-template
+  stage: test
+  script:
+    - rustup component add clippy
+    - cd server
+    - cargo clippy -- -D warnings
+  allow_failure: true
+
+test:format:
+  extends: .rust-template
+  stage: test
+  script:
+    - rustup component add rustfmt
+    - cd server
+    - cargo fmt -- --check
+  allow_failure: true
