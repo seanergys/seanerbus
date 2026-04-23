@@ -2,10 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "schemas/msg.capnp.h"
+#include <seanerbus_schemas/error_payload.hpp>
+
 #include <capnp/message.h>
 #include <capnp/serialize.h>
-#include <seanerbus_schemas/error_payload.hpp>
+#include <schemas/internal.capnp.h>
 
 namespace seanerbus{
 

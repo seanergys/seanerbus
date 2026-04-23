@@ -3,13 +3,15 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
+#include <utility>
+#include <vector>
+
+#include <cstddef>
+#include <cstdint>
+
 #include <capnp/endian.h>
 #include <capnp/message.h>
 #include <capnp/serialize.h>
-#include <cstddef>
-#include <cstdint>
-#include <vector>
-
 #include <schemas/msg.capnp.h>
 
 namespace seanerbus
@@ -34,7 +36,11 @@ public:
         value = rd.getValue();
     }
 
-    std::vector<std::byte> to_capnp()
+    explicit TimeValueV1(uint64_t time, double value) : time(time), value(value)
+    {
+    }
+
+    std::pair<uint64_t, std::vector<std::byte>> to_capnp()
     {
         capnp::MallocMessageBuilder msg;
 
@@ -45,7 +51,9 @@ public:
 
         auto res = capnp::messageToFlatArray(msg);
 
-        return std::vector<std::byte>(res.begin(), res.end());
+        return std::make_pair(
+            (uint64_t)capnp::schemas::MessageTypes_b06630b2cb0c9ce8::TIME_VALUE_V1,
+            std::vector<std::byte>((std::byte*)res.begin(), (std::byte*)res.end()));
     }
 
     uint64_t time;

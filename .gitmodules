@@ -1,0 +1,3 @@
+[submodule "internal/internal_schemas/bindings/cpp/lib/fmt"]
+	path = internal/internal_schemas/bindings/cpp/lib/fmt
+	url = https://github.com/fmtlib/fmt.git

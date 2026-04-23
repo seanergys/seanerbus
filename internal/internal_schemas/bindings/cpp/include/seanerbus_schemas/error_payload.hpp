@@ -2,11 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include <cstddef>
-#include <schemas/msg.capnp.h>
-
 #include <string>
 #include <vector>
+
+#include <cstddef>
+
+#include <schemas/internal.capnp.h>
 namespace seanerbus
 {
 struct ErrorPayload

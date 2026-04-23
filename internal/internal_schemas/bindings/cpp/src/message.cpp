@@ -2,13 +2,16 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include <capnp/blob.h>
 #include <capnp/message.h>
-#include <capnp/serialize.h>
+
+#include <seanerbus_schemas/message.hpp>
+
 #include <filesystem>
 #include <optional>
-#include <schemas/msg.capnp.h>
-#include <seanerbus_schemas/message.hpp>
+
+#include <capnp/blob.h>
+#include <capnp/serialize.h>
+#include <schemas/internal.capnp.h>
 
 namespace seanerbus
 {

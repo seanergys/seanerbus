@@ -4,12 +4,15 @@
 
 #pragma once
 
-#include "schemas/msg.capnp.h"
-#include <map>
 #include <seanerbus_schemas/message.hpp>
+
+#include <iostream>
+#include <map>
 #include <stdexcept>
 #include <string>
 #include <vector>
+
+#include <schemas/internal.capnp.h>
 
 extern "C"
 {
@@ -30,7 +33,7 @@ namespace client
 class Connection
 {
 public:
-    using subscribe_cb = void (*)(Message, void*);
+    using subscribe_cb = void (*)(Connection&, Message, void*);
 
     Connection(std::string address, std::string port)
     {
@@ -74,6 +77,7 @@ public:
     void publish(Address publish_to, uint64_t payload_type, std::vector<std::byte> payload)
     {
         auto msg = seanerbus::Message::publish(publish_to, payload_type, payload);
+        msg.to_fd_capnp(fd_);
     }
 
     void subscribe(Address subscribe_to, subscribe_cb sub, void* userdata)
@@ -95,10 +99,10 @@ public:
             switch (msg.type)
             {
             case ::Message::MessageType::PUBLISH:
-                sub_cbs_.at(msg.address)(msg, sub_userdata_.at(msg.address));
+                sub_cbs_.at(msg.address)(*this, msg, sub_userdata_.at(msg.address));
                 break;
             case ::Message::MessageType::REQUEST:
-                req_cbs_.at(msg.address)(msg, req_userdata_.at(msg.address));
+                req_cbs_.at(msg.address)(*this, msg, req_userdata_.at(msg.address));
                 break;
             default:
                 throw std::runtime_error("Unknown msg type!");
@@ -114,12 +118,12 @@ public:
 
         auto ret_msg = seanerbus::Message::from_fd_capnp(fd_);
 
-        if (msg.type != ::Message::MessageType::RESPONSE)
+        if (ret_msg.type != ::Message::MessageType::RESPONSE)
         {
             throw std::runtime_error("Got something else than a response for a request");
         }
 
-        return msg;
+        return ret_msg;
     }
 
     void respond_to(Message msg, uint64_t payload_type, std::vector<std::byte> payload)
