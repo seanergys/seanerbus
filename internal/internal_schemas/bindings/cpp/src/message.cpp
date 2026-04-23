@@ -2,11 +2,16 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include <schemas/msg.capnp.h>
-#include <capnp/blob.h>
-#include <seanerbus_schemas/message.hpp>
 #include <capnp/message.h>
+
+#include <seanerbus_schemas/message.hpp>
+
+#include <filesystem>
+#include <optional>
+
+#include <capnp/blob.h>
 #include <capnp/serialize.h>
+#include <schemas/internal.capnp.h>
 
 namespace seanerbus
 {
@@ -75,6 +80,68 @@ namespace seanerbus
 
     writeMessageToFd(fd, message);
 
+    }
+
+    Message Message::subscribe(Address addr)
+    {
+        Message res;
+
+        res.type = ::Message::MessageType::SUBSCRIBE;
+        res.to = std::nullopt;
+        res.from = std::nullopt;
+        res.address = addr;
+        res.payload = Payload{ 0, std::vector<std::byte>() };
+        return res;
+    }
+
+    Message Message::publish(Address addr, uint64_t payload_type, std::vector<std::byte> payload)
+    {
+        Message res;
+
+        res.type = ::Message::MessageType::PUBLISH;
+        res.to = std::nullopt;
+        res.from = std::nullopt;
+        res.address = addr;
+        res.payload = Payload{ payload_type, payload };
+        return res;
+    }
+
+    Message Message::request(Address addr, uint64_t payload_type, std::vector<std::byte> payload)
+    {
+        Message res;
+
+        res.type = ::Message::MessageType::REQUEST;
+        res.to = std::nullopt;
+        res.from = std::nullopt;
+        res.address = addr;
+        res.payload = Payload{ payload_type, payload };
+        return res;
+    }
+
+    Message Message::response(Message msg, uint64_t payload_type, std::vector<std::byte> payload)
+    {
+        Message res;
+
+        res.type = ::Message::MessageType::RESPONSE;
+        res.to = msg.from;
+        res.from = std::nullopt;
+        res.address = msg.address;
+        res.payload = Payload{ payload_type, payload };
+
+        return res;
+    }
+
+    Message Message::register_endpoint(Address addr)
+    {
+        Message res;
+
+        res.type = ::Message::MessageType::REGISTER;
+        res.to = std::nullopt;
+        res.from = std::nullopt;
+        res.address = addr;
+        res.payload = Payload{ 0, std::vector<std::byte>() };
+
+        return res;
     }
 }
 

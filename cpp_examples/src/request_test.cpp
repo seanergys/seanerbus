@@ -1,0 +1,41 @@
+// SPDX-FileCopyrightText: 2026 SEANERGYS Partners <https://seanergys.eu>
+//
+// SPDX-License-Identifier: MIT
+
+#include <seanerbus_client/connection.hpp>
+#include <seanerbus_msg/hello_world_req_v1.hpp>
+
+#include <iostream>
+
+#include <schemas/msg.capnp.h>
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+    if (argc != 2)
+    {
+        std::cerr << "./publish_test UUID" << std::endl;
+        return -1;
+    }
+    auto addr = seanerbus::Address{ seanerbus::Uuid{ argv[1] } };
+
+    // Connect to the server.
+    seanerbus::client::Connection conn("localhost", "5398");
+
+    auto res = seanerbus::msg::HelloWorldReqV1("Hello World").to_capnp();
+
+    auto msg = conn.request(addr, res.first, res.second);
+
+    if (msg.payload.payload_type !=
+        (uint64_t)capnp::schemas::MessageTypes_b06630b2cb0c9ce8::HELLO_WORLD_RES)
+    {
+        std::cerr << "Got unknown return message type!" << std::endl;
+        return -1;
+    }
+
+    seanerbus::msg::HelloWorldReqV1 result(msg.payload.payload.data(), msg.payload.payload.size());
+
+    std::cout << "Got answer to request: " << result.str_msg << std::endl;
+
+    return 0;
+}
