@@ -14,12 +14,25 @@ If Rust is installed, it can be started with:
 
 ```
 cd server
-cargo res
+cargo run
 # If more debug info is wanted:
 RUST_LOG=trace cargo run
 ```
 
 It will listen on `localhost:5398` for incoming connections.
+
+### `(rust|cpp)_examples/`
+
+Examples using the Rust/(C/C++) client library for:
+
+- publishing time-series data
+- subscribing to time-series data
+- requesting a "Hello World" request
+- responding to a "Hello World" request
+
+### `naming_scheme/`
+
+A prototype of the naming scheme proposed for WP2.
 
 ### `msg/`
 
@@ -30,19 +43,6 @@ This is accompanied by Rust and C++ convenience libraries for creating those mes
 ### `client/`
 
 C++ and Rust client libraries for `req/res` and `pub/sub` with the server.
-
-### `rust_examples/`
-
-Examples using the Rust client library for:
-
-- publishing time-series data
-- subscribing to time-series data
-- requesting a "Hello World" request
-- responding to a "Hello World" request
-
-### `naming_scheme/`
-
-A prototype of the naming scheme proposed for WP2.
 
 ### `internal`
 
