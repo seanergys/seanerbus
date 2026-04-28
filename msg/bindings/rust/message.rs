@@ -10,6 +10,8 @@ use crate::msg_capnp::hello_world_req_v1;
 use crate::msg_capnp::naming_service_request_v1;
 use crate::msg_capnp::naming_service_response_v1;
 use crate::msg_capnp::time_value_v1;
+
+/// FOOBAR
 #[derive(Debug)]
 pub enum Message {
     TimeValueV1(u64, f64),

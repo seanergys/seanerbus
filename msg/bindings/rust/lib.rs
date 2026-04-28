@@ -2,5 +2,6 @@
 //
 // SPDX-License-Identifier: MIT
 
+/// FOobar
 pub mod message;
 pub mod msg_capnp;

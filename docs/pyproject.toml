@@ -1,0 +1,7 @@
+[project]
+name = "docs"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = ["sphinx", "breathe", "sphinxcontrib_rust", "sphinx-rtd-theme", "seanerbus_client @ file:///${PROJECT_ROOT}/../client/bindings/python","seanerbus_msg @ file:///${PROJECT_ROOT}/../msg/bindings/python"]

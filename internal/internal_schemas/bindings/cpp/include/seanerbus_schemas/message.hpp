@@ -15,15 +15,32 @@
 
 namespace seanerbus
 {
+/**
+ * A UUID, per RFC9562
+ */
 struct Uuid
 {
     uint64_t upper;
     uint64_t lower;
 
+    /**
+     * Create a uuid from two 64-bit integers
+     *
+     * @param upper The upper 64 bit of the UUID
+     * @param lower The lower 64 bit of the UUID
+     */
     Uuid(uint64_t upper, uint64_t lower) : upper(upper), lower(lower)
     {
     }
 
+    /**
+     * Create a uuid from a formatted string
+     *
+     * This string has to have the format:
+     *   ec80dfdd-3f7e-44c4-ab59-7347195a27a5
+     *
+     * @param s The string to convert from
+     */
     explicit Uuid(std::string_view s)
     {
         // expects format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (32 hex digits + 4 dashes)
@@ -38,6 +55,9 @@ struct Uuid
         lower = (parse_hex(s.substr(19, 4)) << 48) | parse_hex(s.substr(24, 12));
     }
 
+    /**
+     * Convert UUID to string
+     */
     explicit operator std::string() const
     {
         return fmt::format("{:08x}-{:04x}-{:04x}-{:04x}-{:012x}", upper >> 32,
@@ -82,8 +102,18 @@ struct ConnectionId
     Uuid u_;
 };
 
+/**
+ * A SeanerBUS address.
+ *
+ * SeanerBUS addresses are currently all UUIDv4s:
+ */
 struct Address
 {
+    /**
+     * Create an address from the given UUID
+     *
+     * @param u The UUID
+     */
     explicit Address(Uuid u) : u_(u)
     {
     }
