@@ -21,7 +21,7 @@ RUST_LOG=trace cargo run
 
 It will listen on `localhost:5398` for incoming connections.
 
-### `(rust|cpp)_examples/`
+### `(rust|cpp/python)_examples/`
 
 Examples using the Rust/(C/C++) client library for:
 
@@ -29,6 +29,34 @@ Examples using the Rust/(C/C++) client library for:
 - subscribing to time-series data
 - requesting a "Hello World" request
 - responding to a "Hello World" request
+
+Try them out, any combination of languages works together:
+
+```sh
+# First Shell
+cd server
+cargo run
+# Second Shell:
+cd rust_examples
+cargo run --bin publish_test  a366335b-52f0-4658-a42b-7e73e83ec91f
+# Third Shell:
+cd cpp_examples/build
+./subscribe_test a366335b-52f0-4658-a42b-7e73e83ec91f
+
+```
+
+```sh
+# First Shell
+cd server
+cargo run
+# Second Shell:
+cd rust_examples
+cargo run --bin response_test  a366335b-52f0-4658-a42b-7e73e83ec91f
+# Third Shell:
+cd python
+./request_test.py  a366335b-52f0-4658-a42b-7e73e83ec91f
+
+```
 
 ### `naming_scheme/`
 

@@ -21,6 +21,7 @@ path = [
    "msg/schemas/msg.capnp",
    "naming_scheme/Cargo.lock",
    "naming_scheme/Cargo.toml",
+   "naming_scheme/.gitignore",
    "naming_scheme/README.md",
    "naming_scheme/services.json",
    "naming_scheme/.gitignore",

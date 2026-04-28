@@ -4,10 +4,10 @@
 enum MessageTypes
 {
     timeValueV1 @0;
-    namingServiceReq @1;
-    namingServiceRes @2;
-    helloWorldReq @3;
-    helloWorldRes @4;
+    namingServiceReqV1 @1;
+    namingServiceResV1 @2;
+    helloWorldReqV1 @3;
+    helloWorldResV1 @4;
 }
 
 struct TimeValueV1

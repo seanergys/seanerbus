@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2026 SEANERGYS Partners <https://seanergys.eu>
+#
+# SPDX-License-Identifier: MIT
+
+[build-system]
+requires = ["setuptools"]
+
+[project]
+dependencies = [
+  "pycapnp"
+]
+
+name = "seanerbus_client"
+version = "0.0.1"
