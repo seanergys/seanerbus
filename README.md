@@ -75,3 +75,7 @@ C++ and Rust client libraries for `req/res` and `pub/sub` with the server.
 ### `internal`
 
 Internal shared code between the server and client(s)
+
+### `scenario_tests`
+
+End-to-End scenario tests

@@ -1,9 +1,11 @@
+# SPDX-FileCopyrightText: 2026 SEANERGYS Partners <https://seanergys.eu>
+#
+# SPDX-License-Identifier: MIT
+
 import capnp
 import os
 
-msg_capnp = capnp.load(
-    os.path.dirname(os.path.abspath(__file__)) + "/msg.capnp"
-)
+msg_capnp = capnp.load(os.path.dirname(os.path.abspath(__file__)) + "/msg.capnp")
 
 
 class TimeValueV1:

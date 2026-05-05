@@ -8,10 +8,7 @@ import uuid
 import random
 
 capnp.remove_import_hook()
-msg_capnp = capnp.load(
-    os.path.dirname(os.path.abspath(__file__))
-    + "/internal.capnp"
-)
+msg_capnp = capnp.load(os.path.dirname(os.path.abspath(__file__)) + "/internal.capnp")
 
 
 def uuid_to_u64_pair(uuid: uuid.UUID) -> tuple[int, int]:
@@ -26,7 +23,7 @@ class Connection:
         pass
 
     @staticmethod
-    async def connect(host: str, port: int) -> Connection:
+    async def connect(host: str, port: int):
         """Connects to the seanerbus at host and port, returns an open connection"""
         conn: Connection = Connection()
 
@@ -48,7 +45,7 @@ class Connection:
         await msg.write_async(self.stream)
 
     async def register(self, register_to: uuid.UUID):
-        """Registers a req/res service at register_to. requests to this address will be then forwarded to this client """
+        """Registers a req/res service at register_to. requests to this address will be then forwarded to this client"""
         msg = msg_capnp.Message.new_message()
         (upper, lower) = uuid_to_u64_pair(register_to)
         msg.address.upper = upper
@@ -79,7 +76,7 @@ class Connection:
         msg.type = "request"
         msg.payloadType = payload[0]
         msg.payload = payload[1]
-        msg.matchingId = random.randint(0, ((1 << 64) -1))
+        msg.matchingId = random.randint(0, ((1 << 64) - 1))
         await msg.write_async(self.stream)
         message = await msg_capnp.Message.read_async(self.stream)
         return message
