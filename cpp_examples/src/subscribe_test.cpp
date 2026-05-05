@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include <seanerbus_client/connection.hpp>
+#include <seanerbus_client/simple_event_loop.hpp>
 #include <seanerbus_msg/time_value_v1.hpp>
 
 #include <iostream>
@@ -42,5 +43,6 @@ int main(int argc, char** argv)
     conn.subscribe(seanerbus::Address{ seanerbus::Uuid{ argv[1] } }, sub_handler);
 
     // Run the main loop, reading for messages.
-    conn.main_loop();
+    seanerbus::client::SimpleEventLoop sel(conn);
+    sel.run();
 }

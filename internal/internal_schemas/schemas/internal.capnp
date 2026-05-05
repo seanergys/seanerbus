@@ -22,6 +22,7 @@ struct Message
     }
     payloadType @4  :UInt64;
     payload @5 :Data;
+    matchingId @6 :UInt64;
 }
 
 struct ErrorPayload

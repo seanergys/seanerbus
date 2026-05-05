@@ -37,6 +37,4 @@ int main(int argc, char** argv)
         time++;
         value++;
     }
-    // Run the main loop, reading for messages.
-    conn.main_loop();
 }

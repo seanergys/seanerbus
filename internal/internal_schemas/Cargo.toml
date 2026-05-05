@@ -12,6 +12,7 @@ build = "bindings/rust/build.rs"
 path = 'bindings/rust/lib.rs'
 [dependencies]
 capnp = "0.25.2"
+rand = "0.10.1"
 thiserror = "2.0.18"
 uuid = { version = "1.22.0", features = ["v4"] }
 

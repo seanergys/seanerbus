@@ -3,12 +3,31 @@
 // SPDX-License-Identifier: MIT
 
 #include <seanerbus_client/connection.hpp>
+#include <seanerbus_client/simple_event_loop.hpp>
 #include <seanerbus_msg/hello_world_req_v1.hpp>
 
 #include <iostream>
 
 #include <schemas/msg.capnp.h>
 #include <unistd.h>
+
+void req_handler(seanerbus::client::Connection& conn, seanerbus::Message msg)
+{
+    if (msg.payload.first != (uint64_t)::MessageTypes::HELLO_WORLD_RES_V1)
+    {
+        std::cerr << "Got unknown return message type!" << std::endl;
+        return;
+    }
+    else
+    {
+
+        seanerbus::msg::HelloWorldReqV1 result(msg.payload);
+
+        std::cout << "Got answer to request: " << result.str_msg << std::endl;
+    }
+
+    conn.shutdown();
+}
 
 int main(int argc, char** argv)
 {
@@ -24,17 +43,11 @@ int main(int argc, char** argv)
 
     auto res = seanerbus::msg::HelloWorldReqV1("Hello World").to_capnp();
 
-    auto msg = conn.request(addr, res);
+    conn.request(addr, res, req_handler);
 
-    if (msg.payload.first != (uint64_t)::MessageTypes::HELLO_WORLD_RES_V1)
-    {
-        std::cerr << "Got unknown return message type!" << std::endl;
-        return -1;
-    }
+    seanerbus::client::SimpleEventLoop sel(conn);
 
-    seanerbus::msg::HelloWorldReqV1 result(msg.payload);
-
-    std::cout << "Got answer to request: " << result.str_msg << std::endl;
+    sel.run();
 
     return 0;
 }
