@@ -16,10 +16,14 @@
 #include <utility>
 #include <vector>
 
+#include <cerrno>
+
+#include <kj/exception.h>
 #include <schemas/internal.capnp.h>
 
 extern "C"
 {
+#include <fcntl.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,6 +43,7 @@ class Connection
 public:
     Connection(std::string address, std::string port)
     {
+        buffer_ = reinterpret_cast<std::byte*>(malloc(1024));
         int sfd, s;
         struct addrinfo hints;
         struct addrinfo *result, *rp;
@@ -74,6 +79,7 @@ public:
             throw std::runtime_error("Could not open a fitting socket!");
         }
         fd_ = sfd;
+        fcntl(fd_, F_SETFL, O_NONBLOCK);
     }
 
     template <class invoke_tuple>
@@ -101,6 +107,37 @@ public:
         msg.to_fd_capnp(fd_);
     }
 
+    void try_read()
+    {
+        int res = recv(fd_, buffer_ + cursor_, buffer_size_ - cursor_, 0);
+        if (res == buffer_size_ - cursor_)
+        {
+            buffer_ = reinterpret_cast<std::byte*>(realloc(buffer_, buffer_size_ * 2));
+            buffer_size_ = buffer_size_ * 2;
+        }
+        cursor_ += res;
+
+        try
+        {
+            while (true)
+            {
+
+                auto res = Message::from_buf_capnp(
+                    kj::ArrayPtr(reinterpret_cast<capnp::word*>(buffer_), cursor_));
+                cursor_ = cursor_ - res.first;
+                handle(res.second);
+                memmove(buffer_, buffer_ + res.first, buffer_size_ - res.first);
+            }
+        }
+        catch (kj::Exception& e)
+        {
+        }
+    }
+
+    int get_fd()
+    {
+        return fd_;
+    }
     template <class F, class... Args>
     void subscribe(Address subscribe_to, F&& f, Args&&... args)
     {
@@ -122,40 +159,43 @@ public:
                           std::forward_as_tuple(deleter<invoke_tuple>));
     }
 
-    void main_loop()
+    void handle(seanerbus::Message msg)
     {
-        while (true)
+        switch (msg.type)
         {
-            auto msg = seanerbus::Message::from_fd_capnp(fd_);
-
-            switch (msg.type)
-            {
-            case ::Message::MessageType::PUBLISH:
-                sub_cbs_.at(msg.address)(*this, msg, sub_userdata_.at(msg.address));
-                break;
-            case ::Message::MessageType::REQUEST:
-                req_cbs_.at(msg.address)(*this, msg, req_userdata_.at(msg.address));
-                break;
-            default:
-                throw std::runtime_error("Unknown msg type!");
-            }
+        case ::Message::MessageType::PUBLISH:
+            sub_cbs_.at(msg.address)(*this, msg, sub_userdata_.at(msg.address));
+            break;
+        case ::Message::MessageType::REQUEST:
+            req_cbs_.at(msg.address)(*this, msg, req_userdata_.at(msg.address));
+            break;
+        case ::Message::MessageType::RESPONSE:
+            res_cbs_.at(msg.matching_id)(*this, msg, res_userdata_.at(msg.matching_id));
+            break;
+        default:
+            throw std::runtime_error("Unknown msg type!");
         }
     }
 
-    Message request(Address address, std::pair<uint64_t, std::vector<std::byte>> payload)
+    template <class F, class... Args>
+    void request(Address address, std::pair<uint64_t, std::vector<std::byte>> payload, F&& f,
+                 Args&&... args)
     {
         auto msg = seanerbus::Message::request(address, payload);
 
+        using invoke_tuple = std::tuple<F, Args...>;
+
+        res_cbs_.emplace(std::piecewise_construct, std::forward_as_tuple(msg.matching_id),
+                         std::forward_as_tuple(executor<invoke_tuple>));
+
+        void* data = std::unique_ptr<invoke_tuple>(
+                         new invoke_tuple(invoke_tuple(std::move(f), std::forward<Args>(args)...)))
+                         .release();
+        res_userdata_.emplace(msg.matching_id, data);
+
+        deleters_.emplace(data, deleter<invoke_tuple>);
+
         msg.to_fd_capnp(fd_);
-
-        auto ret_msg = seanerbus::Message::from_fd_capnp(fd_);
-
-        if (ret_msg.type != ::Message::MessageType::RESPONSE)
-        {
-            throw std::runtime_error("Got something else than a response for a request");
-        }
-
-        return ret_msg;
     }
 
     void respond_to(Message msg, std::pair<uint64_t, std::vector<std::byte>> payload)
@@ -190,12 +230,23 @@ public:
             elem.second(elem.first);
         }
         close(fd_);
+        free(buffer_);
     }
 
     template <class invoke_tuple>
     static void deleter(void* arg)
     {
         std::unique_ptr<invoke_tuple>{ (invoke_tuple*)arg };
+    }
+
+    void shutdown()
+    {
+        shutdown_ = true;
+    }
+
+    bool is_shutdown()
+    {
+        return shutdown_;
     }
 
 private:
@@ -205,7 +256,13 @@ private:
     std::map<Address, void*> sub_userdata_;
     std::map<Address, void* (*)(Connection&, Message, void*)> req_cbs_;
     std::map<Address, void*> req_userdata_;
+    std::map<uint64_t, void* (*)(Connection&, Message, void*)> res_cbs_;
+    std::map<uint64_t, void*> res_userdata_;
     std::map<void*, void (*)(void*)> deleters_;
+    std::byte* buffer_ = nullptr;
+    size_t cursor_ = 0;
+    size_t buffer_size_ = 1024;
+    bool shutdown_ = false;
 };
 } // namespace client
 } // namespace seanerbus

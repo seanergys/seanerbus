@@ -15,26 +15,32 @@
 
 namespace seanerbus
 {
+std::pair<size_t, Message> Message::from_buf_capnp(kj::ArrayPtr<capnp::word> ptr)
+{
+    capnp::MallocMessageBuilder msg;
 
-    Message Message::from_fd_capnp(int fd)
+    auto res = initMessageBuilderFromFlatArrayCopy(ptr, msg);
+
+    ::Message::Reader rd = msg.getRoot<::Message>();
+
+    return std::make_pair((res.begin() - ptr.begin()) * sizeof(capnp::word), Message::from_msg(rd));
+}
+
+Message Message::from_msg(::Message::Reader& rd)
+{
+    Message res;
+
+    res.type = rd.getType();
+
+    auto addr_rd = rd.getAddress();
+    res.matching_id = rd.getMatchingId();
+    res.address = Address({ addr_rd.getUpper(), addr_rd.getLower() });
+
+    if (rd.hasFrom())
     {
-        capnp::MallocMessageBuilder msg;
-
-        capnp::readMessageCopyFromFd(fd, msg);
-
-        ::Message::Reader rd = msg.getRoot<::Message>();
-        Message res;
-
-        res.type = rd.getType();
-
-        auto addr_rd = rd.getAddress();
-        res.address = Address({ addr_rd.getUpper(), addr_rd.getLower() });
-        
-        if(rd.hasFrom())
-        {
         auto from_rd = rd.getFrom();
          res.from = ConnectionId({ from_rd.getUpper(), from_rd.getLower() });
-        }
+    }
         if(rd.hasTo())
         {
         auto to_rd = rd.getFrom();
@@ -48,7 +54,7 @@ namespace seanerbus
         res.payload = std::make_pair(rd.getPayloadType(), payload);
 
         return res;
-    }
+}
 
     void Message::to_fd_capnp(int fd)
     {
@@ -73,6 +79,8 @@ namespace seanerbus
     msg_from.setUpper(to->u_.upper);
     msg_from.setLower(to->u_.lower);
     }
+
+    sub_msg.setMatchingId(this->matching_id);
 
     sub_msg.setPayload(
         capnp::Data::Reader((const kj::byte*)payload.second.data(), payload.second.size()));
@@ -111,6 +119,7 @@ namespace seanerbus
         Message res;
 
         res.type = ::Message::MessageType::REQUEST;
+        res.matching_id = rand();
         res.to = std::nullopt;
         res.from = std::nullopt;
         res.address = addr;
@@ -124,6 +133,7 @@ namespace seanerbus
 
         res.type = ::Message::MessageType::RESPONSE;
         res.to = msg.from;
+        res.matching_id = msg.matching_id;
         res.from = std::nullopt;
         res.address = msg.address;
         res.payload = payload;

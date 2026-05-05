@@ -108,14 +108,15 @@ class Message
         static Message register_endpoint(Address addr);
 
         ::Message::MessageType type;
+        uint64_t matching_id;
         std::optional<ConnectionId> to = std::nullopt;
         std::optional<ConnectionId> from = std::nullopt;
         Address address = Address(Uuid{0,0});
         std::pair<uint64_t, std::vector<std::byte>> payload =
             std::pair{ 0, std::vector<std::byte>() };
 
-        static Message from_fd_capnp(int fd);
-
+        static std::pair<size_t, Message> from_buf_capnp(kj::ArrayPtr<capnp::word> ptr);
+        static Message from_msg(::Message::Reader& rd);
         void to_fd_capnp(int fd);
 };
 }

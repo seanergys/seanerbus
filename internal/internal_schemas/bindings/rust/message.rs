@@ -6,6 +6,7 @@ use crate::error_payload::ErrorPayload;
 pub use crate::internal_capnp;
 use thiserror::Error;
 use uuid::Uuid;
+use rand::RngExt;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum MessageType {
@@ -74,6 +75,7 @@ pub struct Message {
     pub address: Address,
     pub payload: Vec<u8>,
     pub payload_type: u64,
+    pub matching_id: u64
 }
 
 impl Message {
@@ -97,7 +99,6 @@ impl Message {
         let payload = msg.get_payload().unwrap();
         let payload_type = msg.get_payload_type();
         let address = msg.get_address().unwrap();
-
         let from = match msg.has_from() {
             true => {
                 let from = msg.get_from().unwrap();
@@ -118,6 +119,7 @@ impl Message {
             }
             false => None,
         };
+        let matching_id = msg.get_matching_id();
 
         let dp_type = MessageType::from(msg.get_type().unwrap());
         Some((
@@ -131,6 +133,7 @@ impl Message {
                 )),
                 to,
                 from,
+                matching_id
             },
             (reader.size_in_words() + 1) * 8,
         )) // This is always short one word, dont ask me why.
@@ -146,6 +149,7 @@ impl Message {
         msg.set_payload(&self.payload);
         msg.set_payload_type(self.payload_type);
         msg.set_type(self.dp_type.clone().into());
+        msg.set_matching_id(self.matching_id);
         let mut uuid_builder = msg.reborrow().init_address();
 
         let uuid_pair = self.address.0.as_u64_pair();
@@ -189,6 +193,7 @@ impl Message {
             }
             .to_capnp()
             .unwrap(),
+            matching_id: 0
         }
     }
 
@@ -200,6 +205,7 @@ impl Message {
             address: addr,
             payload: vec![],
             payload_type: 0,
+            matching_id: 0
         }
     }
 
@@ -211,10 +217,12 @@ impl Message {
             address: addr,
             payload: payload.to_vec(),
             payload_type,
+            matching_id: 0
         }
     }
 
     pub fn request_msg(addr: Address, payload_type: u64, payload: &[u8]) -> Message {
+        let mut rng = rand::rng();
         Message {
             dp_type: MessageType::Request,
             to: None,
@@ -222,6 +230,7 @@ impl Message {
             address: addr,
             payload: payload.to_vec(),
             payload_type,
+            matching_id: rng.random()
         }
     }
 
@@ -233,6 +242,7 @@ impl Message {
             address: responds_to.address,
             payload: payload.to_vec(),
             payload_type,
+            matching_id: responds_to.matching_id
         }
     }
 
@@ -244,6 +254,7 @@ impl Message {
             address: addr,
             payload: vec![],
             payload_type: 0,
+            matching_id: 0
         }
     }
 }
@@ -262,6 +273,7 @@ mod tests {
             address: Address(Uuid::new_v4()),
             payload: str.as_bytes().to_vec(),
             payload_type: 42,
+            matching_id: 69
         };
 
         let foo = msg1.to_capnp().expect("Can serialize message");
@@ -287,6 +299,7 @@ mod tests {
             address: Address(Uuid::new_v4()),
             payload: str.as_bytes().to_vec(),
             payload_type: 42,
+            matching_id: 0
         };
 
         let foo = msg1.to_capnp().expect("Can serialize message");

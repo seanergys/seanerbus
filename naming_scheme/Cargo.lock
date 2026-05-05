@@ -496,9 +496,7 @@ name = "seanerbus_client"
 version = "0.1.0"
 dependencies = [
  "seanerbus_async",
- "seanerbus_msg",
  "seanerbus_schemas",
- "serde",
  "thiserror",
  "tokio",
  "uuid",

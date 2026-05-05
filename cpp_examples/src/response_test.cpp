@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include <seanerbus_client/connection.hpp>
+#include <seanerbus_client/simple_event_loop.hpp>
 #include <seanerbus_msg/hello_world_req_v1.hpp>
 #include <seanerbus_msg/hello_world_res_v1.hpp>
 
@@ -50,7 +51,8 @@ int main(int argc, char** argv)
 
     conn.register_endpoint(addr, res_handler);
 
-    conn.main_loop();
+    seanerbus::client::SimpleEventLoop sel(conn);
+    sel.run();
 
     return 0;
 }
