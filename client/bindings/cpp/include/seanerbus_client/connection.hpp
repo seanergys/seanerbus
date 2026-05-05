@@ -5,6 +5,7 @@
 #pragma once
 
 #include <seanerbus_schemas/message.hpp>
+#include <seanerbus_schemas/error_payload.hpp>
 
 #include <functional>
 #include <iostream>
@@ -31,6 +32,7 @@ extern "C"
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+
 }
 
 namespace seanerbus
@@ -172,6 +174,11 @@ public:
         case ::Message::MessageType::RESPONSE:
             res_cbs_.at(msg.matching_id)(*this, msg, res_userdata_.at(msg.matching_id));
             break;
+        case ::Message::MessageType::ERROR:
+            {
+            auto err = seanerbus::ErrorPayload::from_vec(msg.payload.second);
+            throw std::runtime_error(err.str);
+            }
         default:
             throw std::runtime_error("Unknown msg type!");
         }
