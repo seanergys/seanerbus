@@ -21,9 +21,15 @@ namespace seanerbus
 namespace msg
 {
 
+/**
+ * A pair of a timestamp and a double value
+ */
 class TimeValueV1
 {
 public:
+    /**
+     * Decode a payload as a TimeValueV1
+     */
     TimeValueV1(std::pair<uint64_t, std::vector<std::byte>> payload)
     {
         if (!payload.first == (uint64_t)::MessageTypes::TIME_VALUE_V1)
@@ -44,10 +50,16 @@ public:
         value = rd.getValue();
     }
 
+    /**
+     * Create a TimeValueV1 from a timestamp and value
+     */
     explicit TimeValueV1(uint64_t time, double value) : time(time), value(value)
     {
     }
 
+    /**
+     * Output the Cap'n'Proto encoded data, as ingestecd by the C++ client library
+     */
     std::pair<uint64_t, std::vector<std::byte>> to_capnp()
     {
         capnp::MallocMessageBuilder msg;
@@ -64,7 +76,13 @@ public:
             std::vector<std::byte>((std::byte*)res.begin(), (std::byte*)res.end()));
     }
 
+    /**
+     * A timestamp
+     */
     uint64_t time;
+    /**
+     * A value
+     */
     double value;
 };
 

@@ -15,7 +15,7 @@ path = "src/naming_server/src/main.rs"
 
 seanerbus_client = { path = '../client' } 
 seanerbus_msg = { path = '../msg' } 
-seanerbus_schemas = { path = '../internal_schemas' } 
+seanerbus_schemas = { path = '../internal/internal_schemas' } 
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 thiserror = "2.0.18"

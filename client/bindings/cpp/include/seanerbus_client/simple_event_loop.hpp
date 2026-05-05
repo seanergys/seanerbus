@@ -13,6 +13,10 @@ extern "C"
 #include <poll.h>
 }
 
+/**
+ * A very simple poll() based event-loop, holding one Connection.
+ *
+ */
 namespace seanerbus
 {
 namespace client
@@ -20,10 +24,17 @@ namespace client
 class SimpleEventLoop
 {
 public:
+    /**
+     * Creates a new SimpleEventLoop that handles the given connection
+     */
     SimpleEventLoop(Connection& connection) : connection_(connection)
     {
     }
 
+    /**
+     * Runs the event-loop, effectively poll()-ing on the underlying fd and notifying try_read()
+     * when it is appropriate.
+     */
     void run()
     {
         struct pollfd pfds[1];

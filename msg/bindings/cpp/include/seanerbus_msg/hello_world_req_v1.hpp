@@ -21,9 +21,15 @@ namespace seanerbus
 namespace msg
 {
 
+/**
+ * A "Hello World" Test request
+ */
 class HelloWorldReqV1
 {
 public:
+    /**
+     * Decode a payload as a HelloWorldReqV1
+     */
     HelloWorldReqV1(std::pair<uint64_t, std::vector<std::byte>> payload)
     {
         if (!payload.first == (uint64_t)::MessageTypes::HELLO_WORLD_REQ_V1)
@@ -43,10 +49,16 @@ public:
         str_msg = rd.getMsg();
     }
 
+    /**
+     * Create a new HelloWorldReqV1 from the given string.
+     */
     explicit HelloWorldReqV1(std::string str_msg) : str_msg(str_msg)
     {
     }
 
+    /**
+     * Encode the HelloWorldReqV1 with Cap'n'Proto to send it with the client API.
+     */
     std::pair<uint64_t, std::vector<std::byte>> to_capnp()
     {
         capnp::MallocMessageBuilder msg;
@@ -62,6 +74,9 @@ public:
             std::vector<std::byte>((std::byte*)res.begin(), (std::byte*)res.end()));
     }
 
+    /**
+     * The string in the "Hello World" request.
+     */
     std::string str_msg;
 };
 

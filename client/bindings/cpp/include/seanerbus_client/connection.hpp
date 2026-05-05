@@ -40,10 +40,24 @@ namespace seanerbus
 
 namespace client
 {
+/**
+ * A single connection to the data-plane.
+ * 
+ * One program can hold multiple indepdendent connections to the same data-plane.
+ */
 class Connection
 {
 public:
-    Connection(std::string address, std::string port)
+    /**
+     * Creates a new connection to the data-plane.
+     *
+     * By default, the server listens at localhost:5398.
+     *
+     * @param address The hostname to connect to (e.g. "localhost" or "10.23.31.12")
+     * @param port The port to connect to (5398)
+     */
+    Connection(std::string address
+            , std::string port)
     {
         buffer_ = reinterpret_cast<std::byte*>(malloc(1024));
         int sfd, s;
@@ -84,31 +98,24 @@ public:
         fcntl(fd_, F_SETFL, O_NONBLOCK);
     }
 
-    template <class invoke_tuple>
-    static void* executor(Connection& conn, Message msg, void* arg)
-    {
-        invoke_tuple* func_arg = static_cast<invoke_tuple*>(arg);
-
-        // Tuple is unpacked here. Don't ask how.
-        using indices = std::make_index_sequence<std::tuple_size<invoke_tuple>::value - 1>;
-        executor_helper(conn, msg, *func_arg, indices{});
-
-        return nullptr;
-    }
-
-    template <class F, class... Args, size_t... Indices>
-    static void executor_helper(Connection& conn, Message& msg, std::tuple<F, Args...>& t,
-                                std::index_sequence<Indices...> is)
-    {
-        std::invoke(std::move(std::get<0>(t)), conn, msg, std::move(std::get<Indices + 1>(t))...);
-    }
-
+    /**
+     * Publish a single payload to the given address.
+     *
+     * @param publish_to Address to publish to
+     * @param payload An encoded payload, as created by the C++ payload libraries to_capnp() function.
+     */
     void publish(Address publish_to, std::pair<uint64_t, std::vector<std::byte>> payload)
     {
         auto msg = seanerbus::Message::publish(publish_to, payload);
         msg.to_fd_capnp(fd_);
     }
 
+    /**
+     * Tries to read some more data from the underlying connection.
+     *
+     * If a full Message was received, the received message will be forwarded to the appropriate
+     * callback.
+     */
     void try_read()
     {
         int res = recv(fd_, buffer_ + cursor_, buffer_size_ - cursor_, 0);
@@ -136,10 +143,51 @@ public:
         }
     }
 
+    /**
+     * Returns the file descriptor associated with this connection.
+     * This can then be passed into poll, for example.
+     */
     int get_fd()
     {
         return fd_;
     }
+
+    /**
+     * Subscribe to messages published on the given address.
+     * When the Connection receives a publish message for this address, it will call the function f.
+     *
+     * The client  will start receiving message from the subscribed addresses immediately.
+     * The messages are, however, only processed once main_loop() is called.
+     *
+     * The function f must always take a Connection& and a Message as a first and second argument.
+     * the additional arguments to subscribe() are added to it after the Connection& and Message argument: 
+     *
+     * Without any further arguments:
+     *
+     *      void func_one(Connection&, Message);
+     *      susbcribe(some_addr, func_one);
+     * 
+     * When a published message for some_addr is received, func_one is called as:
+     *
+     *      func_one(*this, received_message);
+     *
+     * Alternatively if subscribe is given an additional integer  as an argument:
+     *
+     *      int foobar;
+     *      void func_two(Connection, Message, int);
+     *      subscribe(some_other_addr, func_two, foobar);
+     *
+     * This calls (on receive of a message to some_other_addr):
+     *
+     *      func_two(*this, received_message, foobar)
+     *
+     *
+     * For more information, see cpp_examples/src/subscribe_test.cpp
+     *
+     * @param subscribe_to Address to subscribe to
+     * @param f callback to call when a message from adderss subscribe_to appears.
+     * @param args 0 to n additional arguments to the function f as described above.
+     */
     template <class F, class... Args>
     void subscribe(Address subscribe_to, F&& f, Args&&... args)
     {
@@ -161,29 +209,19 @@ public:
                           std::forward_as_tuple(deleter<invoke_tuple>));
     }
 
-    void handle(seanerbus::Message msg)
-    {
-        switch (msg.type)
-        {
-        case ::Message::MessageType::PUBLISH:
-            sub_cbs_.at(msg.address)(*this, msg, sub_userdata_.at(msg.address));
-            break;
-        case ::Message::MessageType::REQUEST:
-            req_cbs_.at(msg.address)(*this, msg, req_userdata_.at(msg.address));
-            break;
-        case ::Message::MessageType::RESPONSE:
-            res_cbs_.at(msg.matching_id)(*this, msg, res_userdata_.at(msg.matching_id));
-            break;
-        case ::Message::MessageType::ERROR:
-            {
-            auto err = seanerbus::ErrorPayload::from_vec(msg.payload.second);
-            throw std::runtime_error(err.str);
-            }
-        default:
-            throw std::runtime_error("Unknown msg type!");
-        }
-    }
-
+    /**
+     * Send a request to address with the given payload.
+     *
+     * The callback f and the additional args behave exactly as in subscribe()
+     * and are called on receive of the response.
+     *
+     * See: cpp_examples/src/request_test.cpp for an example.
+     *
+     * @param address The address to send the request to
+     * @param payload The payload to send with the request
+     * @param f The function to call when a request comes in.
+     * @param args The 0..n arguments forwarded to the function.
+     */
     template <class F, class... Args>
     void request(Address address, std::pair<uint64_t, std::vector<std::byte>> payload, F&& f,
                  Args&&... args)
@@ -205,12 +243,33 @@ public:
         msg.to_fd_capnp(fd_);
     }
 
+    /**
+     * Takes an incoming request and responds to it with payload.
+     *
+     * @param msg The msg to which we are responding.
+     * @param payload The payload to send with the response.
+     *
+     */
     void respond_to(Message msg, std::pair<uint64_t, std::vector<std::byte>> payload)
     {
         auto res_msg = seanerbus::Message::response(msg, payload);
         res_msg.to_fd_capnp(fd_);
     }
 
+    /**
+     * Registers a req/res service at address addr.
+     * 
+     * When another communication partner on the data-plane makes a request to address, the
+     * server will forward this to the client that has registered it.
+     *
+     * The callback f and the additional args behave exactly as in subscribe()
+     *
+     * See: cpp_examples/src/response_test.cpp for an example.
+     *
+     * @param addr The addr to register the request service to.
+     * @param f The function to call when a request comes in.
+     * @param args The 0..n arguments forwarded to the function. 
+     */
     template <class F, class... Args>
     void register_endpoint(Address addr, F f, Args... args)
     {
@@ -240,23 +299,74 @@ public:
         free(buffer_);
     }
 
-    template <class invoke_tuple>
-    static void deleter(void* arg)
-    {
-        std::unique_ptr<invoke_tuple>{ (invoke_tuple*)arg };
-    }
-
+    /**
+     * Signals back to the Connection that the user of the connection wants to shut it down.
+     */
     void shutdown()
     {
         shutdown_ = true;
     }
 
+    /**
+     * Checks if the user of the connection has requested a shutdown.
+     *
+     * After calling try_read(), the event-loop code should check if shudown was requested for this
+     * Connection and handle it accordingly.
+     */
     bool is_shutdown()
     {
         return shutdown_;
     }
 
 private:
+    template <class invoke_tuple>
+    static void deleter(void* arg)
+    {
+        std::unique_ptr<invoke_tuple>{ (invoke_tuple*)arg };
+    }
+
+    void handle(seanerbus::Message msg)
+    {
+        switch (msg.type)
+        {
+        case ::Message::MessageType::PUBLISH:
+            sub_cbs_.at(msg.address)(*this, msg, sub_userdata_.at(msg.address));
+            break;
+        case ::Message::MessageType::REQUEST:
+            req_cbs_.at(msg.address)(*this, msg, req_userdata_.at(msg.address));
+            break;
+        case ::Message::MessageType::RESPONSE:
+            res_cbs_.at(msg.matching_id)(*this, msg, res_userdata_.at(msg.matching_id));
+            break;
+        case ::Message::MessageType::ERROR:
+        {
+            auto err = seanerbus::ErrorPayload::from_vec(msg.payload.second);
+            throw std::runtime_error(err.str);
+        }
+        default:
+            throw std::runtime_error("Unknown msg type!");
+        }
+    }
+
+    template <class invoke_tuple>
+    static void* executor(Connection& conn, Message msg, void* arg)
+    {
+        invoke_tuple* func_arg = static_cast<invoke_tuple*>(arg);
+
+        // Tuple is unpacked here. Don't ask how.
+        using indices = std::make_index_sequence<std::tuple_size<invoke_tuple>::value - 1>;
+        executor_helper(conn, msg, *func_arg, indices{});
+
+        return nullptr;
+    }
+
+    template <class F, class... Args, size_t... Indices>
+    static void executor_helper(Connection& conn, Message& msg, std::tuple<F, Args...>& t,
+                                std::index_sequence<Indices...> is)
+    {
+        std::invoke(std::move(std::get<0>(t)), conn, msg, std::move(std::get<Indices + 1>(t))...);
+    }
+
     int fd_ = -1;
 
     std::map<Address, void* (*)(Connection&, Message, void*)> sub_cbs_;

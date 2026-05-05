@@ -1,8 +1,8 @@
 stages:
   - reuse-lint
   - build
-  - build-cpp
   - test
+  - docs
 
 workflow:
   rules:
@@ -88,3 +88,33 @@ test:format:
     - cd ../rust_examples
     - cargo fmt -- --check
   allow_failure: true
+
+docs:docs:
+  image: python:latest
+  stage: docs
+  artifacts:
+    paths:
+      - public
+  script:
+    - apt-get update && apt-get install -y rustup
+    - apt-get update && apt-get install -y cmake capnproto libcapnp-dev doxygen
+    - rustup default stable
+    - cargo install sphinx-rustdocgen
+    - pip install uv
+    - cd docs
+    - PATH="/builds/software/seanerbus/.cargo/bin/:$PATH" ./make_docs.sh
+  pages: true
+
+docs:deploy:
+  image: python:latest
+  stage: docs
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  script:
+    - apt-get update && apt-get install -y rustup
+    - apt-get update && apt-get install -y cmake capnproto libcapnp-dev doxygen
+    - rustup default stable
+    - cargo install sphinx-rustdocgen
+    - pip install uv
+    - cd docs
+    - PATH="/builds/software/seanerbus/.cargo/bin/:$PATH" ./make_docs.sh
