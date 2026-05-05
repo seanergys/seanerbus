@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 SEANERGYS Partners <https://seanergys.eu>
+
+SPDX-License-Identifier: MIT
+-->
+
 # Examples of using the Rust client library
 
 This directory contains basic examples of using the Rust client library with SeanerBUS.

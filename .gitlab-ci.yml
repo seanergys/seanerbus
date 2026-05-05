@@ -1,76 +1,85 @@
 stages:
-  - reuse-lint
+  - prebuild
   - build
   - test
   - docs
+  - end_to_end
 
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
 
 variables:
-  RUST_VERSION: "1.86"
   CARGO_HOME: "$CI_PROJECT_DIR/.cargo"
   CARGO_INCREMENTAL: 0
   DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
   DOCKER_IMAGE_TAG: $CI_COMMIT_SHA
-  DS_MAX_DEPTH: -1
 
-cache:
-  key: $CI_COMMIT_REF_SLUG
-  paths:
-    - .cargo/
-    - server/target/
+reuse-lint:
+  stage: prebuild
+  image: python:latest
+  script:
+    - pip install reuse
+    - reuse lint
 
-.rust-template:
-  image: rust:$RUST_VERSION-slim
-  before_script:
-    # Install system dependencies required for building the Rust application
-    - apt-get update && apt-get install -y capnproto
+cpp-clang-format:
+  image: debian:testing-slim
+  stage: prebuild
+  script:
+    - apt-get update && apt-get install -y clang-format git
+    - git-clang-format HEAD~1
 
-.build-template:
-  extends: .rust-template
+
+build-rust:
+  image: debian:testing-slim
   stage: build
   script:
-    - rustup target add $TARGET
+    - apt-get update && apt-get install -y capnproto rustup build-essential
+    - rustup default stable
     - cd server
-    - cargo build --release --target $TARGET
+    - cargo build --release
     - cd ../rust_examples
-    - cargo build --release --target $TARGET
-
-build-linux:
-  extends: .build-template
-  variables:
-    TARGET: x86_64-unknown-linux-gnu
-  artifacts:
-    paths:
-      - server/target/$TARGET/release/seanerbus
-    expire_in: 1 week
+    - cargo build --release
   allow_failure: false
 
 build-cpp:
+  image: debian:testing-slim
   stage: build
   script:
-    - apt-get update && apt-get install -y cmake capnproto libcapnp-dev
+    - apt-get update && apt-get install -y cmake capnproto pkg-config libcapnp-dev git build-essential
     - git submodule update --init --recursive
     - cd cpp_examples
     - cmake .
     - make -j4
 
-test:unit:
-  extends: .rust-template
+
+build-python:
+  image: python:latest
+  stage: build
+  script:
+    - apt-get update && apt-get install -y cmake capnproto libcapnp-dev
+    - pip install client/bindings/python
+    - pip install msg/bindings/python
+    - cd python_examples
+
+test:rust-unit:
+  image: debian:testing-slim
   stage: test
   script:
+    - apt-get update && apt-get install -y capnproto rustup build-essential
+    - rustup default stable
     - cd server
     - cargo test --verbose
     - cd ../rust_examples
     - cargo test --verbose
 
 
-test:clippy:
-  extends: .rust-template
+test:rust-clippy:
+  image: debian:testing-slim
   stage: test
   script:
+    - apt-get update && apt-get install -y capnproto rustup build-essential
+    - rustup default stable
     - rustup component add clippy
     - cd server
     - cargo clippy -- -D warnings
@@ -78,10 +87,12 @@ test:clippy:
     - cargo clippy -- -D warnings
   allow_failure: true
 
-test:format:
-  extends: .rust-template
+test:rust-format:
+  image: debian:testing-slim
   stage: test
   script:
+    - apt-get update && apt-get install -y capnproto rustup build-essential
+    - rustup default stable
     - rustup component add rustfmt
     - cd server
     - cargo fmt -- --check
@@ -89,12 +100,38 @@ test:format:
     - cargo fmt -- --check
   allow_failure: true
 
+test:ruff-check:
+  image: python:latest
+  stage: test
+  script:
+    - pip install ruff
+    - cd client/bindings/python
+    - ruff check
+    - cd $CI_PROJECT_DIR
+    - cd msg/bindings/python
+    - ruff check
+    - cd $CI_PROJECT_DIR
+    - cd python_examples
+    - ruff check
+
+test:ruff-format:
+  image: python:latest
+  stage: test
+  script:
+    - pip install ruff
+    - cd client/bindings/python
+    - ruff format --check
+    - cd $CI_PROJECT_DIR
+    - cd msg/bindings/python
+    - ruff format --check
+    - cd $CI_PROJECT_DIR
+    - cd python_examples
+    - ruff format --check
+
+
 docs:docs:
   image: python:latest
   stage: docs
-  artifacts:
-    paths:
-      - public
   script:
     - apt-get update && apt-get install -y rustup
     - apt-get update && apt-get install -y cmake capnproto libcapnp-dev doxygen
@@ -103,7 +140,6 @@ docs:docs:
     - pip install uv
     - cd docs
     - PATH="/builds/software/seanerbus/.cargo/bin/:$PATH" ./make_docs.sh
-  pages: true
 
 docs:deploy:
   image: python:latest
@@ -118,3 +154,24 @@ docs:deploy:
     - pip install uv
     - cd docs
     - PATH="/builds/software/seanerbus/.cargo/bin/:$PATH" ./make_docs.sh
+  pages: true
+  artifacts:
+    paths:
+      - public
+
+sub_python_pub_cpp:
+  image: python:latest
+  stage: end_to_end
+  script:
+    - apt-get update && apt-get install -y cmake capnproto pkg-config libcapnp-dev git rustup build-essential
+    - git submodule update --init --recursive
+    - rustup default stable
+    - pip install msg/bindings/python
+    - pip install client/bindings/python
+    - cd scenario_tests
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make -j4
+    - cd ..
+    - ./sub_python_pub_cpp.sh

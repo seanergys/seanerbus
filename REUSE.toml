@@ -28,7 +28,32 @@ path = [
    "server/.gitignore",
    "server/Cargo.lock",
    "server/Cargo.toml",
-   "server/README.md"
+   "server/README.md",
+   ".clang-format",
+   ".gitlab-ci.yml",
+   "client/README.md",
+   "client/bindings/cpp/.gitignore",
+   "client/bindings/cpp/Doxyfile",
+   "client/bindings/python/.gitignore",
+   "client/bindings/python/src/seanerbus_client/.gitignore",
+   "client/bindings/python/src/seanerbus_client/internal.capnp",
+   "cpp_examples/.gitignore",
+   "cpp_examples/README.md",
+   ".gitmodules",
+   "docs/.gitignore",
+   "docs/.python-version",
+   "docs/README.md",
+   "docs/sphinx/.gitignore",
+   "docs/uv.lock",
+   "internal/async/.gitignore",
+   "internal/async/Cargo.lock",
+   "internal/internal_schemas/Cargo.lock",
+   "internal/internal_schemas/.gitignore",
+   "internal/internal_schemas/bindings/cpp/.gitignore",
+   "internal/internal_schemas/bindings/cpp/Doxyfile",
+   "internal/internal_schemas/schemas/internal.capnp",
+   "rust_examples/Cargo.lock",
+   "msg/bindings/python/src/seanerbus_msg/msg.capnp"
    ]
 SPDX-FileCopyrightText = "2026 SEANERGYS Partners <https://seanergys.eu>"
 SPDX-License-Identifier = "MIT"

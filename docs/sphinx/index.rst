@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText: 2026 SEANERGYS Partners <https://seanergys.eu>
+..
+.. SPDX-License-Identifier: MIT
+
 .. SeanerBUS documentation master file, created by
    sphinx-quickstart on Tue Apr 28 13:20:43 2026.
    You can adapt this file completely to your liking, but it should at least
