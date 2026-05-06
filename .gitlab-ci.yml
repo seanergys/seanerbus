@@ -58,9 +58,7 @@ build-python:
   stage: build
   script:
     - apt-get update && apt-get install -y cmake capnproto libcapnp-dev
-    - pip install client/bindings/python
-    - pip install msg/bindings/python
-    - cd python_examples
+    - pip install bindings/python
 
 test:rust-unit:
   image: debian:testing-slim
@@ -105,10 +103,7 @@ test:ruff-check:
   stage: test
   script:
     - pip install ruff
-    - cd client/bindings/python
-    - ruff check
-    - cd $CI_PROJECT_DIR
-    - cd msg/bindings/python
+    - cd bindings/python
     - ruff check
     - cd $CI_PROJECT_DIR
     - cd python_examples
@@ -119,10 +114,7 @@ test:ruff-format:
   stage: test
   script:
     - pip install ruff
-    - cd client/bindings/python
-    - ruff format --check
-    - cd $CI_PROJECT_DIR
-    - cd msg/bindings/python
+    - cd bindings/python
     - ruff format --check
     - cd $CI_PROJECT_DIR
     - cd python_examples
@@ -166,8 +158,7 @@ sub_python_pub_cpp:
     - apt-get update && apt-get install -y cmake capnproto pkg-config libcapnp-dev git rustup build-essential
     - git submodule update --init --recursive
     - rustup default stable
-    - pip install msg/bindings/python
-    - pip install client/bindings/python
+    - pip install bindings/python
     - cd scenario_tests
     - mkdir build
     - cd build

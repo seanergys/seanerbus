@@ -10,7 +10,7 @@ dependencies = [
   "pycapnp"
 ]
 
-name = "seanerbus_client"
+name = "seanerbus"
 version = "0.0.1"
 [tool.setuptools]
 # ...
@@ -22,7 +22,7 @@ include-package-data = true
 where = ["src"]
 
 [tool.setuptools.package-data]
-seanerbus_client = ["*.capnp"]
+seanerbus = ["client/internal.capnp", "msg/msg.capnp"]
 
 [tool.ruff.lint]
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`) codes by default.

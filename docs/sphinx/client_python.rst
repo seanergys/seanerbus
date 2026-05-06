@@ -7,6 +7,6 @@ Python Client Library
 
 The centerpiece of this API is the Connection class, which holds a single connection to the data-plane and the communication primitives which can be used on it.
 
-.. autoclass:: seanerbus_client::Connection
+.. autoclass:: seanerbus.client::Connection
    :members:
    :undoc-members:

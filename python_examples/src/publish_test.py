@@ -4,8 +4,8 @@
 #
 # SPDX-License-Identifier: MIT
 
-import seanerbus_client
-from seanerbus_msg import TimeValueV1
+import seanerbus.client
+from seanerbus.msg import TimeValueV1
 import capnp
 from time import sleep
 import asyncio
@@ -15,7 +15,7 @@ import sys
 
 async def main():
     # Connect to the SeanerBUS
-    c = await seanerbus_client.Connection.connect("localhost", 5398)
+    c = await seanerbus.client.Connection.connect("localhost", 5398)
 
     time = 0
     value = 0.0

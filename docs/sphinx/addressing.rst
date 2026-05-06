@@ -35,12 +35,12 @@ To avoid boot-strapping problems, the naming service is the only part of the dat
 .. note::
    If its anywhere possible, the Naming Service MUST also remain the only service with a non-random Address. Random generation of addresses is what makes it possible to create unique addresses 
 
-On '00000000-0000-0000-0000-0000010ca105' it offers a request/response interface ingesting ``NamingServiceRequestV1``'s and return ``NamingServiceResponseV1``.
+On '00000000-0000-0000-0000-0000010ca105' it offers a request/response interface ingesting ``NamingServiceReqV1``'s and return ``NamingServiceResV1``.
 
 A detailed description of the interface is given in the definition of the `Naming Service Request/Response Payloads  <msg_capnp.html#naming-service-requests-and-responses>`_.
 
-In Short, a client sends a ``NamingServiceRequestV1`` into which it puts the ``key=value`` pairs of the name(s) it wants to look up.
-The Naming Server responds with a ``NamingServiceResponseV1`` which contains 0..n UUID addresses of the names in its database which matched the ``NamingServiceRequestV1`` ``key=value`` pairs.
+In Short, a client sends a ``NamingServiceReqV1`` into which it puts the ``key=value`` pairs of the name(s) it wants to look up.
+The Naming Server responds with a ``NamingServiceResV1`` which contains 0..n UUID addresses of the names in its database which matched the ``NamingServiceReqV1`` ``key=value`` pairs.
 
 Be mindful that any such query can return more than one address.
 
@@ -80,3 +80,7 @@ The file below gives an indication of the ``services.json`` format:
             "attrs": {"node": "6", "sensor": "power"}
         }
     ]
+
+
+.. toctree::
+   addressing_python

@@ -7,16 +7,16 @@ use uuid::Uuid;
 
 use crate::msg_capnp::MessageTypes;
 use crate::msg_capnp::hello_world_req_v1;
-use crate::msg_capnp::naming_service_request_v1;
-use crate::msg_capnp::naming_service_response_v1;
+use crate::msg_capnp::naming_service_req_v1;
+use crate::msg_capnp::naming_service_res_v1;
 use crate::msg_capnp::time_value_v1;
 
 /// FOOBAR
 #[derive(Debug)]
 pub enum Message {
     TimeValueV1(u64, f64),
-    NamingServiceRequestV1(Vec<(String, String)>),
-    NamingServiceResponseV1(Vec<Uuid>),
+    NamingServiceReqV1(Vec<(String, String)>),
+    NamingServiceResV1(Vec<Uuid>),
     HelloWorldReqV1(String),
     HelloWorldResV1(String),
 }
@@ -48,7 +48,7 @@ impl Message {
             MessageTypes::NamingServiceReqV1 => {
                 let reader =
                     capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;
-                let reader = reader.get_root::<naming_service_request_v1::Reader>()?;
+                let reader = reader.get_root::<naming_service_req_v1::Reader>()?;
 
                 let mut attrs: Vec<(String, String)> = vec![];
                 for kv in reader.get_attributes()? {
@@ -58,19 +58,19 @@ impl Message {
                     ));
                 }
 
-                Ok(Message::NamingServiceRequestV1(attrs))
+                Ok(Message::NamingServiceReqV1(attrs))
             }
             MessageTypes::NamingServiceResV1 => {
                 let reader =
                     capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;
-                let reader = reader.get_root::<naming_service_response_v1::Reader>()?;
+                let reader = reader.get_root::<naming_service_res_v1::Reader>()?;
 
                 let mut attrs: Vec<Uuid> = vec![];
                 for addr in reader.get_matching_interfaces()? {
                     attrs.push(Uuid::from_u64_pair(addr.get_upper(), addr.get_lower()));
                 }
 
-                Ok(Message::NamingServiceResponseV1(attrs))
+                Ok(Message::NamingServiceResV1(attrs))
             }
 
             MessageTypes::HelloWorldReqV1 => {
@@ -110,9 +110,9 @@ impl Message {
 
                 Ok((MessageTypes::TimeValueV1 as u64, buffer))
             }
-            Message::NamingServiceRequestV1(attrs) => {
+            Message::NamingServiceReqV1(attrs) => {
                 let mut bld =
-                    capnp::message::TypedBuilder::<naming_service_request_v1::Owned>::new_default();
+                    capnp::message::TypedBuilder::<naming_service_req_v1::Owned>::new_default();
                 let msg = bld.init_root();
 
                 let mut attr_builder = msg.init_attributes(attrs.len().try_into().unwrap());
@@ -133,9 +133,9 @@ impl Message {
 
                 Ok((MessageTypes::NamingServiceReqV1 as u64, buffer))
             }
-            Message::NamingServiceResponseV1(uuids) => {
+            Message::NamingServiceResV1(uuids) => {
                 let mut bld =
-                    capnp::message::TypedBuilder::<naming_service_response_v1::Owned>::new_default(
+                    capnp::message::TypedBuilder::<naming_service_res_v1::Owned>::new_default(
                     );
                 let msg = bld.init_root();
 

@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
+
 def main():
     print("Hello from docs!")
 

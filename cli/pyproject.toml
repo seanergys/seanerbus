@@ -7,26 +7,13 @@ requires = ["setuptools"]
 
 [project]
 dependencies = [
-  "pycapnp"
+  "seanerbus @ file:///${PROJECT_ROOT}/../bindings/python"
 ]
 
-name = "seanerbus_msg"
+name = "seanerbus_cli"
 version = "0.0.1"
 
-[tool.setuptools]
-# ...
-# By default, include-package-data is true in pyproject.toml,
-# so you do NOT have to specify this line.
-include-package-data = true
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.setuptools.package-data]
-seanerbus_msg = ["*.capnp"]
-
 [tool.ruff.lint]
-
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`) codes by default.
 # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
 # McCabe complexity (`C901`) by default.

@@ -63,7 +63,7 @@ The naming service will respond to a NamingServiceRequestV1 with a NamingService
 
 .. code-block:: python
 
-    struct NamingServiceRequestV1
+    struct NamingServiceReqV1
     {
     struct KV
     {
@@ -78,7 +78,7 @@ The naming service will respond to a NamingServiceRequestV1 with a NamingService
     upper @1 :UInt64;
     }
 
-    struct NamingServiceResponseV1
+    struct NamingServiceResV1
     {
     matchingInterfaces @0 :List(Address);
     }

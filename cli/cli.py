@@ -5,8 +5,9 @@
 # SPDX-License-Identifier: MIT
 
 import argparse
-import seanerbus_msg
-import seanerbus_client
+import seanerbus.msg
+import seanerbus.client
+import seanerbus.naming
 import asyncio
 import capnp
 import uuid
@@ -18,20 +19,20 @@ def print_msg(msg):
 
 def parse_msg(payload_type, payload):
     parsed_payload_type = None
-    for var in vars(seanerbus_msg.msg_capnp.MessageTypes):
-        if getattr(seanerbus_msg.msg_capnp.MessageTypes, var) == payload_type:
+    for var in vars(seanerbus.msg.msg_capnp.MessageTypes):
+        if getattr(seanerbus.msg.msg_capnp.MessageTypes, var) == payload_type:
             parsed_payload_type = var
     payload_class = parsed_payload_type[:1].upper() + parsed_payload_type[1:]
 
-    with getattr(seanerbus_msg.msg_capnp, payload_class).from_bytes(payload) as msg:
+    with getattr(seanerbus.msg.msg_capnp, payload_class).from_bytes(payload) as msg:
         return (payload_class, msg)
 
 
 async def make_publish(args):
     address = uuid.UUID(args.address)
-    payload_content = getattr(seanerbus_msg.msg_capnp, args.type).new_message()
+    payload_content = getattr(seanerbus.msg.msg_capnp, args.type).new_message()
     payload_type = getattr(
-        seanerbus_msg.msg_capnp.MessageTypes, args.type[:1].lower() + args.type[1:]
+        seanerbus.msg.msg_capnp.MessageTypes, args.type[:1].lower() + args.type[1:]
     )
 
     for kv in args.keyvalue:
@@ -47,19 +48,35 @@ async def make_publish(args):
             pass
         setattr(payload_content, kv[0], kv[1])
 
-    c = await seanerbus_client.Connection.connect("localhost", 5398)
+    c = await seanerbus.client.Connection.connect("localhost", 5398)
     await c.publish(address, (payload_type, payload_content.to_bytes()))
 
 
 async def make_subscribe(args):
     address = uuid.UUID(args.address)
-    c = await seanerbus_client.Connection.connect("localhost", 5398)
+    c = await seanerbus.client.Connection.connect("localhost", 5398)
     await c.subscribe(address)
 
     while True:
         msg = await c.read_msg()
         print(msg.payloadType)
         print_msg(parse_msg(msg.payloadType, msg.payload))
+
+
+async def make_resolve(args):
+    resolv = {}
+    for kv in args.keyvalue:
+        kv = kv.split("=")
+        if len(kv) != 2:
+            print(
+                f"{kv}: key=value arguments need to consist of two terms separated by a '=' sign!"
+            )
+            exit(1)
+        resolv[kv[0]] = kv[1]
+    uuids = await seanerbus.naming.resolve(resolv)
+    print(f"Resolved {resolv} to:")
+    for uuid in uuids:
+        print(f"\t{uuid}")
 
 
 parser = argparse.ArgumentParser(
@@ -78,11 +95,16 @@ publish_parser.add_argument(
     "keyvalue", nargs="*", help="key=value pairs to put into the payload"
 )
 
+resolve_parser = subparsers.add_parser("resolve", help="Resolve a name")
+resolve_parser.add_argument("keyvalue", nargs="*", help="key=value pairs to resolve")
 args = parser.parse_args()
 
-# print(vars(seanerbus_msg.msg_capnp.MessageTypes))
+# print(vars(seanerbus.msg.msg_capnp.MessageTypes))
 if args.cmd == "publish":
     asyncio.run(capnp.run(make_publish(args)))
 
 if args.cmd == "subscribe":
     asyncio.run(capnp.run(make_subscribe(args)))
+
+if args.cmd == "resolve":
+    asyncio.run(capnp.run(make_resolve(args)))

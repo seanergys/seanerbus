@@ -5,14 +5,20 @@
 Python Payload Library
 ======================
 
-.. autoclass:: seanerbus_msg::TimeValueV1
+.. autoclass:: seanerbus.msg::TimeValueV1
    :members:
    :undoc-members:
 
-.. autoclass:: seanerbus_msg::HelloWorldReqV1
+.. autoclass:: seanerbus.msg::HelloWorldReqV1
    :members:
    :undoc-members:
 
-.. autoclass:: seanerbus_msg::HelloWorldResV1
+.. autoclass:: seanerbus.msg::HelloWorldResV1
+   :members:
+   :undoc-members:
+.. autoclass:: seanerbus.msg::NamingServiceResV1
+   :members:
+   :undoc-members:
+.. autoclass:: seanerbus.msg::NamingServiceReqV1
    :members:
    :undoc-members:
