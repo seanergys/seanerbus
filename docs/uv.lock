@@ -97,8 +97,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "breathe" },
-    { name = "seanerbus-client" },
-    { name = "seanerbus-msg" },
+    { name = "seanerbus" },
     { name = "sphinx" },
     { name = "sphinx-rtd-theme" },
     { name = "sphinxcontrib-rust" },
@@ -107,8 +106,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "breathe" },
-    { name = "seanerbus-client", directory = "../client/bindings/python" },
-    { name = "seanerbus-msg", directory = "../msg/bindings/python" },
+    { name = "seanerbus", directory = "../bindings/python" },
     { name = "sphinx" },
     { name = "sphinx-rtd-theme" },
     { name = "sphinxcontrib-rust" },
@@ -320,20 +318,9 @@ wheels = [
 ]
 
 [[package]]
-name = "seanerbus-client"
+name = "seanerbus"
 version = "0.0.1"
-source = { directory = "../client/bindings/python" }
-dependencies = [
-    { name = "pycapnp" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "pycapnp" }]
-
-[[package]]
-name = "seanerbus-msg"
-version = "0.0.1"
-source = { directory = "../msg/bindings/python" }
+source = { directory = "../bindings/python" }
 dependencies = [
     { name = "pycapnp" },
 ]

@@ -43,29 +43,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     while let Some(msg) = conn.read_msg().await? {
         match msg.dp_type {
-            seanerbus_schemas::message::MessageType::Request => {
+            seanerbus_schemas::message::MessageType::Request=> {
                 let naming_msg =
                     seanerbus_msg::message::Message::from_capnp(msg.payload_type, &msg.payload)?;
 
-                if let seanerbus_msg::message::Message::NamingServiceRequestV1(attrs) = naming_msg {
+                if let seanerbus_msg::message::Message::NamingServiceReqV1(attrs) = naming_msg {
                     println!("Resolving: {:?}", attrs);
 
                     let uuids = get_matching_addresses(attrs, &services);
 
                     println!("Resolved To: {:?}", uuids);
                     let (payload_type, payload) =
-                        seanerbus_msg::message::Message::NamingServiceResponseV1(uuids)
+                        seanerbus_msg::message::Message::NamingServiceResV1(uuids)
                             .to_capnp()?;
                     conn.respond_to(&msg, payload_type, &payload).await?;
                 } else {
                     panic!(
-                        "Got request of type {}  although NamingServiceRequestV1 was expected!",
+                        "Got request of type {}  although NamingServiceReqV1 was expected!",
                         msg.payload_type
                     );
                 }
             }
             _ => panic!(
-                "Got message of type {:?}, while expecting Request!",
+                "Got message of type {:?}, while expecting Req!",
                 msg.dp_type
             ),
         }

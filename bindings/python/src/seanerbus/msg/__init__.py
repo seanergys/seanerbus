@@ -4,6 +4,14 @@
 
 import capnp
 import os
+import uuid
+
+
+def uuid_to_u64_pair(uuid: uuid.UUID) -> tuple[int, int]:
+    upper = uuid.int >> 64
+    lower = uuid.int & (1 << 64) - 1
+    return (upper, lower)
+
 
 msg_capnp = capnp.load(os.path.dirname(os.path.abspath(__file__)) + "/msg.capnp")
 
@@ -85,3 +93,69 @@ class HelloWorldResV1:
         msg = msg_capnp.HelloWorldResV1.new_message()
         msg.msg = self.msg
         return (msg_capnp.MessageTypes.helloWorldResV1, msg.to_bytes())
+
+
+class NamingServiceReqV1:
+    def __init__(self, kvs):
+        self.kvs = kvs
+
+    def from_capnp(msg):
+        """Decodes the given message (as returned by Connection.read_msg() as a NamingServiceReqV1V1"""
+        res = NamingServiceReqV1({})
+
+        if msg.payloadType != msg_capnp.MessageTypes.namingServiceReqV1:
+            raise RuntimeError(
+                f"Can not interpret message of type {msg.payloadType} as NamingServiceReqV1!"
+            )
+
+        with msg_capnp.NamingServiceReqV1.from_bytes(msg.payload) as req:
+            for i in req.attributes:
+                print(i)
+                res.kvs[i.key] = i.value
+        return res
+
+    def to_capnp(self) -> tuple[int, bytes]:
+        """Encodes this NamingServiceReqV1 as a Cap'n'Proto payload, so that it can be used with Connection.subscribe()"""
+        msg = msg_capnp.NamingServiceReqV1.new_message()
+
+        list_of_kvs = list(self.kvs.items())
+
+        msg.init("attributes", len(list_of_kvs))
+
+        for num, element in enumerate(list_of_kvs):
+            print(element)
+            msg.attributes[num].key = element[0]
+            msg.attributes[num].value = element[1]
+        return (msg_capnp.MessageTypes.namingServiceReqV1, msg.to_bytes())
+
+
+class NamingServiceResV1:
+    def __init__(self, uuids):
+        self.uuids = uuids
+
+    def from_capnp(msg):
+        """Decodes the given message (as returned by Connection.read_msg() as a NamingServiceResV1"""
+        res = NamingServiceResV1([])
+
+        if msg.payloadType != msg_capnp.MessageTypes.namingServiceResV1:
+            raise RuntimeError(
+                f"Can not interpret message of type {msg.payloadType} as NamingServiceResV1!"
+            )
+
+        with msg_capnp.NamingServiceResV1.from_bytes(msg.payload) as req:
+            for i in req.matchingInterfaces:
+                uuid_num = (i.upper << 64) + i.lower
+                res.uuids.append(uuid.UUID(int=uuid_num))
+        return res
+
+    def to_capnp(self) -> tuple[int, bytes]:
+        """Encodes this NamingServiceResV1 as a Cap'n'Proto payload, so that it can be used with Connection.subscribe()"""
+        msg = msg_capnp.NamingServiceResV1.new_message()
+
+        msg.init("matchingInterfaces", len(self.uuids))
+
+        for num, uuid_in in enumerate(self.uuids):
+            (upper, lower) = uuid_to_u64_pair(uuid_in)
+            msg.matchingInterfaces[num].upper = upper
+            msg.matchingInterfaces[num].lower = lower
+        return (msg_capnp.MessageTypes.namingServiceResV1, msg.to_bytes())

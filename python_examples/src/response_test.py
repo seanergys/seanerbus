@@ -3,8 +3,8 @@
 #
 # SPDX-License-Identifier: MIT
 
-import seanerbus_client
-from seanerbus_msg import HelloWorldReqV1, HelloWorldResV1
+import seanerbus.client
+from seanerbus.msg import HelloWorldReqV1, HelloWorldResV1
 import capnp
 import asyncio
 import uuid
@@ -13,7 +13,7 @@ import sys
 
 async def main():
     # Connect to the SeanerBUS
-    c = await seanerbus_client.Connection.connect("localhost", 5398)
+    c = await seanerbus.client.Connection.connect("localhost", 5398)
 
     # Registers as a request-responder with the broker
     await c.register(uuid.UUID(sys.argv[1]))

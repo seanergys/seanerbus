@@ -20,7 +20,7 @@ enum PayloadType {
  timeValueV1 @0;
 }
 
-struct NamingServiceRequestV1
+struct NamingServiceReqV1
 {
 struct KV
 {
@@ -35,7 +35,7 @@ lower @0 :UInt64;
 upper @1 :UInt64;
 }
 
-struct NamingServiceResponseV1
+struct NamingServiceResV1
 {
 matchingInterfaces @0 :List(Address);
 }

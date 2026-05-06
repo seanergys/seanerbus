@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 SEANERGYS Partners <https://seanergys.eu>
+
+SPDX-License-Identifier: MIT
+-->
+
 # 🐑 SeanerBUS -- Prototype Implementation of the Data Plane
 
 This is a prototype implementation of the core transport facilities of the Data-Plane.
@@ -57,6 +63,9 @@ cd python
 ./request_test.py  a366335b-52f0-4658-a42b-7e73e83ec91f
 
 ```
+### `bindings/python`
+
+This contains the Python bindings for the SeanerBUS.
 
 ### `naming_scheme/`
 
@@ -75,6 +84,10 @@ C++ and Rust client libraries for `req/res` and `pub/sub` with the server.
 ### `internal`
 
 Internal shared code between the server and client(s)
+
+### `cli/`
+
+A command-line interface for sending SeanerBUS message from the shell.
 
 ### `scenario_tests`
 

@@ -35,8 +35,8 @@ path = [
    "client/bindings/cpp/.gitignore",
    "client/bindings/cpp/Doxyfile",
    "client/bindings/python/.gitignore",
-   "client/bindings/python/src/seanerbus_client/.gitignore",
-   "client/bindings/python/src/seanerbus_client/internal.capnp",
+   "bindings/python/src/seanerbus/client/.gitignore",
+   "bindings/python/src/seanerbus/client/internal.capnp",
    "cpp_examples/.gitignore",
    "cpp_examples/README.md",
    ".gitmodules",
@@ -53,7 +53,7 @@ path = [
    "internal/internal_schemas/bindings/cpp/Doxyfile",
    "internal/internal_schemas/schemas/internal.capnp",
    "rust_examples/Cargo.lock",
-   "msg/bindings/python/src/seanerbus_msg/msg.capnp"
+   "bindings/python/src/seanerbus/msg/msg.capnp"
    ]
 SPDX-FileCopyrightText = "2026 SEANERGYS Partners <https://seanergys.eu>"
 SPDX-License-Identifier = "MIT"

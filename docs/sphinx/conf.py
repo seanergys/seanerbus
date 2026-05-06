@@ -13,22 +13,31 @@
 from this import s
 
 
-project = 'SeanerBUS'
-copyright = '2026, SEANERGYS Partners'
-author = 'SEANERGYS Partners'
+project = "SeanerBUS"
+copyright = "2026, SEANERGYS Partners"
+author = "SEANERGYS Partners"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['breathe', 'sphinxcontrib_rust', 'sphinx.ext.autosummary', "myst_parser", 'sphinx.ext.autodoc']
+extensions = [
+    "breathe",
+    "sphinxcontrib_rust",
+    "sphinx.ext.autosummary",
+    "myst_parser",
+    "sphinx.ext.autodoc",
+]
 
-breathe_projects = {"cpp_seanerbus_client" : "../../client/bindings/cpp/xml", "cpp_seanerbus_schemas" : "../..//internal/internal_schemas/bindings/cpp/xml",
-                    "cpp_seanerbus_msg" : "../../msg/bindings/cpp/xml"}
+breathe_projects = {
+    "cpp_seanerbus_client": "../../client/bindings/cpp/xml",
+    "cpp_seanerbus_schemas": "../..//internal/internal_schemas/bindings/cpp/xml",
+    "cpp_seanerbus_msg": "../../msg/bindings/cpp/xml",
+}
 
 source_suffix = {
     ".rst": "restructuredtext",
     ".md": "markdown",
-    ".txt": "markdown", # Optional
+    ".txt": "markdown",  # Optional
 }
 # See docs/compatibility for details on these extensions.
 myst_enable_extensions = {
@@ -45,13 +54,12 @@ rust_doc_dir = "sphinx/crates/"
 rust_rustdoc_fmt = "md"
 breathe_default_project = "cpp_seanerbus_client"
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 exclude_patterns = []
-
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'sphinx_rtd_theme'
-html_static_path = ['_static']
+html_theme = "sphinx_rtd_theme"
+html_static_path = ["_static"]

@@ -4,14 +4,15 @@
 #
 # SPDX-License-Identifier: MIT
 
-import seanerbus_client
-from seanerbus_msg import TimeValueV1
+import seanerbus.client
+from seanerbus.msg import TimeValueV1
 import capnp
 import asyncio
 import uuid
 
+
 async def main():
-    c = await seanerbus_client.Connection.connect("localhost", 5398)
+    c = await seanerbus.client.Connection.connect("localhost", 5398)
 
     await c.subscribe(uuid.UUID(int=10))
 
@@ -25,5 +26,6 @@ async def main():
     if tv.time != 2 or tv.value != 2.0:
         exit(1)
     exit(0)
+
 
 asyncio.run(capnp.run(main()))
