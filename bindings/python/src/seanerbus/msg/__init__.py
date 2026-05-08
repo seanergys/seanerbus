@@ -159,3 +159,80 @@ class NamingServiceResV1:
             msg.matchingInterfaces[num].upper = upper
             msg.matchingInterfaces[num].lower = lower
         return (msg_capnp.MessageTypes.namingServiceResV1, msg.to_bytes())
+
+
+class VectorReqV1:
+    def __init__(self, values: list[float]):
+        """Creates a new VectorReqV1 from the given list of floats"""
+        self.values = values
+
+    @staticmethod
+    def from_capnp(msg):
+        """Decodes the given message (as returned by Connection.read_msg()) as a VectorReqV1"""
+        req_obj = VectorReqV1([])
+
+        if msg.payloadType != msg_capnp.MessageTypes.vectorReqV1:
+            raise RuntimeError(
+                f"Can not interpret message of type {msg.payloadType} as VectorReqV1!"
+            )
+
+        with msg_capnp.VectorReqV1.from_bytes(msg.payload) as req:
+            # Convert Cap’n Proto list -> Python list
+            req_obj.values = list(req.values)
+
+
+        return req_obj
+
+    def to_capnp(self) -> tuple[int, bytes]:
+        """Encodes this VectorReqV1 as a Cap'n Proto payload"""
+        msg = msg_capnp.VectorReqV1.new_message()
+
+        # Initialize list with proper size
+        values_builder = msg.init("values", len(self.values))
+
+        # Fill list
+        for i, v in enumerate(self.values):
+            values_builder[i] = v
+
+        return (msg_capnp.MessageTypes.vectorReqV1, msg.to_bytes())
+
+class VectorResV1:
+    def __init__(self, results: list[float]):
+        """Creates a new VectorResV1 from the given list of floats"""
+        self.results = results
+
+    @staticmethod
+    def from_capnp(msg):
+        """Decodes the given message (as returned by Connection.read_msg() as a VectorResV1"""
+        res = VectorResV1([])
+
+        if msg.payloadType != msg_capnp.MessageTypes.vectorResV1:
+            raise RuntimeError(
+                f"Can not interpret message of type {msg.payloadType} as VectorResV1!"
+            )
+
+        with msg_capnp.VectorResV1.from_bytes(msg.payload) as req:
+            # Convert Cap’n Proto list → Python list
+            res.results = list(req.results)
+
+        return res
+
+    def to_capnp(self) -> tuple[int, bytes]:
+        """Encodes this VectorResV1 as a Cap'n Proto payload"""
+        msg = msg_capnp.VectorResV1.new_message()
+
+
+        # Initialize list with correct size
+        l=self.results.values
+
+        results_builder = msg.init("results", len(l))
+        self.results=l
+
+        # Fill values
+        for i, v in enumerate(self.results):
+            results_builder[i] = v
+
+        return (msg_capnp.MessageTypes.vectorResV1, msg.to_bytes())
+
+
+>>>>>>> 7d3db15 (python array implementation):msg/bindings/python/src/seanerbus_msg/__init__.py

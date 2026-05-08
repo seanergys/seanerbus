@@ -8,6 +8,11 @@ enum MessageTypes
     namingServiceResV1 @2;
     helloWorldReqV1 @3;
     helloWorldResV1 @4;
+
+
+    vectorReqV1 @5;
+    vectorResV1 @6;
+
 }
 
 struct TimeValueV1
@@ -49,3 +54,15 @@ struct HelloWorldResV1
 {
 msg @0 :Text;
 }
+
+
+struct VectorReqV1
+{
+    values @0 :List(Float64);
+}
+
+struct VectorResV1
+{
+    results @0 :List(Float64);
+}
+
