@@ -180,7 +180,6 @@ class VectorReqV1:
             # Convert Cap’n Proto list -> Python list
             req_obj.values = list(req.values)
 
-
         return req_obj
 
     def to_capnp(self) -> tuple[int, bytes]:
@@ -195,6 +194,7 @@ class VectorReqV1:
             values_builder[i] = v
 
         return (msg_capnp.MessageTypes.vectorReqV1, msg.to_bytes())
+
 
 class VectorResV1:
     def __init__(self, results: list[float]):
@@ -221,18 +221,10 @@ class VectorResV1:
         """Encodes this VectorResV1 as a Cap'n Proto payload"""
         msg = msg_capnp.VectorResV1.new_message()
 
-
-        # Initialize list with correct size
-        l=self.results.values
-
-        results_builder = msg.init("results", len(l))
-        self.results=l
+        results_builder = msg.init("results", len(self.results))
 
         # Fill values
         for i, v in enumerate(self.results):
             results_builder[i] = v
 
         return (msg_capnp.MessageTypes.vectorResV1, msg.to_bytes())
-
-
->>>>>>> 7d3db15 (python array implementation):msg/bindings/python/src/seanerbus_msg/__init__.py

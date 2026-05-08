@@ -1,6 +1,12 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2026 SEANERGYS Partners <https://seanergys.eu>
+#
+# SPDX-License-Identifier: MIT
+
 set -euo pipefail
 
-cd ../server
+cd ../../server
 cargo build
 ./target/debug/seanerbus &
 SERVER_PID=$!
@@ -9,10 +15,10 @@ echo "server PID is $SERVER_PID"
 
 sleep 1
 
-cd ..
+cd ../contrib/scenario_tests
 
 # identity function: f(x)->y with x=y
-timeout 10s python3 ./python_examples/src/response_test_array.py a366335b-52f0-4658-a42b-7e73e83ec91e &
+timeout 10s python3 response_test_array.py a366335b-52f0-4658-a42b-7e73e83ec91e &
 
 RESPONSE_PID=$!
 
@@ -23,7 +29,7 @@ kill -0 $RESPONSE_PID || exit 1;
 sleep 1
 
 # request asks "[1., 2., 3.]" and should receive "[1., 2., 3.]"
-timeout 10s python3 ./python_examples/src/request_test_array.py a366335b-52f0-4658-a42b-7e73e83ec91e >> /tmp/log.txt &
+timeout 10s python3 request_test_array.py a366335b-52f0-4658-a42b-7e73e83ec91e >> /tmp/log.txt &
 
 REQUEST_PID=$!
 

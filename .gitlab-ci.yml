@@ -188,8 +188,7 @@ sub_python_pub_python_array:
     - apt-get update && apt-get install -y cmake capnproto pkg-config libcapnp-dev git rustup build-essential
     - git submodule update --init --recursive
     - rustup default stable
-    - pip install msg/bindings/python
-    - pip install client/bindings/python
-    - cd scenario_tests
-    - ./sub_python_pub_python_array.sh
+    - pip install bindings/python
+    - cd contrib/scenario_tests
+    - ./req_python_res_python_array.sh
 

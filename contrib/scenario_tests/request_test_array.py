@@ -3,29 +3,28 @@
 #
 # SPDX-License-Identifier: MIT
 
-import seanerbus_client
-from seanerbus_msg import VectorReqV1, VectorResV1
+import seanerbus.client
+from seanerbus.msg import VectorReqV1, VectorResV1
 import capnp
 import asyncio
 import uuid
 import sys
 
-import numpy as np
 
 async def main():
     # Connect to the SeanerBUS
-    c = await seanerbus_client.Connection.connect("localhost", 5398)
+    c = await seanerbus.client.Connection.connect("localhost", 5398)
     print(c)
 
     # Send a HelloWorldReqV1 to the UUID given on the command line.
     # Interpret the result as a HelloWorldResV1
     u = uuid.UUID(sys.argv[1])
-    v = VectorReqV1([1.,2.,3.]).to_capnp()
+    v = VectorReqV1([1.0, 2.0, 3.0]).to_capnp()
     a = await c.request(u, v)
-    
+
     print("Received payloadType:", a.payloadType)
 
-    msg = VectorResV1.from_capnp( a )
+    msg = VectorResV1.from_capnp(a)
 
     print(f"Got a Response: {msg.results}")
 

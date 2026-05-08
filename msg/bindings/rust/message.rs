@@ -10,6 +10,8 @@ use crate::msg_capnp::hello_world_req_v1;
 use crate::msg_capnp::naming_service_req_v1;
 use crate::msg_capnp::naming_service_res_v1;
 use crate::msg_capnp::time_value_v1;
+use crate::msg_capnp::vector_req_v1;
+use crate::msg_capnp::vector_res_v1;
 
 /// FOOBAR
 #[derive(Debug)]
@@ -19,6 +21,8 @@ pub enum Message {
     NamingServiceResV1(Vec<Uuid>),
     HelloWorldReqV1(String),
     HelloWorldResV1(String),
+    VectorReqV1(Vec<f64>),
+    VectorResV1(Vec<f64>),
 }
 
 #[derive(Error, Debug)]
@@ -91,6 +95,26 @@ impl Message {
                     reader.get_msg().unwrap().to_str().unwrap().to_owned(),
                 ))
             }
+
+            MessageTypes::VectorReqV1 => {
+                let reader =
+                    capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;
+                let reader = reader.get_root::<vector_req_v1::Reader>()?;
+
+                Ok(Message::VectorReqV1(
+                    reader.get_values().unwrap().iter().collect(),
+                ))
+            }
+
+            MessageTypes::VectorResV1 => {
+                let reader =
+                    capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;
+                let reader = reader.get_root::<vector_res_v1::Reader>()?;
+
+                Ok(Message::VectorResV1(
+                    reader.get_results().unwrap().iter().collect(),
+                ))
+            }
         }
     }
 
@@ -135,8 +159,7 @@ impl Message {
             }
             Message::NamingServiceResV1(uuids) => {
                 let mut bld =
-                    capnp::message::TypedBuilder::<naming_service_res_v1::Owned>::new_default(
-                    );
+                    capnp::message::TypedBuilder::<naming_service_res_v1::Owned>::new_default();
                 let msg = bld.init_root();
 
                 let mut attr_builder =
@@ -175,6 +198,34 @@ impl Message {
                 capnp::serialize::write_message(&mut buffer, bld.borrow_inner())?;
 
                 Ok((MessageTypes::HelloWorldResV1 as u64, buffer))
+            }
+            Message::VectorReqV1(vec) => {
+                let mut bld = capnp::message::TypedBuilder::<vector_req_v1::Owned>::new_default();
+                let msg = bld.init_root();
+
+                let mut values_builder = msg.init_values(vec.len() as u32);
+
+                for (i, elem) in vec.iter().enumerate() {
+                    values_builder.reborrow().set(i as u32, *elem);
+                }
+                let mut buffer = vec![];
+                capnp::serialize::write_message(&mut buffer, bld.borrow_inner())?;
+
+                Ok((MessageTypes::VectorReqV1 as u64, buffer))
+            }
+            Message::VectorResV1(vec) => {
+                let mut bld = capnp::message::TypedBuilder::<vector_res_v1::Owned>::new_default();
+                let msg = bld.init_root();
+
+                let mut values_builder = msg.init_results(vec.len() as u32);
+
+                for (i, elem) in vec.iter().enumerate() {
+                    values_builder.reborrow().set(i as u32, *elem);
+                }
+                let mut buffer = vec![];
+                capnp::serialize::write_message(&mut buffer, bld.borrow_inner())?;
+
+                Ok((MessageTypes::VectorResV1 as u64, buffer))
             }
         }
     }
