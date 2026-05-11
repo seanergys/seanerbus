@@ -49,8 +49,15 @@ build-cpp:
     - apt-get update && apt-get install -y cmake capnproto pkg-config libcapnp-dev git build-essential
     - git submodule update --init --recursive
     - cd cpp_examples
-    - cmake .
+    - cmake . -DCMAKE_INSTALL_PREFIX=../../install_seanerbus
+    - make -j4 install
+    - cd ../contrib/pkgconfig_build_test
+    - cmake . -DCMAKE_PREFIX_PATH=../../../install_seanerbus
     - make -j4
+    - cd ../cmake_config_build_test
+    - cmake . -DCMAKE_PREFIX_PATH=../../../install_seanerbus
+    - make -j4
+
 
 
 build-python:
@@ -159,7 +166,7 @@ sub_python_pub_cpp:
     - git submodule update --init --recursive
     - rustup default stable
     - pip install bindings/python
-    - cd scenario_tests
+    - cd contrib/scenario_tests
     - mkdir build
     - cd build
     - cmake ..

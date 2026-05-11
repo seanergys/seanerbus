@@ -15,16 +15,16 @@ This is a `RAII <https://en.wikipedia.org/wiki/Resource_acquisition_is_initializ
 This only defines the communication primitives (pub/sub/req/res), for encoding the actual payloads, see the `C++ Payload Library <msg_cpp.html>`_.
 
 .. doxygenclass:: seanerbus::client::Connection
-   :project: cpp_seanerbus_client
+   :project: cpp_seanerbus
    :members:
 .. doxygenclass:: seanerbus::client::SimpleEventLoop
-   :project: cpp_seanerbus_client
+   :project: cpp_seanerbus
    :members:
 .. doxygenstruct:: seanerbus::Address
-   :project: cpp_seanerbus_schemas
+   :project: cpp_seanerbus
    :members:
 
 .. doxygenstruct:: seanerbus::Uuid
-   :project: cpp_seanerbus_schemas
+   :project: cpp_seanerbus
    :members:
 
