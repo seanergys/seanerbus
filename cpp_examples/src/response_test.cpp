@@ -2,15 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include <seanerbus_client/connection.hpp>
-#include <seanerbus_client/simple_event_loop.hpp>
-#include <seanerbus_msg/hello_world_req_v1.hpp>
-#include <seanerbus_msg/hello_world_res_v1.hpp>
+#include <seanerbus/client/connection.hpp>
+#include <seanerbus/client/simple_event_loop.hpp>
+#include <seanerbus/msg/hello_world_req_v1.hpp>
+#include <seanerbus/msg/hello_world_res_v1.hpp>
 
 #include <iostream>
 #include <stdexcept>
 
-#include <schemas/msg.capnp.h>
 #include <unistd.h>
 
 void res_handler(seanerbus::client::Connection& conn, seanerbus::Message msg)

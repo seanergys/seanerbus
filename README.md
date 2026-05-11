@@ -67,6 +67,10 @@ cd python
 
 This contains the Python bindings for the SeanerBUS.
 
+### `bindings/cpp`
+
+This contains the C++ bindings to the SeanerBUS.
+
 ### `naming_scheme/`
 
 A prototype of the naming scheme proposed for WP2.
@@ -74,8 +78,6 @@ A prototype of the naming scheme proposed for WP2.
 ### `msg/`
 
 Contains the Cap'n'Proto schemas for the Data-Plane messages to be communicated over the Data-Plane for purposes such as requesting name-resolution and publishing TimeSeries data on the Data-Plane.
-
-This is accompanied by Rust and C++ convenience libraries for creating those messages.
 
 ### `client/`
 
@@ -89,6 +91,6 @@ Internal shared code between the server and client(s)
 
 A command-line interface for sending SeanerBUS message from the shell.
 
-### `scenario_tests`
+### `contrib`
 
-End-to-End scenario tests
+Various scripts, usually tests.

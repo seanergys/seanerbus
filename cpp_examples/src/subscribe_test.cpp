@@ -2,14 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include <seanerbus_client/connection.hpp>
-#include <seanerbus_client/simple_event_loop.hpp>
-#include <seanerbus_msg/time_value_v1.hpp>
+#include <seanerbus/client/connection.hpp>
+#include <seanerbus/client/simple_event_loop.hpp>
+#include <seanerbus/msg/time_value_v1.hpp>
 
 #include <iostream>
 #include <stdexcept>
-
-#include <schemas/msg.capnp.h>
 
 void sub_handler(seanerbus::client::Connection& conn, seanerbus::Message message)
 {

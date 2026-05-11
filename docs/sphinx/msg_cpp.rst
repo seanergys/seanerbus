@@ -14,13 +14,13 @@ This includes:
 - HelloWorldResV1 A "Hello World" response type, consisting of only a string message.
 
 .. doxygenclass:: seanerbus::msg::TimeValueV1
-   :project: cpp_seanerbus_msg
+   :project: cpp_seanerbus
    :members:
 
 .. doxygenclass:: seanerbus::msg::HelloWorldReqV1
-   :project: cpp_seanerbus_msg
+   :project: cpp_seanerbus
    :members:
 
 .. doxygenclass:: seanerbus::msg::HelloWorldResV1
-   :project: cpp_seanerbus_msg
+   :project: cpp_seanerbus
    :members:

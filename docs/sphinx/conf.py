@@ -29,9 +29,7 @@ extensions = [
 ]
 
 breathe_projects = {
-    "cpp_seanerbus_client": "../../client/bindings/cpp/xml",
-    "cpp_seanerbus_schemas": "../..//internal/internal_schemas/bindings/cpp/xml",
-    "cpp_seanerbus_msg": "../../msg/bindings/cpp/xml",
+    "cpp_seanerbus": "../../bindings/cpp/xml",
 }
 
 source_suffix = {
