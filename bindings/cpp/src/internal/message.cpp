@@ -6,12 +6,18 @@
 
 #include <seanerbus/internal/message.hpp>
 
-#include <filesystem>
+#include <iostream>
 #include <optional>
+#include <system_error>
 
 #include <capnp/blob.h>
 #include <capnp/serialize.h>
 #include <seanerbus/internal/internal.capnp.h>
+
+extern "C"
+{
+#include <sys/socket.h>
+}
 
 namespace seanerbus
 {
@@ -85,7 +91,25 @@ void Message::to_fd_capnp(int fd)
         capnp::Data::Reader((const kj::byte*)payload.second.data(), payload.second.size()));
     sub_msg.setPayloadType(payload.first);
 
-    writeMessageToFd(fd, message);
+    auto enc = capnp::messageToFlatArray(message);
+
+    int transferred = 0;
+    while (transferred != enc.size() * sizeof(capnp::word))
+    {
+        int res = send(fd, reinterpret_cast<std::byte*>(enc.begin()) + transferred,
+                       enc.size() * sizeof(capnp::word) - transferred, 0);
+
+        if (res == -1 && errno == EAGAIN)
+        {
+            continue;
+        }
+        else if (res == -1)
+        {
+            throw std::system_error(errno, std::system_category());
+        }
+
+        transferred += res;
+    }
 }
 
 Message Message::subscribe(Address addr)
