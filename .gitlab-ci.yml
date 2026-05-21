@@ -15,6 +15,13 @@ variables:
   DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
   DOCKER_IMAGE_TAG: $CI_COMMIT_SHA
 
+check-differ-capnp:
+  stage: prebuild
+  image: python:latest
+  script:
+    - diff -u --color=always  msg/schemas/msg.capnp bindings/python/src/seanerbus/msg/msg.capnp
+    - diff -u --color=always internal/internal_schemas/schemas/internal.capnp bindings/python/src/seanerbus/client/internal.capnp 
+
 reuse-lint:
   stage: prebuild
   image: python:latest
