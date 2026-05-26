@@ -8,13 +8,29 @@ SPDX-License-Identifier: MIT
 
 These are the Python examples for the SeanerBUS.
 
-Trying out those examples requires the seanerbus_msg and seanerbus_client Python libraries.
+## Setup
 
-Install them into a venv of your choosing with:
+From the **seanerbus root directory**, create a virtual environment and install the Python package:
 
 ```sh
-cd client/bindings/python
-pip install .
-cd msg/bindings/python
-pip install .
+uv venv .venv
+source .venv/bin/activate
+uv pip install bindings/python/
 ```
+
+## Running the examples
+
+With the server running (`cd server && cargo run`) and the virtual environment activated:
+
+```sh
+# Publish/subscribe test — two shells:
+python3 python_examples/src/publish_test.py   a366335b-52f0-4658-a42b-7e73e83ec91f
+python3 python_examples/src/subscribe_test.py a366335b-52f0-4658-a42b-7e73e83ec91f
+
+# Request/response test — two shells:
+python3 python_examples/src/response_test.py  a366335b-52f0-4658-a42b-7e73e83ec91f
+python3 python_examples/src/request_test.py   a366335b-52f0-4658-a42b-7e73e83ec91f
+```
+
+Replace the UUID with one of your own choosing, or use the same UUID shown above.
+Any combination of Python, Rust, and C++ examples interoperates.

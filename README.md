@@ -60,9 +60,8 @@ cargo run
 # Second Shell:
 cd rust_examples
 cargo run --bin response_test  a366335b-52f0-4658-a42b-7e73e83ec91f
-# Third Shell:
-cd python
-./request_test.py  a366335b-52f0-4658-a42b-7e73e83ec91f
+# Third Shell (from seanerbus root, with .venv activated — see python_examples/README.md):
+python3 python_examples/src/request_test.py  a366335b-52f0-4658-a42b-7e73e83ec91f
 
 ```
 ### `bindings/python`
