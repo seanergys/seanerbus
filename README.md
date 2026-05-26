@@ -19,6 +19,8 @@ The server/broker component.
 If Rust is installed, it can be started with:
 
 ```
+rustup default stable # if Rust is not installed another way
+sudo apt install capnproto # Package containing the `capnp` tool
 cd server
 cargo run
 # If more debug info is wanted:
