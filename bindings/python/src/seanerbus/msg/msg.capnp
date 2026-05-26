@@ -9,7 +9,6 @@ enum MessageTypes
     helloWorldReqV1 @3;
     helloWorldResV1 @4;
 
-
     vectorReqV1 @5;
     vectorResV1 @6;
 

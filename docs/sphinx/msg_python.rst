@@ -16,9 +16,19 @@ Python Payload Library
 .. autoclass:: seanerbus.msg::HelloWorldResV1
    :members:
    :undoc-members:
+
 .. autoclass:: seanerbus.msg::NamingServiceResV1
    :members:
    :undoc-members:
+
 .. autoclass:: seanerbus.msg::NamingServiceReqV1
+   :members:
+   :undoc-members:
+
+.. autoclass:: seanerbus.msg::VectorResV1
+   :members:
+   :undoc-members:
+
+.. autoclass:: seanerbus.msg::VectorReqV1
    :members:
    :undoc-members:
