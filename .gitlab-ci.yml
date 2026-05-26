@@ -180,3 +180,15 @@ sub_python_pub_cpp:
     - make -j4
     - cd ..
     - ./sub_python_pub_cpp.sh
+
+sub_python_pub_python_array:
+  image: python:latest
+  stage: end_to_end
+  script:
+    - apt-get update && apt-get install -y cmake capnproto pkg-config libcapnp-dev git rustup build-essential
+    - git submodule update --init --recursive
+    - rustup default stable
+    - pip install bindings/python
+    - cd contrib/scenario_tests
+    - ./req_python_res_python_array.sh
+

@@ -21,7 +21,6 @@ async def main():
     while True:
         # Wait for a message
         msg = await c.read_msg()
-
         # Try to decode its payload as a HelloWorldReqV1
         payload = HelloWorldReqV1.from_capnp(msg)
 
