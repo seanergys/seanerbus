@@ -14,6 +14,8 @@ enum MessageTypes
 
     reverseResolveReqV1 @7;
     reverseResolveResV1 @8;
+
+    fluxLifecycleEventV1 @9;
 }
 
 struct TimeValueV1
@@ -78,3 +80,7 @@ struct VectorResV1
     results @0 :List(Float64);
 }
 
+struct FluxLifecycleEventV1
+{
+data @0 :Text;
+}
