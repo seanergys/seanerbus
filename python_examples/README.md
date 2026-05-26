@@ -13,9 +13,9 @@ These are the Python examples for the SeanerBUS.
 From the **seanerbus root directory**, create a virtual environment and install the Python package:
 
 ```sh
-python3 -m venv .venv
+uv venv .venv
 source .venv/bin/activate
-pip install bindings/python/
+uv pip install bindings/python/
 ```
 
 ## Running the examples
