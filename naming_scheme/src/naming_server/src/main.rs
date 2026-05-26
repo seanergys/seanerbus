@@ -17,16 +17,29 @@ struct Services {
 fn get_matching_addresses(attrs: Vec<(String, String)>, services: &[Services]) -> Vec<Uuid> {
     let mut services = services.to_owned();
     for attr in &attrs {
-        services
-            .retain(|s| {
-                if let Some(v) = s.attrs.get(&attr.0) {
-                    if attr.1 == "*" { true } else { *v == attr.1 }
-                } else {
-                    false
-                }
-            });
+        services.retain(|s| {
+            if let Some(v) = s.attrs.get(&attr.0) {
+                if attr.1 == "*" { true } else { *v == attr.1 }
+            } else {
+                false
+            }
+        });
     }
     services.into_iter().map(|s| s.uuid).collect()
+}
+
+fn get_name_for_address(addr: Uuid, services: &[Services]) -> Vec<(String, String)> {
+    for service in services {
+        if service.uuid == addr {
+            return service
+                .attrs
+                .clone()
+                .into_iter()
+                .collect::<Vec<(String, String)>>();
+        }
+    }
+
+    Vec::new()
 }
 
 #[tokio::main]
@@ -43,25 +56,35 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     while let Some(msg) = conn.read_msg().await? {
         match msg.dp_type {
-            seanerbus_schemas::message::MessageType::Request=> {
+            seanerbus_schemas::message::MessageType::Request => {
                 let naming_msg =
                     seanerbus_msg::message::Message::from_capnp(msg.payload_type, &msg.payload)?;
 
-                if let seanerbus_msg::message::Message::NamingServiceReqV1(attrs) = naming_msg {
-                    println!("Resolving: {:?}", attrs);
+                match naming_msg {
+                    seanerbus_msg::message::Message::ResolveReqV1(attrs) => {
+                        println!("Resolving: {:?}", attrs);
 
-                    let uuids = get_matching_addresses(attrs, &services);
+                        let uuids = get_matching_addresses(attrs, &services);
 
-                    println!("Resolved To: {:?}", uuids);
-                    let (payload_type, payload) =
-                        seanerbus_msg::message::Message::NamingServiceResV1(uuids)
+                        println!("Resolved To: {:?}", uuids);
+                        let (payload_type, payload) =
+                            seanerbus_msg::message::Message::ResolveResV1(uuids).to_capnp()?;
+                        conn.respond_to(&msg, payload_type, &payload).await?;
+                    }
+                    seanerbus_msg::message::Message::ReverseResolveReqV1(uuid) => {
+                        let (payload_type, payload) =
+                            seanerbus_msg::message::Message::ReverseResolveResV1(
+                                get_name_for_address(uuid, &services),
+                            )
                             .to_capnp()?;
-                    conn.respond_to(&msg, payload_type, &payload).await?;
-                } else {
-                    panic!(
-                        "Got request of type {}  although NamingServiceReqV1 was expected!",
-                        msg.payload_type
-                    );
+                        conn.respond_to(&msg, payload_type, &payload).await?;
+                    }
+                    _ => {
+                        panic!(
+                            "Got request of type {}  although NamingServiceReqV1 was expected!",
+                            msg.payload_type
+                        );
+                    }
                 }
             }
             _ => panic!(

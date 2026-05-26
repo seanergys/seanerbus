@@ -12,7 +12,8 @@ extern "C"
 {
 #include <unistd.h>
 }
-void req_handler(seanerbus::client::Connection& conn, seanerbus::Message msg)
+
+void req_handler(seanerbus::client::Connection* conn, seanerbus::Message msg)
 {
     if (msg.payload.first != (uint64_t)::MessageTypes::HELLO_WORLD_RES_V1)
     {
@@ -27,7 +28,7 @@ void req_handler(seanerbus::client::Connection& conn, seanerbus::Message msg)
         std::cout << "Got answer to request: " << result.str_msg << std::endl;
     }
 
-    conn.shutdown();
+    conn->shutdown();
 }
 
 int main(int argc, char** argv)

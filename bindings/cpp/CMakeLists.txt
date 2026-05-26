@@ -97,3 +97,17 @@ install(
 install(
     FILES "${CMAKE_CURRENT_BINARY_DIR}/seanerbus.pc"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+
+if(PROJECT_IS_TOP_LEVEL)
+    find_package(Catch2 CONFIG)
+
+    if(Catch2_FOUND)
+        include(CTest)
+        include(Catch)
+
+        add_executable(tests tests/test.cpp)
+        
+        target_link_libraries(tests PRIVATE Catch2::Catch2WithMain Seanerbus::seanerbus)
+        catch_discover_tests(tests)
+    endif()
+endif()

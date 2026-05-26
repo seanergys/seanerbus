@@ -4,10 +4,16 @@
 enum MessageTypes
 {
     timeValueV1 @0;
-    namingServiceReqV1 @1;
-    namingServiceResV1 @2;
+    resolveReqV1 @1;
+    resolveResV1 @2;
     helloWorldReqV1 @3;
     helloWorldResV1 @4;
+
+    vectorReqV1 @5;
+    vectorResV1 @6;
+
+    reverseResolveReqV1 @7;
+    reverseResolveResV1 @8;
 }
 
 struct TimeValueV1
@@ -20,13 +26,14 @@ enum PayloadType {
  timeValueV1 @0;
 }
 
-struct NamingServiceReqV1
-{
 struct KV
 {
 key @0 :Text;
 value @1 :Text;
 }
+
+struct ResolveReqV1
+{
 attributes @0 :List(KV);
 }
 
@@ -35,9 +42,19 @@ lower @0 :UInt64;
 upper @1 :UInt64;
 }
 
-struct NamingServiceResV1
+struct ResolveResV1
 {
 matchingInterfaces @0 :List(Address);
+}
+
+struct ReverseResolveReqV1
+{
+address @0 :Address;
+}
+
+struct ReverseResolveResV1
+{
+name @0 :List(KV);
 }
 
 struct HelloWorldReqV1
@@ -49,3 +66,15 @@ struct HelloWorldResV1
 {
 msg @0 :Text;
 }
+
+
+struct VectorReqV1
+{
+    values @0 :List(Float64);
+}
+
+struct VectorResV1
+{
+    results @0 :List(Float64);
+}
+

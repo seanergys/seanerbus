@@ -73,10 +73,17 @@ async def make_resolve(args):
             )
             exit(1)
         resolv[kv[0]] = kv[1]
-    uuids = await seanerbus.naming.resolve(resolv)
+    addrs = await seanerbus.naming.resolve(resolv)
     print(f"Resolved {resolv} to:")
-    for uuid in uuids:
-        print(f"\t{uuid}")
+    for addr in addrs:
+        print(f"\t{addr}")
+
+
+async def make_rev_resolve(args):
+    addr = uuid.UUID(args.uuid)
+
+    kvs = await seanerbus.naming.reverse_resolve(addr)
+    print(f"'{addr} => {kvs}")
 
 
 parser = argparse.ArgumentParser(
@@ -97,6 +104,11 @@ publish_parser.add_argument(
 
 resolve_parser = subparsers.add_parser("resolve", help="Resolve a name")
 resolve_parser.add_argument("keyvalue", nargs="*", help="key=value pairs to resolve")
+
+rev_resolve_parser = subparsers.add_parser(
+    "reverse-resolve", help="Reverse resolve address to name"
+)
+rev_resolve_parser.add_argument("uuid", help="Address to resolve back")
 args = parser.parse_args()
 
 # print(vars(seanerbus.msg.msg_capnp.MessageTypes))
@@ -108,3 +120,6 @@ if args.cmd == "subscribe":
 
 if args.cmd == "resolve":
     asyncio.run(capnp.run(make_resolve(args)))
+
+if args.cmd == "reverse-resolve":
+    asyncio.run(capnp.run(make_rev_resolve(args)))

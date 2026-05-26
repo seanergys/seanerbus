@@ -82,7 +82,6 @@ public:
 
             if (connect(sfd, rp->ai_addr, rp->ai_addrlen) != -1)
                 break; /* Success */
-
             close(sfd);
         }
 
@@ -289,6 +288,12 @@ public:
         deleters_.emplace(data, deleter<invoke_tuple>);
     }
 
+    Connection(Connection&) = delete;
+    Connection(Connection&&) = delete;
+
+    Connection& operator=(Connection&) = delete;
+    Connection& operator=(Connection&&) = delete;
+
     ~Connection()
     {
         for (auto& elem : deleters_)
@@ -364,7 +369,7 @@ private:
     static void executor_helper(Connection& conn, Message& msg, std::tuple<F, Args...>& t,
                                 std::index_sequence<Indices...> is)
     {
-        std::invoke(std::move(std::get<0>(t)), conn, msg, std::move(std::get<Indices + 1>(t))...);
+        std::invoke(std::move(std::get<0>(t)), &conn, msg, std::move(std::get<Indices + 1>(t))...);
     }
 
     int fd_ = -1;

@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -32,7 +33,7 @@ public:
      */
     HelloWorldReqV1(std::pair<uint64_t, std::vector<std::byte>> payload)
     {
-        if (!payload.first == (uint64_t)::MessageTypes::HELLO_WORLD_REQ_V1)
+        if (payload.first != (uint64_t)::MessageTypes::HELLO_WORLD_REQ_V1)
         {
             throw std::runtime_error(
                 "Trying to decode a message as a HelloWorldRegV1 that is not a HelloWorldRegV1");

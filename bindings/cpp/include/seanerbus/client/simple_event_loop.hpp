@@ -63,7 +63,8 @@ public:
             }
             else
             {
-                throw std::runtime_error("Unknown poll revent!");
+                throw std::runtime_error(
+                    fmt::format("Unknown poll revent!: {:x}", pfds[0].revents));
             }
         }
     }
