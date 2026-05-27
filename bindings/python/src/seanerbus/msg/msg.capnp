@@ -14,7 +14,6 @@ enum MessageTypes
 
     reverseResolveReqV1 @7;
     reverseResolveResV1 @8;
-
     fluxLifecycleEventV1 @9;
 }
 
