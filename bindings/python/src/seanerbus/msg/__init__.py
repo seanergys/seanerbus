@@ -285,3 +285,33 @@ class VectorResV1:
             results_builder[i] = v
 
         return (msg_capnp.MessageTypes.vectorResV1, msg.to_bytes())
+
+
+class FluxLifecycleEventV1:
+    def __init__(self, data: str):
+        """Creates a new FluxLifecycleEventV1 from the given list of floats"""
+        self.data = data
+
+    @staticmethod
+    def from_capnp(msg):
+        """Decodes the given message (as returned by Connection.read_msg() as a FluxLifecycleEventV1"""
+        res = FluxLifecycleEventV1([])
+
+        if msg.payloadType != msg_capnp.MessageTypes.fluxLifecycleEventV1:
+            raise RuntimeError(
+                f"Can not interpret message of type {msg.payloadType} as FluxLifecycleEventV1!"
+            )
+
+        with msg_capnp.FluxLifecycleEventV1.from_bytes(msg.payload) as req:
+            # Convert Cap’n Proto list → Python list
+            res.data = list(req.data)
+
+        return res
+
+    def to_capnp(self) -> tuple[int, bytes]:
+        """Encodes this FluxLifecycleEventV1 as a Cap'n Proto payload"""
+        msg = msg_capnp.FluxLifecycleEventV1.new_message()
+
+        msg.data = self.data
+
+        return (msg_capnp.MessageTypes.fluxLifecycleEventV1, msg.to_bytes())

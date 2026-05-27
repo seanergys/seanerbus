@@ -6,6 +6,7 @@ use thiserror::Error;
 use uuid::Uuid;
 
 use crate::msg_capnp::MessageTypes;
+use crate::msg_capnp::flux_lifecycle_event_v1;
 use crate::msg_capnp::hello_world_req_v1;
 use crate::msg_capnp::resolve_req_v1;
 use crate::msg_capnp::resolve_res_v1;
@@ -27,6 +28,7 @@ pub enum Message {
     VectorResV1(Vec<f64>),
     ReverseResolveReqV1(Uuid),
     ReverseResolveResV1(Vec<(String, String)>),
+    FluxLifecycleEventV1(String),
 }
 
 #[derive(Error, Debug)]
@@ -143,6 +145,15 @@ impl Message {
                 }
 
                 Ok(Message::ResolveReqV1(attrs))
+            }
+            MessageTypes::FluxLifecycleEventV1 => {
+                let reader =
+                    capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;
+                let reader = reader.get_root::<flux_lifecycle_event_v1::Reader>()?;
+
+                Ok(Message::FluxLifecycleEventV1(
+                    reader.get_data().unwrap().to_str().unwrap().to_owned(),
+                ))
             }
         }
     }
@@ -285,11 +296,21 @@ impl Message {
                         .get(i as u32)
                         .set_value(attr.1.clone());
                 }
-
                 let mut buffer = vec![];
                 capnp::serialize::write_message(&mut buffer, bld.borrow_inner())?;
 
                 Ok((MessageTypes::ReverseResolveResV1 as u64, buffer))
+            }
+            Message::FluxLifecycleEventV1(str_data) => {
+                let mut bld =
+                    capnp::message::TypedBuilder::<flux_lifecycle_event_v1::Owned>::new_default();
+                let mut msg = bld.init_root();
+
+                msg.set_data(str_data);
+
+                let mut buffer = vec![];
+                capnp::serialize::write_message(&mut buffer, bld.borrow_inner())?;
+                Ok((MessageTypes::FluxLifecycleEventV1 as u64, buffer))
             }
         }
     }
