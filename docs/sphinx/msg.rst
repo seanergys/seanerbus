@@ -16,6 +16,3 @@ Additionally, There a convenience Rust/C++/Python payload encoding/decoding libr
 .. toctree::
    msg_capnp
    new_msg_type
-   msg_cpp
-   msg_python
-   crates/rust_msg/bindings/rust/lib

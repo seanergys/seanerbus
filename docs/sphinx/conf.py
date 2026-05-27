@@ -50,7 +50,7 @@ myst_enable_extensions = {
 rust_crates = {"rust_msg": "../msg", "rust_client": "../client"}
 rust_doc_dir = "sphinx/crates/"
 rust_rustdoc_fmt = "md"
-breathe_default_project = "cpp_seanerbus_client"
+breathe_default_project = "cpp_seanerbus"
 
 templates_path = ["_templates"]
 exclude_patterns = []

@@ -25,7 +25,9 @@ Lastly it makes use of a `two-level addressing and naming scheme <addressing.htm
 .. toctree::
    :caption: Contents:
 
-   client
    server
    msg
    addressing
+   cpp_api
+   rust_api
+   python_api
