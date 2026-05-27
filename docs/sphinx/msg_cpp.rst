@@ -31,6 +31,12 @@ This includes:
    :members:
 
 .. doxygenclass:: seanerbus::msg::VectorResV1
+
+.. doxygenclass:: seanerbus::msg::ResolveReqV1
+   :project: cpp_seanerbus
+   :members:
+
+.. doxygenclass:: seanerbus::msg::ResolveResV1
    :project: cpp_seanerbus
    :members:
 

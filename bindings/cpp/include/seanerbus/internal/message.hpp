@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: 2026 SEANERGYS Partners <https://seanergys.eu>
 //
 // SPDX-License-Identifier: MIT
+#pragma once
 
+#include <iostream>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -58,11 +60,16 @@ struct Uuid
     /**
      * Convert UUID to string
      */
-    explicit operator std::string() const
+    std::string as_string() const
     {
         return fmt::format("{:08x}-{:04x}-{:04x}-{:04x}-{:012x}", upper >> 32,
                            (upper >> 16) & 0xffff, upper & 0xffff, lower >> 48,
                            lower & 0x0000'ffff'ffff'ffff);
+    }
+
+    friend std::ostream& operator<<(std::ostream& lhs, const Uuid& rhs)
+    {
+        return lhs << rhs.as_string();
     }
 
     friend bool operator<(const Uuid& lhs, const Uuid& rhs)
@@ -73,6 +80,11 @@ struct Uuid
         }
 
         return lhs.upper < rhs.lower;
+    }
+
+    friend bool operator==(const Uuid& lhs, const Uuid& rhs)
+    {
+        return lhs.lower == rhs.lower && lhs.upper == rhs.upper;
     }
 
 private:
@@ -120,11 +132,21 @@ struct Address
     {
     }
 
+    static Address locator()
+    {
+        return Address{ { 0, 0x10ca105 } };
+    }
+
     Uuid u_;
 
     friend bool operator<(const Address& lhs, const Address& rhs)
     {
         return lhs.u_ < rhs.u_;
+    }
+
+    friend bool operator==(const Address& lhs, const Address& rhs)
+    {
+        return lhs.u_ == rhs.u_;
     }
 };
 
