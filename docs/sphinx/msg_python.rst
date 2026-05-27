@@ -17,11 +17,19 @@ Python Payload Library
    :members:
    :undoc-members:
 
-.. autoclass:: seanerbus.msg::NamingServiceResV1
+.. autoclass:: seanerbus.msg::ResolveResV1
    :members:
    :undoc-members:
 
-.. autoclass:: seanerbus.msg::NamingServiceReqV1
+.. autoclass:: seanerbus.msg::ResolveReqV1
+   :members:
+   :undoc-members:
+
+.. autoclass:: seanerbus.msg::ReverseResolveReqV1
+   :members:
+   :undoc-members:
+
+.. autoclass:: seanerbus.msg::ReverseResolveResV1
    :members:
    :undoc-members:
 
