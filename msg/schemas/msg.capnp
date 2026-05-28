@@ -15,6 +15,12 @@ enum MessageTypes
     reverseResolveReqV1 @7;
     reverseResolveResV1 @8;
     fluxLifecycleEventV1 @9;
+
+    registerResolveReqV1 @10;
+    registerResolveResV1 @11;
+
+    unregisterResolveReqV1 @12;
+    unregisterResolveResV1 @13;
 }
 
 struct TimeValueV1
@@ -83,3 +89,27 @@ struct FluxLifecycleEventV1
 {
 data @0 :Text;
 }
+
+struct RegisterResolveReqV1
+{
+name @0 :List(KV);
+address @1 :Address;
+}
+
+struct RegisterResolveResV1
+{
+success @0: Bool;
+errMsg @1: Text;
+}
+
+struct UnregisterResolveReqV1
+{
+address @0 :Address;
+}
+
+struct UnregisterResolveResV1
+{
+success @0: Bool;
+errMsg @1: Text;
+}
+

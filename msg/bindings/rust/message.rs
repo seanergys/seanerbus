@@ -8,11 +8,15 @@ use uuid::Uuid;
 use crate::msg_capnp::MessageTypes;
 use crate::msg_capnp::flux_lifecycle_event_v1;
 use crate::msg_capnp::hello_world_req_v1;
+use crate::msg_capnp::register_resolve_req_v1;
+use crate::msg_capnp::register_resolve_res_v1;
 use crate::msg_capnp::resolve_req_v1;
 use crate::msg_capnp::resolve_res_v1;
 use crate::msg_capnp::reverse_resolve_req_v1;
 use crate::msg_capnp::reverse_resolve_res_v1;
 use crate::msg_capnp::time_value_v1;
+use crate::msg_capnp::unregister_resolve_req_v1;
+use crate::msg_capnp::unregister_resolve_res_v1;
 use crate::msg_capnp::vector_req_v1;
 use crate::msg_capnp::vector_res_v1;
 
@@ -29,6 +33,10 @@ pub enum Message {
     ReverseResolveReqV1(Uuid),
     ReverseResolveResV1(Vec<(String, String)>),
     FluxLifecycleEventV1(String),
+    RegisterResolveReqV1(Vec<(String, String)>, Uuid),
+    RegisterResolveResV1(bool, String),
+    UnregisterResolveReqV1(Uuid),
+    UnregisterResolveResV1(bool, String),
 }
 
 #[derive(Error, Debug)]
@@ -154,6 +162,58 @@ impl Message {
                 Ok(Message::FluxLifecycleEventV1(
                     reader.get_data().unwrap().to_str().unwrap().to_owned(),
                 ))
+            }
+            MessageTypes::RegisterResolveReqV1 => {
+                let reader =
+                    capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;
+                let reader = reader.get_root::<register_resolve_req_v1::Reader>()?;
+                let address = Uuid::from_u64_pair(
+                    reader.get_address().unwrap().get_upper(),
+                    reader.get_address().unwrap().get_lower(),
+                );
+
+                let mut name: Vec<(String, String)> = vec![];
+                for kv in reader.get_name()? {
+                    name.push((
+                        kv.get_key()?.to_string().unwrap(),
+                        kv.get_value()?.to_string().unwrap(),
+                    ));
+                }
+
+                Ok(Message::RegisterResolveReqV1(name, address))
+            }
+            MessageTypes::RegisterResolveResV1 => {
+                let reader =
+                    capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;
+
+                let reader = reader.get_root::<register_resolve_res_v1::Reader>()?;
+
+                Ok(Message::RegisterResolveResV1(
+                    reader.get_success(),
+                    reader.get_err_msg().unwrap().to_string().unwrap(),
+                ))
+            }
+            MessageTypes::UnregisterResolveResV1 => {
+                let reader =
+                    capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;
+
+                let reader = reader.get_root::<unregister_resolve_res_v1::Reader>()?;
+
+                Ok(Message::UnregisterResolveResV1(
+                    reader.get_success(),
+                    reader.get_err_msg().unwrap().to_string().unwrap(),
+                ))
+            }
+            MessageTypes::UnregisterResolveReqV1 => {
+                let reader =
+                    capnp::serialize::read_message(data, capnp::message::ReaderOptions::new())?;
+
+                let reader = reader.get_root::<unregister_resolve_req_v1::Reader>()?;
+
+                Ok(Message::UnregisterResolveReqV1(Uuid::from_u64_pair(
+                    reader.get_address().unwrap().get_upper(),
+                    reader.get_address().unwrap().get_lower(),
+                )))
             }
         }
     }
@@ -311,6 +371,72 @@ impl Message {
                 let mut buffer = vec![];
                 capnp::serialize::write_message(&mut buffer, bld.borrow_inner())?;
                 Ok((MessageTypes::FluxLifecycleEventV1 as u64, buffer))
+            }
+
+            Message::RegisterResolveReqV1(name, addr) => {
+                let mut bld =
+                    capnp::message::TypedBuilder::<register_resolve_req_v1::Owned>::new_default();
+                let mut msg = bld.init_root();
+                let mut uuid_builder = msg.reborrow().init_address();
+
+                let uuid_pair = addr.as_u64_pair();
+                uuid_builder.set_upper(uuid_pair.0);
+                uuid_builder.set_lower(uuid_pair.1);
+
+                let mut attr_builder = msg.init_name(name.len().try_into().unwrap());
+                for (i, attr) in name.iter().enumerate() {
+                    attr_builder
+                        .reborrow()
+                        .get(i as u32)
+                        .set_key(attr.0.clone());
+                    attr_builder
+                        .reborrow()
+                        .get(i as u32)
+                        .set_value(attr.1.clone());
+                }
+                let mut buffer = vec![];
+                capnp::serialize::write_message(&mut buffer, bld.borrow_inner())?;
+                Ok((MessageTypes::RegisterResolveReqV1 as u64, buffer))
+            }
+
+            Message::RegisterResolveResV1(success, err_msg) => {
+                let mut bld =
+                    capnp::message::TypedBuilder::<register_resolve_res_v1::Owned>::new_default();
+                let mut msg = bld.init_root();
+
+                msg.set_success(*success);
+                msg.set_err_msg(err_msg);
+
+                let mut buffer = vec![];
+                capnp::serialize::write_message(&mut buffer, bld.borrow_inner())?;
+                Ok((MessageTypes::RegisterResolveResV1 as u64, buffer))
+            }
+            Message::UnregisterResolveResV1(success, err_msg) => {
+                let mut bld =
+                    capnp::message::TypedBuilder::<unregister_resolve_res_v1::Owned>::new_default();
+                let mut msg = bld.init_root();
+
+                msg.set_success(*success);
+                msg.set_err_msg(err_msg);
+
+                let mut buffer = vec![];
+                capnp::serialize::write_message(&mut buffer, bld.borrow_inner())?;
+                Ok((MessageTypes::UnregisterResolveResV1 as u64, buffer))
+            }
+
+            Message::UnregisterResolveReqV1(addr) => {
+                let mut bld =
+                    capnp::message::TypedBuilder::<unregister_resolve_req_v1::Owned>::new_default();
+                let mut msg = bld.init_root();
+                let mut uuid_builder = msg.reborrow().init_address();
+
+                let uuid_pair = addr.as_u64_pair();
+                uuid_builder.set_upper(uuid_pair.0);
+                uuid_builder.set_lower(uuid_pair.1);
+
+                let mut buffer = vec![];
+                capnp::serialize::write_message(&mut buffer, bld.borrow_inner())?;
+                Ok((MessageTypes::UnregisterResolveReqV1 as u64, buffer))
             }
         }
     }

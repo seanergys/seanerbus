@@ -52,3 +52,23 @@ TEST_CASE("ReverseResolveResV1 enc/dec works")
     REQUIRE(seanerbus::msg::ReverseResolveResV1(payload).name ==
             std::map<std::string, std::string>{ { "foo", "bar" }, { "bar", "baz" } });
 }
+
+TEST_CASE("RegisterResolveReqV1 enc/dec works")
+{
+    auto payload = seanerbus::msg::RegisterResolveReqV1({ { "foo", "bar" }, { "bar", "baz" } },
+                                                        seanerbus::Address(seanerbus::Uuid(42, 24)))
+                       .to_capnp();
+
+    REQUIRE(seanerbus::msg::RegisterResolveReqV1(payload).name ==
+            std::map<std::string, std::string>{ { "foo", "bar" }, { "bar", "baz" } });
+    REQUIRE(seanerbus::msg::RegisterResolveReqV1(payload).addr ==
+            seanerbus::Address(seanerbus::Uuid(42, 24)));
+}
+
+TEST_CASE("RegisterResolveResV1 enc/dec works")
+{
+    auto payload = seanerbus::msg::RegisterResolveResV1(false, "I'm not happy").to_capnp();
+
+    REQUIRE(!seanerbus::msg::RegisterResolveResV1(payload).success);
+    REQUIRE(seanerbus::msg::RegisterResolveResV1(payload).err_msg == "I'm not happy");
+}

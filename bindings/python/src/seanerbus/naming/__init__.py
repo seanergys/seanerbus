@@ -5,6 +5,8 @@
 from ..client import Connection
 from ..msg import ReverseResolveReqV1, ReverseResolveResV1
 from ..msg import ResolveResV1, ResolveReqV1
+from ..msg import RegisterResolveReqV1, RegisterResolveResV1
+from ..msg import UnregisterResolveReqV1, UnregisterResolveResV1
 import uuid
 
 
@@ -28,3 +30,29 @@ async def reverse_resolve(addr):
     )
 
     return msg.name
+
+
+async def register_resolve(name, addr):
+    """Registers a name for the given address with the naming service"""
+
+    c = await Connection.connect("localhost", 5398)
+
+    msg = RegisterResolveResV1.from_capnp(
+        await c.request(
+            uuid.UUID(int=0x10CA105), RegisterResolveReqV1(name, addr).to_capnp()
+        )
+    )
+    return msg
+
+
+async def unregister_resolve(addr):
+    """Unregisters an address from the naming service"""
+
+    c = await Connection.connect("localhost", 5398)
+
+    msg = UnregisterResolveResV1.from_capnp(
+        await c.request(
+            uuid.UUID(int=0x10CA105), UnregisterResolveReqV1(addr).to_capnp()
+        )
+    )
+    return msg
