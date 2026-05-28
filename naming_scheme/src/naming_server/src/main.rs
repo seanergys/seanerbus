@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 use seanerbus_client::Connection;
+use seanerbus_msg::message::Message;
 use seanerbus_schemas::message::Address;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -47,7 +48,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
     let file = std::fs::File::open("services.json")?;
 
-    let services: Vec<Services> = serde_json::from_reader(file)?;
+    let mut services: Vec<Services> = serde_json::from_reader(file)?;
 
     let mut conn = Connection::new("localhost:5398").await?;
 
@@ -57,27 +58,64 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     while let Some(msg) = conn.read_msg().await? {
         match msg.dp_type {
             seanerbus_schemas::message::MessageType::Request => {
-                let naming_msg =
-                    seanerbus_msg::message::Message::from_capnp(msg.payload_type, &msg.payload)?;
+                let naming_msg = Message::from_capnp(msg.payload_type, &msg.payload)?;
 
                 match naming_msg {
-                    seanerbus_msg::message::Message::ResolveReqV1(attrs) => {
+                    Message::ResolveReqV1(attrs) => {
                         println!("Resolving: {:?}", attrs);
 
                         let uuids = get_matching_addresses(attrs, &services);
 
                         println!("Resolved To: {:?}", uuids);
-                        let (payload_type, payload) =
-                            seanerbus_msg::message::Message::ResolveResV1(uuids).to_capnp()?;
+                        let (payload_type, payload) = Message::ResolveResV1(uuids).to_capnp()?;
                         conn.respond_to(&msg, payload_type, &payload).await?;
                     }
-                    seanerbus_msg::message::Message::ReverseResolveReqV1(uuid) => {
+                    Message::ReverseResolveReqV1(uuid) => {
                         let (payload_type, payload) =
-                            seanerbus_msg::message::Message::ReverseResolveResV1(
-                                get_name_for_address(uuid, &services),
+                            Message::ReverseResolveResV1(get_name_for_address(uuid, &services))
+                                .to_capnp()?;
+                        conn.respond_to(&msg, payload_type, &payload).await?;
+                    }
+                    Message::RegisterResolveReqV1(name, addr) => {
+                        if services.iter().any(|service| service.uuid == addr) {
+                            println!("Can not register {}, already registered!", addr);
+                            let (payload_type, payload) = Message::RegisterResolveResV1(
+                                false,
+                                "Service already exists!".to_string(),
                             )
                             .to_capnp()?;
-                        conn.respond_to(&msg, payload_type, &payload).await?;
+
+                            conn.respond_to(&msg, payload_type, &payload).await?;
+                        } else {
+                            println!("Registered {:?} to {}", name, addr);
+                            services.push(Services {
+                                uuid: addr,
+                                attrs: name.into_iter().collect::<HashMap<String, String>>(),
+                            });
+                            let (payload_type, payload) =
+                                Message::RegisterResolveResV1(true, String::new()).to_capnp()?;
+
+                            conn.respond_to(&msg, payload_type, &payload).await?;
+                        }
+                    }
+                    Message::UnregisterResolveReqV1(addr) => {
+                        if services.iter().any(|service| service.uuid == addr) {
+                            services.retain(|service| service.uuid != addr);
+
+                            println!("Deregistering {}", addr);
+                            let (payload_type, payload) =
+                                Message::UnregisterResolveResV1(true, String::new()).to_capnp()?;
+                            conn.respond_to(&msg, payload_type, &payload).await?;
+                        } else {
+                            println!("Can not deregister {}, does not exist!", addr);
+                            let (payload_type, payload) = Message::UnregisterResolveResV1(
+                                false,
+                                "No service under that address to deregister!".to_string(),
+                            )
+                            .to_capnp()?;
+
+                            conn.respond_to(&msg, payload_type, &payload).await?;
+                        }
                     }
                     _ => {
                         panic!(

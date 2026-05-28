@@ -29,7 +29,8 @@ def parse_msg(payload_type, payload):
 
 
 async def make_publish(args):
-    address = uuid.UUID(args.address)
+    addr = uuid.UUID(args.addr)
+
     payload_content = getattr(seanerbus.msg.msg_capnp, args.type).new_message()
     payload_type = getattr(
         seanerbus.msg.msg_capnp.MessageTypes, args.type[:1].lower() + args.type[1:]
@@ -49,13 +50,13 @@ async def make_publish(args):
         setattr(payload_content, kv[0], kv[1])
 
     c = await seanerbus.client.Connection.connect("localhost", 5398)
-    await c.publish(address, (payload_type, payload_content.to_bytes()))
+    await c.publish(addr, (payload_type, payload_content.to_bytes()))
 
 
 async def make_subscribe(args):
-    address = uuid.UUID(args.address)
+    addr = uuid.UUID(args.addr)
     c = await seanerbus.client.Connection.connect("localhost", 5398)
-    await c.subscribe(address)
+    await c.subscribe(addr)
 
     while True:
         msg = await c.read_msg()
@@ -80,10 +81,41 @@ async def make_resolve(args):
 
 
 async def make_rev_resolve(args):
-    addr = uuid.UUID(args.uuid)
+    addr = uuid.UUID(args.addr)
 
     kvs = await seanerbus.naming.reverse_resolve(addr)
     print(f"'{addr} => {kvs}")
+
+
+async def make_reg_resolve(args):
+    addr = uuid.UUID(args.addr)
+    name = {}
+    for kv in args.keyvalue:
+        kv = kv.split("=")
+        if len(kv) != 2:
+            print(
+                f"{kv}: key=value arguments need to consist of two terms separated by a '=' sign!"
+            )
+            exit(1)
+        name[kv[0]] = kv[1]
+
+    res = await seanerbus.naming.register_resolve(name, addr)
+
+    if res.success:
+        print(f"Succesfully registered address {addr} for name {name}")
+    else:
+        print(f"Registering address {addr} for name {name} failed: {res.errMsg}")
+
+
+async def make_unreg_resolve(args):
+    addr = uuid.UUID(args.addr)
+
+    res = await seanerbus.naming.unregister_resolve(addr)
+
+    if res.success:
+        print(f"Succesfully unregistered address {addr}")
+    else:
+        print(f"Unregistering address {addr} failed: {res.errMsg}")
 
 
 parser = argparse.ArgumentParser(
@@ -93,11 +125,11 @@ parser = argparse.ArgumentParser(
 subparsers = parser.add_subparsers(help="foobar", dest="cmd")
 
 subscribe_parser = subparsers.add_parser("subscribe", help="Subscribe to some address")
-subscribe_parser.add_argument("-a", "--address", help="Address to subscribe to")
+subscribe_parser.add_argument("-a", "--addr", help="Address to subscribe to")
 
 publish_parser = subparsers.add_parser("publish", help="Publish a message")
 publish_parser.add_argument("-t", "--type", help="SeanerBUS payload type to publish")
-publish_parser.add_argument("-a", "--address", help="UUID address to publish to")
+publish_parser.add_argument("-a", "--addr", help="UUID address to publish to")
 publish_parser.add_argument(
     "keyvalue", nargs="*", help="key=value pairs to put into the payload"
 )
@@ -108,7 +140,22 @@ resolve_parser.add_argument("keyvalue", nargs="*", help="key=value pairs to reso
 rev_resolve_parser = subparsers.add_parser(
     "reverse-resolve", help="Reverse resolve address to name"
 )
-rev_resolve_parser.add_argument("uuid", help="Address to resolve back")
+rev_resolve_parser.add_argument("addr", help="Address to resolve back")
+
+reg_resolve_parser = subparsers.add_parser(
+    "register-resolve", help="Reverse resolve address to name"
+)
+reg_resolve_parser.add_argument("addr", help="Address to register")
+reg_resolve_parser.add_argument(
+    "keyvalue", nargs="*", help="name given to the address as key=value pairs"
+)
+
+unreg_resolve_parser = subparsers.add_parser(
+    "unregister-resolve", help="Reverse resolve address to name"
+)
+unreg_resolve_parser.add_argument(
+    "addr", help="Address to deregister from naming service"
+)
 args = parser.parse_args()
 
 # print(vars(seanerbus.msg.msg_capnp.MessageTypes))
@@ -123,3 +170,9 @@ if args.cmd == "resolve":
 
 if args.cmd == "reverse-resolve":
     asyncio.run(capnp.run(make_rev_resolve(args)))
+
+if args.cmd == "register-resolve":
+    asyncio.run(capnp.run(make_reg_resolve(args)))
+
+if args.cmd == "unregister-resolve":
+    asyncio.run(capnp.run(make_unreg_resolve(args)))

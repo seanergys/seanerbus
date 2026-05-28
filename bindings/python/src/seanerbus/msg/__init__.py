@@ -315,3 +315,132 @@ class FluxLifecycleEventV1:
         msg.data = self.data
 
         return (msg_capnp.MessageTypes.fluxLifecycleEventV1, msg.to_bytes())
+
+
+class RegisterResolveReqV1:
+    def __init__(self, name, uuid):
+        self.name = name
+        self.uuid = uuid
+
+    def from_capnp(msg):
+        """Decodes the given message (as returned by Connection.read_msg() as a ResolveResV1"""
+        res = RegisterResolveReqV1(None, None)
+
+        if msg.payloadType != msg_capnp.MessageTypes.registerResolveReqV1:
+            raise RuntimeError(
+                f"Can not interpret message of type {msg.payloadType} as ResolveResV1!"
+            )
+
+        with msg_capnp.RegisterResolveReqV1.from_bytes(msg.payload) as req:
+            res.uuid = (req.address.upper << 64) + req.address.lower
+            for i in req.name:
+                res.name[i.key] = i.value
+        return res
+
+    def to_capnp(self) -> tuple[int, bytes]:
+        """Encodes this ResolveResV1 as a Cap'n'Proto payload, so that it can be used with Connection.subscribe()"""
+        msg = msg_capnp.RegisterResolveReqV1.new_message()
+
+        (upper, lower) = uuid_to_u64_pair(self.uuid)
+        msg.address.upper = upper
+        msg.address.lower = lower
+
+        list_of_kvs = list(self.name.items())
+
+        msg.init("name", len(list_of_kvs))
+
+        for num, element in enumerate(list_of_kvs):
+            msg.name[num].key = element[0]
+            msg.name[num].value = element[1]
+        return (msg_capnp.MessageTypes.registerResolveReqV1, msg.to_bytes())
+
+
+class RegisterResolveResV1:
+    def __init__(self, success, err_msg):
+        """Creates a new RegisterResolveResV1 from the given list of floats"""
+        self.success = success
+        self.err_msg = err_msg
+
+    @staticmethod
+    def from_capnp(msg):
+        """Decodes the given message (as returned by Connection.read_msg() as a RegisterResolveResV1"""
+        res = RegisterResolveResV1(None, None)
+
+        if msg.payloadType != msg_capnp.MessageTypes.registerResolveResV1:
+            raise RuntimeError(
+                f"Can not interpret message of type {msg.payloadType} as RegisterResolveResV1!"
+            )
+
+        with msg_capnp.RegisterResolveResV1.from_bytes(msg.payload) as req:
+            res.success = req.success
+            res.errMsg = req.errMsg
+
+        return res
+
+    def to_capnp(self) -> tuple[int, bytes]:
+        """Encodes this RegisterResolveResV1 as a Cap'n Proto payload"""
+        msg = msg_capnp.RegisterResolveResV1.new_message()
+
+        msg.success = self.success
+        msg.errMsg = self.errMsg
+
+        return (msg_capnp.MessageTypes.registerResolveResV1, msg.to_bytes())
+
+
+class UnregisterResolveReqV1:
+    def __init__(self, uuid):
+        self.uuid = uuid
+
+    def from_capnp(msg):
+        """Decodes the given message (as returned by Connection.read_msg() as a ResolveResV1"""
+        res = UnregisterResolveReqV1([])
+
+        if msg.payloadType != msg_capnp.MessageTypes.unregisterResolveReqV1:
+            raise RuntimeError(
+                f"Can not interpret message of type {msg.payloadType} as ResolveResV1!"
+            )
+
+        with msg_capnp.UnregisterResolveReqV1.from_bytes(msg.payload) as req:
+            res.uuid = (req.address.upper << 64) + req.address.lower
+        return res
+
+    def to_capnp(self) -> tuple[int, bytes]:
+        """Encodes this ResolveResV1 as a Cap'n'Proto payload, so that it can be used with Connection.subscribe()"""
+        msg = msg_capnp.UnregisterResolveReqV1.new_message()
+
+        (upper, lower) = uuid_to_u64_pair(self.uuid)
+        msg.address.upper = upper
+        msg.address.lower = lower
+        return (msg_capnp.MessageTypes.unregisterResolveReqV1, msg.to_bytes())
+
+
+class UnregisterResolveResV1:
+    def __init__(self, success, err_msg):
+        """Creates a new UnregisterResolveResV1 from the given list of floats"""
+        self.success = success
+        self.err_msg = err_msg
+
+    @staticmethod
+    def from_capnp(msg):
+        """Decodes the given message (as returned by Connection.read_msg() as a UnregisterResolveResV1"""
+        res = UnregisterResolveResV1(None, None)
+
+        if msg.payloadType != msg_capnp.MessageTypes.unregisterResolveResV1:
+            raise RuntimeError(
+                f"Can not interpret message of type {msg.payloadType} as UnregisterResolveResV1!"
+            )
+
+        with msg_capnp.UnregisterResolveResV1.from_bytes(msg.payload) as req:
+            res.success = req.success
+            res.errMsg = req.errMsg
+
+        return res
+
+    def to_capnp(self) -> tuple[int, bytes]:
+        """Encodes this UnregisterResolveResV1 as a Cap'n Proto payload"""
+        msg = msg_capnp.UnregisterResolveResV1.new_message()
+
+        msg.success = self.success
+        msg.errMsg = self.errMsg
+
+        return (msg_capnp.MessageTypes.unregisterResolveResV1, msg.to_bytes())
