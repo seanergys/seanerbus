@@ -6,6 +6,7 @@
 #include <seanerbus/client/connection.hpp>
 #include <seanerbus/client/simple_event_loop.hpp>
 #include <seanerbus/helpers/one_shot_resolve.hpp>
+#include <seanerbus/msg/flux_lifecycle_event_v1.hpp>
 #include <seanerbus/msg/resolve_req_v1.hpp>
 #include <seanerbus/msg/resolve_res_v1.hpp>
 #include <seanerbus/msg/reverse_resolve_req_v1.hpp>
@@ -71,4 +72,11 @@ TEST_CASE("RegisterResolveResV1 enc/dec works")
 
     REQUIRE(!seanerbus::msg::RegisterResolveResV1(payload).success);
     REQUIRE(seanerbus::msg::RegisterResolveResV1(payload).err_msg == "I'm not happy");
+}
+
+TEST_CASE("FluxLifecycleEventV1 enc/dec works")
+{
+    auto payload = seanerbus::msg::FluxLifecycleEventV1("I'm a test").to_capnp();
+
+    REQUIRE(seanerbus::msg::FluxLifecycleEventV1(payload).str_data == "I'm a test");
 }

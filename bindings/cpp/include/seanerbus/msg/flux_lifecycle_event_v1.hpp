@@ -40,7 +40,7 @@ public:
 
         ::FluxLifecycleEventV1::Reader rd = msg.getRoot<::FluxLifecycleEventV1>();
 
-        str_data = rd.geData();
+        str_data = rd.getData();
     }
 
     explicit FluxLifecycleEventV1(std::string str_data) : str_data(str_data)
