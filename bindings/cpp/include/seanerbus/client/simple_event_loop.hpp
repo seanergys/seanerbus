@@ -6,11 +6,18 @@
 
 #include <seanerbus/client/connection.hpp>
 
+#include <iostream>
 #include <stdexcept>
+#include <system_error>
+
+#include <csignal>
+
+#include <bits/types/sigset_t.h>
 
 extern "C"
 {
 #include <poll.h>
+#include <sys/signalfd.h>
 }
 
 /**
@@ -29,6 +36,44 @@ public:
      */
     SimpleEventLoop(Connection& connection) : connection_(connection)
     {
+        pfds[0].fd = connection_.get_fd();
+        pfds[0].events = POLLIN;
+        pfds[0].revents = 0;
+
+        sigset_t mask;
+        sigemptyset(&mask);
+        sigaddset(&mask, SIGINT);
+
+        if (sigprocmask(SIG_BLOCK, &mask, NULL) == -1)
+        {
+            throw std::system_error(errno, std::system_category());
+        }
+        pfds[1].fd = signalfd(-1, &mask, 0);
+        pfds[1].events = POLLIN;
+        pfds[1].revents = 0;
+    }
+
+    /**
+     * Handler that is called if SIGINT (i.e. Ctrl+C) is received.
+     *
+     * By default, shuts the connection down.
+     *
+     * Override this function to supply your own SIGINT behaviour.
+     */
+    virtual void sigint_handler()
+    {
+        connection_.shutdown();
+    }
+
+    /**
+     * Handler that is called if poll() times out.
+     *
+     * By default, does nothing.
+     *
+     * Override this function to supply your own time-out behaviour.
+     */
+    virtual void timeout_handler()
+    {
     }
 
     /**
@@ -37,39 +82,39 @@ public:
      */
     void run()
     {
-        struct pollfd pfds[1];
-
-        pfds[0].fd = connection_.get_fd();
-        pfds[0].events = POLLIN;
-        pfds[0].revents = 0;
-
         while (true)
         {
-            poll(pfds, 1, -1);
-
-            if (pfds[0].revents == POLLHUP)
+            if (connection_.is_shutdown())
             {
                 return;
             }
+            int ret = poll(pfds, 2, 2000);
 
-            if (pfds[0].revents == POLLIN)
+            if (ret == 0)
+            {
+                timeout_handler();
+                continue;
+            }
+
+            if (ret == -1)
+            {
+                throw std::system_error(errno, std::system_category());
+            }
+
+            if (pfds[0].revents & POLLIN)
             {
                 connection_.try_read();
-
-                if (connection_.is_shutdown())
-                {
-                    return;
-                }
             }
-            else
+
+            if (pfds[1].revents & POLLIN)
             {
-                throw std::runtime_error(
-                    fmt::format("Unknown poll revent!: {:x}", pfds[0].revents));
+                sigint_handler();
             }
         }
     }
 
 private:
+    struct pollfd pfds[3];
     Connection& connection_;
 };
 } // namespace client

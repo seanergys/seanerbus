@@ -71,7 +71,7 @@ public:
         s = getaddrinfo(address.c_str(), port.c_str(), &hints, &result);
         if (s != 0)
         {
-            throw std::runtime_error("Could not resolve with getaddrinfo");
+            throw std::runtime_error("Could not resolve SeanerBUS address with getaddrinfo");
         }
 
         for (rp = result; rp != NULL; rp = rp->ai_next)
@@ -89,7 +89,7 @@ public:
 
         if (rp == NULL)
         { /* No address succeeded */
-            throw std::runtime_error("Could not open a fitting socket!");
+            throw std::runtime_error("Could not open connection to SeanerBUS!");
         }
         fd_ = sfd;
         fcntl(fd_, F_SETFL, O_NONBLOCK);
@@ -117,6 +117,15 @@ public:
     void try_read()
     {
         int res = recv(fd_, buffer_ + cursor_, buffer_size_ - cursor_, 0);
+
+        if (res == 0)
+        {
+            if (cursor_ != 0)
+            {
+                throw std::runtime_error("Connection shut down with data left to read!");
+            }
+            shutdown();
+        }
         if (res == buffer_size_ - cursor_)
         {
             buffer_ = reinterpret_cast<std::byte*>(realloc(buffer_, buffer_size_ * 2));
