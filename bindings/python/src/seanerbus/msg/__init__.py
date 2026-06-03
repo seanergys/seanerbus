@@ -670,3 +670,61 @@ class HistoryResV1:
 
     def is_error(self) -> bool:
         return self.type == "error"
+
+
+class FluxClassifyJobReqV1:
+    def __init__(self, jobspec):
+        """Creates a new FluxClassifyJobReqV1 from the given list of floats"""
+        self.jobspec = jobspec
+
+    @staticmethod
+    def from_capnp(msg):
+        """Decodes the given message (as returned by Connection.read_msg() as a FluxClassifyJobReqV1"""
+        res = FluxClassifyJobReqV1(None)
+
+        if msg.payloadType != msg_capnp.MessageTypes.fluxClassifyJobReqV1:
+            raise RuntimeError(
+                f"Can not interpret message of type {msg.payloadType} as FluxClassifyJobReqV1!"
+            )
+
+        with msg_capnp.FluxClassifyJobReqV1.from_bytes(msg.payload) as req:
+            res.jobspec = req.jobspec
+
+        return req
+
+    def to_capnp(self) -> tuple[int, bytes]:
+        """Encodes this FluxClassifyJobReqV1 as a Cap'n Proto payload"""
+        msg = msg_capnp.FluxClassifyJobReqV1.new_message()
+
+        msg.jobspec = self.jobspec
+
+        return (msg_capnp.MessageTypes.fluxClassifyJobReqV1, msg.to_bytes())
+
+
+class FluxClassifyJobResV1:
+    def __init__(self, result):
+        """Creates a new FluxClassifyJobResV1 from the given list of floats"""
+        self.result = result
+
+    @staticmethod
+    def from_capnp(msg):
+        """Decodes the given message (as returned by Connection.read_msg() as a FluxClassifyJobResV1"""
+        res = FluxClassifyJobResV1(None)
+
+        if msg.payloadType != msg_capnp.MessageTypes.fluxClassifyJobResV1:
+            raise RuntimeError(
+                f"Can not interpret message of type {msg.payloadType} as FluxClassifyJobResV1!"
+            )
+
+        with msg_capnp.FluxClassifyJobResV1.from_bytes(msg.payload) as req:
+            res.result = req.result
+
+        return res
+
+    def to_capnp(self) -> tuple[int, bytes]:
+        """Encodes this FluxClassifyJobResV1 as a Cap'n Proto payload"""
+        msg = msg_capnp.FluxClassifyJobResV1.new_message()
+
+        msg.result = self.result
+
+        return (msg_capnp.MessageTypes.fluxClassifyJobResV1, msg.to_bytes())

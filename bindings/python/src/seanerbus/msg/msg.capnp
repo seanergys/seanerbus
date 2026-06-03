@@ -23,6 +23,9 @@ enum MessageTypes
 
     historyReqV1 @14;
     historyResV1 @15;
+
+    fluxClassifyJobReqV1 @16;
+    fluxClassifyJobResV1 @17;
 }
 
 struct TimeValueV1
@@ -155,4 +158,14 @@ struct HistoryResV1
         ok @0 :History;
         err @1 :Text;
     }
+}
+
+struct FluxClassifyJobReqV1
+{
+    jobspec @0: Text;
+}
+
+struct FluxClassifyJobResV1
+{
+    result @0: Text;
 }
