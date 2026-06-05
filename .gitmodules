@@ -1,3 +1,6 @@
 [submodule "bindings/cpp/lib/fmt"]
 	path = bindings/cpp/lib/fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "database/lib/hta"]
+	path = database/lib/hta
+	url = https://github.com/metricq/hta.git

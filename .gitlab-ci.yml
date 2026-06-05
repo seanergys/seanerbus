@@ -67,6 +67,9 @@ build-cpp:
     - cd ../cmake_config_build_test
     - cmake . -DCMAKE_PREFIX_PATH=../../install_seanerbus
     - make -j4
+    - cd ../../database
+    - cmake .
+    - make -j4
 
 
 
@@ -174,23 +177,18 @@ sub_python_pub_cpp:
     - apt-get update && apt-get install -y cmake capnproto pkg-config libcapnp-dev git rustup build-essential
     - git submodule update --init --recursive
     - rustup default stable
-    - pip install bindings/python
-    - cd contrib/scenario_tests
-    - mkdir build
-    - cd build
-    - cmake ..
-    - make -j4
-    - cd ..
+    - pip install uv
+    - cd scenario_tests/sub_python_pub_cpp/
     - ./sub_python_pub_cpp.sh
 
-sub_python_pub_python_array:
+req_python_res_python_array:
   image: python:latest
   stage: end_to_end
   script:
     - apt-get update && apt-get install -y cmake capnproto pkg-config libcapnp-dev git rustup build-essential
     - git submodule update --init --recursive
     - rustup default stable
-    - pip install bindings/python
-    - cd contrib/scenario_tests
+    - pip install uv
+    - cd scenario_tests/req_python_res_python_array
     - ./req_python_res_python_array.sh
 

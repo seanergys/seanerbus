@@ -18,8 +18,9 @@ def uuid_to_u64_pair(uuid: uuid.UUID) -> tuple[int, int]:
 
 
 class Connection:
+    """A connection to the dataplane"""
+
     def __init__(self):
-        """foobar"""
         pass
 
     @staticmethod

@@ -90,23 +90,20 @@ impl BrokerChannels {
     pub async fn disconnect(&self, conn_id: ConnectionId) {
         if let Err(e) = self.to_pubsub.send(PubSubMsg::Disconnect(conn_id)).await {
             debug!(
-                "pub/sub service died (Reason: {}), following it to Valhallah",
+                "pub/sub service died (Reason: {}), following it to Valhalla",
                 e
             );
             self.shutdown().await
         }
         if let Err(e) = self.to_reqres.send(ReqResMsg::Disconnect(conn_id)).await {
             debug!(
-                "req/res service died (Reason: {}), following it to Valhallah",
+                "req/res service died (Reason: {}), following it to Valhalla",
                 e
             );
             self.shutdown().await
         }
         if let Err(e) = self.to_mux.send(MuxMsg::Disconnect(conn_id)).await {
-            debug!(
-                "mux service died (Reason: {}), following it to Valhallah",
-                e
-            );
+            debug!("mux service died (Reason: {}), following it to Valhalla", e);
             self.shutdown().await
         }
     }

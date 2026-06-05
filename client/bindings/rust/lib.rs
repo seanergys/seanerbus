@@ -65,7 +65,7 @@ impl Connection {
     ///
     /// Returns a `Connection` if the connect succeeded.
     ///
-    /// Returns a [`ConnectionError`](enum.ConnectionError.html) if an error occured.
+    /// Returns a [`ConnectionError`](enum.ConnectionError.html) if an error occurred.
     pub async fn new(endpoint: &str) -> Result<Connection, ConnectionError> {
         let stream = TcpStream::connect(endpoint).await?;
 

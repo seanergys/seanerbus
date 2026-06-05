@@ -136,7 +136,7 @@ impl Message {
                 matching_id
             },
             (reader.size_in_words() + 1) * 8,
-        )) // This is always short one word, dont ask me why.
+        )) // This is always short one word, don't ask me why.
     }
 
     /// Serializes the Message to the Cap'n'Proto format.

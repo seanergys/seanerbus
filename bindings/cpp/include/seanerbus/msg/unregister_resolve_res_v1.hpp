@@ -32,9 +32,9 @@ public:
      */
     UnregisterResolveResV1(std::pair<uint64_t, std::vector<std::byte>> payload)
     {
-        if (!payload.first == (uint64_t)::MessageTypes::UNREGISTER_RESOLVE_RES_V1)
+        if (payload.first != (uint64_t)::MessageTypes::UNREGISTER_RESOLVE_RES_V1)
         {
-            throw std::runtime_error("Trying to decode someting as UnregisterResolveResV1 that is "
+            throw std::runtime_error("Trying to decode something as UnregisterResolveResV1 that is "
                                      "not UnregisterResolveResV1");
         }
         capnp::MallocMessageBuilder msg;

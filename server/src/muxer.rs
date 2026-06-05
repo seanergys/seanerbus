@@ -30,7 +30,7 @@ pub async fn mux(mut rx: mpsc::Receiver<MuxMsg>) {
                     back_channels.remove(&conn_id);
                 }
                 MuxMsg::Forward(msg) => {
-                    debug!("Got messsage to forward to {}", msg.to.unwrap());
+                    debug!("Got message to forward to {}", msg.to.unwrap());
                     match back_channels.get(&msg.to.unwrap()) {
                         Some(rx) => {
                             if rx.send(SenderMsg::OutMsg(msg.clone())).await.is_err() {

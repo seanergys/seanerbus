@@ -22,7 +22,6 @@ author = "SEANERGYS Partners"
 
 extensions = [
     "breathe",
-    "sphinxcontrib_rust",
     "sphinx.ext.autosummary",
     "myst_parser",
     "sphinx.ext.autodoc",
@@ -47,9 +46,6 @@ myst_enable_extensions = {
     "strikethrough",
     "tasklist",
 }
-rust_crates = {"rust_msg": "../msg", "rust_client": "../client"}
-rust_doc_dir = "sphinx/crates/"
-rust_rustdoc_fmt = "md"
 breathe_default_project = "cpp_seanerbus"
 
 templates_path = ["_templates"]

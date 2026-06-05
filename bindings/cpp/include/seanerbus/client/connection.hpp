@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
-
 #include <seanerbus/internal/error_payload.hpp>
 #include <seanerbus/internal/message.hpp>
 
@@ -42,7 +41,7 @@ namespace client
 /**
  * A single connection to the data-plane.
  *
- * One program can hold multiple indepdendent connections to the same data-plane.
+ * One program can hold multiple independent connections to the same data-plane.
  */
 class Connection
 {
@@ -173,7 +172,7 @@ public:
      * Without any further arguments:
      *
      *      void func_one(Connection&, Message);
-     *      susbcribe(some_addr, func_one);
+     *      subscribe(some_addr, func_one);
      *
      * When a published message for some_addr is received, func_one is called as:
      *
@@ -193,7 +192,7 @@ public:
      * For more information, see cpp_examples/src/subscribe_test.cpp
      *
      * @param subscribe_to Address to subscribe to
-     * @param f callback to call when a message from adderss subscribe_to appears.
+     * @param f callback to call when a message from address subscribe_to appears.
      * @param args 0 to n additional arguments to the function f as described above.
      */
     template <class F, class... Args>
@@ -324,7 +323,7 @@ public:
     /**
      * Checks if the user of the connection has requested a shutdown.
      *
-     * After calling try_read(), the event-loop code should check if shudown was requested for this
+     * After calling try_read(), the event-loop code should check if shutdown was requested for this
      * Connection and handle it accordingly.
      */
     bool is_shutdown()

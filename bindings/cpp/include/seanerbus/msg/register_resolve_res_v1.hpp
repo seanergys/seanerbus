@@ -34,7 +34,7 @@ public:
     {
         if (!payload.first == (uint64_t)::MessageTypes::REGISTER_RESOLVE_RES_V1)
         {
-            throw std::runtime_error("Trying to decode someting as RegisterResolveResV1 that is "
+            throw std::runtime_error("Trying to decode something as RegisterResolveResV1 that is "
                                      "not RegisterResolveResV1");
         }
         capnp::MallocMessageBuilder msg;

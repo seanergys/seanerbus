@@ -25,7 +25,7 @@ Once the connection has been made, the client can interact with the server by se
 .. note::
    These basic line-protocol messages are **not** to be confused with the `Standardized Payloads <line-protocol.html>`_
 
-The Cap'n'Proto definition of the line-protocal messages is shown below:
+The Cap'n'Proto definition of the line-protocol messages is shown below:
 
 
 .. code-block::

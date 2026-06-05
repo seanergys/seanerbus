@@ -33,12 +33,12 @@ impl MessageReader {
     /// Returns:
     /// * [`ConnectionError`](seanerbus_async/error/enum.ConnectionError.html) if the Connection exploded.
     /// * `None` if the end of the stream was reached.
-    /// * `Some(Message)` If a message could be succesfully read.
+    /// * `Some(Message)` If a message could be successfully read.
     pub async fn read_message(&mut self) -> Result<Option<Message>, ConnectionError> {
         loop {
             if let Some((msg, size)) = Message::from_capnp(&self.buffer) {
                 trace!(
-                    "Succesfully parsed message from network, msg_type={:?}, size={}",
+                    "Successfully parsed message from network, msg_type={:?}, size={}",
                     msg.dp_type, size
                 );
                 self.buffer.advance(size);

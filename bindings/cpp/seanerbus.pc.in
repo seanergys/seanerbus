@@ -9,7 +9,7 @@ includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
 
 Name: seanerbus
 Version: 0.0.1
-Description: SeanerBUS prototype implemenation
+Description: SeanerBUS prototype implementation
 Libs: -L${libdir} -lseanerbus
 Requires: capnp fmt
 Cflags: -I${includedir}

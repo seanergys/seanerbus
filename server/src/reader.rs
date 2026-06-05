@@ -146,7 +146,7 @@ mod tests {
         };
 
         let rd = tokio_test::io::Builder::new()
-            .read(b"definitily not a capnp message!")
+            .read(b"definitively not a capnp message!")
             .build();
 
         assert!(matches!(read(id, rd, chans).await, Err(_)));

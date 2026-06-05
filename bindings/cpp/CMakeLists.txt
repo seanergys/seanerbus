@@ -12,7 +12,7 @@ add_subdirectory(lib/fmt)
 
 pkg_check_modules(capnp REQUIRED IMPORTED_TARGET capnp)
 
-add_library(seanerbus  "src/internal/message.cpp" "src/internal/error_payload.cpp")
+add_library(seanerbus  "src/internal/message.cpp" "src/internal/error_payload.cpp" "src/time_series.cpp" "src/resolve.cpp")
 
 target_link_libraries(seanerbus  PkgConfig::capnp fmt::fmt-header-only)
 

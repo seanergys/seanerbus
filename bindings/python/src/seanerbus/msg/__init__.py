@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: MIT
 
+from typing import override
+
 import capnp
 import os
 import uuid
@@ -17,10 +19,12 @@ msg_capnp = capnp.load(os.path.dirname(os.path.abspath(__file__)) + "/msg.capnp"
 
 
 class TimeValueV1:
-    def __init__(self, time, value):
+    """A time-value pair payload"""
+
+    def __init__(self, time: int, value: float):
         """Creates a TimeValueV1 from a timestamp and value"""
-        self.time = time
-        self.value = value
+        self.time: int = time
+        self.value: float = value
 
     @staticmethod
     def from_capnp(msg):
@@ -44,6 +48,8 @@ class TimeValueV1:
 
 
 class HelloWorldReqV1:
+    """A Hello World payload example for req/res (Request half)"""
+
     def __init__(self, msg: str):
         """Creates a new HelloWorldReqV1 from the given string"""
         self.msg = msg
@@ -70,6 +76,8 @@ class HelloWorldReqV1:
 
 
 class HelloWorldResV1:
+    """A Hello World response payload example that contains a string"""
+
     def __init__(self, msg: str):
         """Creates a new HelloWorldResV1 from the given string"""
         self.msg = msg
@@ -96,8 +104,12 @@ class HelloWorldResV1:
 
 
 class ResolveReqV1:
-    def __init__(self, kvs):
-        self.kvs = kvs
+    """A request for name resolution payload"""
+
+    def __init__(self, kvs: dict[str, str]):
+        """Creates a ResolveReqV1 from a name
+        :param kvs: The name dict to look up"""
+        self.kvs: dict[str, str] = kvs
 
     def from_capnp(msg):
         """Decodes the given message (as returned by Connection.read_msg() as a NamingServiceReqV1V1"""
@@ -128,8 +140,12 @@ class ResolveReqV1:
 
 
 class ResolveResV1:
-    def __init__(self, uuids):
-        self.uuids = uuids
+    """A response to a resolve request payload"""
+
+    def __init__(self, uuids: list[uuid.UUID]):
+        """Creates a ResolveResV1 from a list of addresses
+        :param uuids: The list of addresses to include in the response"""
+        self.uuids: list[uuid.UUID] = uuids
 
     def from_capnp(msg):
         """Decodes the given message (as returned by Connection.read_msg() as a ResolveResV1"""
@@ -160,11 +176,13 @@ class ResolveResV1:
 
 
 class ReverseResolveReqV1:
-    def __init__(self, uuid):
-        self.uuid = uuid
+    """A request payload for a reverse resolve, e.g. address back to name"""
+
+    def __init__(self, uuid: uuid.UUID):
+        self.uuid: uuid.UUID = uuid
 
     def from_capnp(msg):
-        """Decodes the given message (as returned by Connection.read_msg() as a ResolveResV1"""
+        """Decodes the given message (as returned by Connection.read_msg() as a ReverseResolveRegV1"""
         res = ReverseResolveReqV1([])
 
         if msg.payloadType != msg_capnp.MessageTypes.resolveResV1:
@@ -177,7 +195,7 @@ class ReverseResolveReqV1:
         return res
 
     def to_capnp(self) -> tuple[int, bytes]:
-        """Encodes this ResolveResV1 as a Cap'n'Proto payload, so that it can be used with Connection.subscribe()"""
+        """Encodes this ReverseResolveReqV1 as a Cap'n'Proto payload, so that it can be used with Connection.subscribe()"""
         msg = msg_capnp.ReverseResolveReqV1.new_message()
 
         (upper, lower) = uuid_to_u64_pair(self.uuid)
@@ -187,8 +205,10 @@ class ReverseResolveReqV1:
 
 
 class ReverseResolveResV1:
-    def __init__(self, name):
-        self.name = name
+    """A reverse resolve response payload for translating addresses back to names"""
+
+    def __init__(self, name: dict[str, str]):
+        self.name: dict[str, str] = name
 
     def from_capnp(msg):
         """Decodes the given message (as returned by Connection.read_msg() as a NamingServiceReqV1V1"""
@@ -219,9 +239,11 @@ class ReverseResolveResV1:
 
 
 class VectorReqV1:
+    """A vector of floats request payload"""
+
     def __init__(self, values: list[float]):
         """Creates a new VectorReqV1 from the given list of floats"""
-        self.values = values
+        self.values: list[float] = values
 
     @staticmethod
     def from_capnp(msg):
@@ -254,9 +276,11 @@ class VectorReqV1:
 
 
 class VectorResV1:
+    """A vector of floats response payload"""
+
     def __init__(self, results: list[float]):
         """Creates a new VectorResV1 from the given list of floats"""
-        self.results = results
+        self.results: list[float] = results
 
     @staticmethod
     def from_capnp(msg):
@@ -288,14 +312,16 @@ class VectorResV1:
 
 
 class FluxLifecycleEventV1:
+    """A payload for publishing Flux lifecycle events"""
+
     def __init__(self, data: str):
         """Creates a new FluxLifecycleEventV1 from the given list of floats"""
-        self.data = data
+        self.data: str = data
 
     @staticmethod
     def from_capnp(msg):
         """Decodes the given message (as returned by Connection.read_msg() as a FluxLifecycleEventV1"""
-        res = FluxLifecycleEventV1([])
+        res = FluxLifecycleEventV1("")
 
         if msg.payloadType != msg_capnp.MessageTypes.fluxLifecycleEventV1:
             raise RuntimeError(
@@ -318,13 +344,15 @@ class FluxLifecycleEventV1:
 
 
 class RegisterResolveReqV1:
-    def __init__(self, name, uuid):
-        self.name = name
-        self.uuid = uuid
+    """A request payload for registering a new name to address mapping"""
+
+    def __init__(self, name: dict[str, str], uuid: uuid.UUID):
+        self.name: dict[str, str] = name
+        self.uuid: uuid.UUID = uuid
 
     def from_capnp(msg):
         """Decodes the given message (as returned by Connection.read_msg() as a ResolveResV1"""
-        res = RegisterResolveReqV1(None, None)
+        res = RegisterResolveReqV1({}, uuid.UUID())
 
         if msg.payloadType != msg_capnp.MessageTypes.registerResolveReqV1:
             raise RuntimeError(
@@ -356,15 +384,17 @@ class RegisterResolveReqV1:
 
 
 class RegisterResolveResV1:
-    def __init__(self, success, err_msg):
-        """Creates a new RegisterResolveResV1 from the given list of floats"""
-        self.success = success
-        self.err_msg = err_msg
+    """A response payload for registering a new name"""
+
+    def __init__(self, success: bool, err_msg: str):
+        """Creates a new RegisterResolveResV1 from the success status and if the register was not successful, an error message"""
+        self.success: bool = success
+        self.err_msg: str = err_msg
 
     @staticmethod
     def from_capnp(msg):
         """Decodes the given message (as returned by Connection.read_msg() as a RegisterResolveResV1"""
-        res = RegisterResolveResV1(None, None)
+        res = RegisterResolveResV1(True, "")
 
         if msg.payloadType != msg_capnp.MessageTypes.registerResolveResV1:
             raise RuntimeError(
@@ -373,7 +403,7 @@ class RegisterResolveResV1:
 
         with msg_capnp.RegisterResolveResV1.from_bytes(msg.payload) as req:
             res.success = req.success
-            res.errMsg = req.errMsg
+            res.err_msg = req.errMsg
 
         return res
 
@@ -382,18 +412,21 @@ class RegisterResolveResV1:
         msg = msg_capnp.RegisterResolveResV1.new_message()
 
         msg.success = self.success
-        msg.errMsg = self.errMsg
+        msg.errMsg = self.err_msg
 
         return (msg_capnp.MessageTypes.registerResolveResV1, msg.to_bytes())
 
 
 class UnregisterResolveReqV1:
-    def __init__(self, uuid):
-        self.uuid = uuid
+    """A request payload for unregistering an addr to name mapping"""
+
+    def __init__(self, uuid: uuid.UUID):
+        """Creates a new unregister request for the given address"""
+        self.uuid: uuid.UUID = uuid
 
     def from_capnp(msg):
         """Decodes the given message (as returned by Connection.read_msg() as a ResolveResV1"""
-        res = UnregisterResolveReqV1([])
+        res = UnregisterResolveReqV1(uuid.UUID())
 
         if msg.payloadType != msg_capnp.MessageTypes.unregisterResolveReqV1:
             raise RuntimeError(
@@ -415,10 +448,12 @@ class UnregisterResolveReqV1:
 
 
 class UnregisterResolveResV1:
-    def __init__(self, success, err_msg):
-        """Creates a new UnregisterResolveResV1 from the given list of floats"""
-        self.success = success
-        self.err_msg = err_msg
+    """A response payload to a unregistering request"""
+
+    def __init__(self, success: bool, err_msg: str):
+        """Creates a new UnregisterResolveResV1 with the given success status and if not successful, error message"""
+        self.success: bool = success
+        self.err_msg: str = err_msg
 
     @staticmethod
     def from_capnp(msg):
@@ -432,7 +467,7 @@ class UnregisterResolveResV1:
 
         with msg_capnp.UnregisterResolveResV1.from_bytes(msg.payload) as req:
             res.success = req.success
-            res.errMsg = req.errMsg
+            res.err_msg = req.errMsg
 
         return res
 
@@ -444,3 +479,194 @@ class UnregisterResolveResV1:
         msg.errMsg = self.errMsg
 
         return (msg_capnp.MessageTypes.unregisterResolveResV1, msg.to_bytes())
+
+
+class HistoryReqV1:
+    """A HistoryReqV1 payload for requesting historic time-series data"""
+
+    def __init__(
+        self,
+        address: uuid.UUID,
+        start_time: int,
+        end_time: int,
+        interval_max: int,
+        history_type: str,
+    ):
+        """Creates a HistoryReqV1
+
+        :param address: Address of the metric to query
+        :param start_time: Start of the interval to query
+        :param end_time: End of the interval to query
+        :interval_max: TODO DOCUMENT (leave as 0 for now)
+        :history_type: Type of history, either \"aggregate\" (one Aggregate over the [start, end] or \""""
+        self.address: uuid.UUID = address
+        self.start_time: int = start_time
+        self.end_time: int = end_time
+        self.interval_max: int = interval_max
+        self.history_type: str = history_type
+
+    @staticmethod
+    def from_capnp(msg) -> "HistoryReqV1":
+        """Decodes the given message (as returned by Connection.read_msg() as a HistoryReqV1"""
+        res = HistoryReqV1(uuid.UUID(), 0, 0, 0, "")
+
+        if msg.payloadType != msg_capnp.MessageTypes.historyReqV1:
+            raise RuntimeError(
+                f"Can not interpret message of type {msg.payloadType} as UnregisterResolveResV1!"
+            )
+        with msg_capnp.historyReqV1.from_bytes(msg.payload) as req:
+            res.address = uuid.UUID(req.address.upper << 64) + req.address.lower
+            res.start_time = req.startTime
+            res.end_time = req.endTime
+            res.interval_max = req.intervalMax
+            res.history_type = req.type
+
+        return res
+
+    def to_capnp(self) -> tuple[int, bytes]:
+        msg = msg_capnp.HistoryReqV1.new_message()
+
+        (upper, lower) = uuid_to_u64_pair(self.address)
+        msg.address.upper = upper
+        msg.address.lower = lower
+        msg.startTime = self.start_time
+        msg.endTime = self.end_time
+        msg.intervalMax = self.interval_max
+        msg.type = self.history_type
+
+        return (msg_capnp.MessageTypes.historyReqV1, msg.to_bytes())
+
+
+class Aggregate:
+    """One Aggregated value from time-series data.
+
+    :param minimum:      Minimum value in the interval given by the Aggregate
+    :param maximum:      Maximum value in the interval given by the Aggregate
+    :param sum:          Sum of all values in this Aggregate
+    :param count:        Number of time-series values in this Aggregate
+    :param integral:     Integral of the values in this Aggregate
+    :param active_time:  fraction of time this Aggregate was active"""
+
+    def __init__(
+        self,
+        minimum: float,
+        maximum: float,
+        sum: float,
+        count: int,
+        integral: float,
+        active_time: int,
+    ):
+        """Creates a new aggregate"""
+        self.minimum: float = minimum
+        self.maximum: float = maximum
+        self.sum: float = sum
+        self.count: int = count
+        self.integral: float = integral
+        self.active_time: int = active_time
+
+    @staticmethod
+    def from_capnp(aggr) -> "Aggregate":
+        ret = Aggregate(0, 0, 0, 0, 0, 0)
+
+        ret.minimum = aggr.minimum
+        ret.maximum = aggr.maximum
+        ret.sum = aggr.sum
+        ret.count = aggr.count
+        ret.integral = aggr.integral
+        ret.active_time = aggr.activeTime
+
+        return ret
+
+    def to_capnp(self):
+        ret = msg_capnp.Aggregate.new_message()
+
+        ret.minimum = self.minimum
+        ret.maximum = self.maximum
+        ret.sum = self.sum
+        ret.count = self.count
+        ret.integral = self.integral
+        ret.active_time = self.active_time
+
+        return ret
+
+    @override
+    def __str__(self) -> str:
+        ret = (
+            f"Minimum: {self.minimum}\n"
+            + f"Maximum: {self.maximum}\n"
+            + f"Sum: {self.sum}\n"
+            + f"Count: {self.count}\n"
+            + f"Integral: {self.integral}\n"
+            + f"Active Time: {self.active_time}\n"
+        )
+        return ret
+
+
+class History:
+    """A history of time-series data, containing timestamps and either raw or pre-aggregated values"""
+
+    def __init__(self):
+        self.time_delta: list[int]
+        self.raw: list[float]
+        self.aggr: list[Aggregate]
+        self.type: str
+
+    @staticmethod
+    def from_capnp(hist) -> "History":
+
+        ret = History()
+        which: str = hist.rawOrAgg.which()
+
+        ret.time_delta = []
+        for v in hist.timeDelta:
+            ret.time_delta.append(v)
+        if which == "value":
+            ret.raw = []
+            ret.type = "raw"
+            for v in hist.rawOrAgg.value:
+                ret.raw.append(v)
+        elif which == "aggregate":
+            ret.aggr = []
+            ret.type = "aggregate"
+            for v in hist.rawOrAgg.aggregate:
+                ret.aggr.append(Aggregate.from_capnp(v))
+
+        return ret
+
+
+class HistoryResV1:
+    """A response payload for a request for historic time-series data"""
+
+    def __init__(self):
+        self.type: str
+        self.err_msg: str
+        self.hist: History
+
+    @staticmethod
+    def make_error(err_msg: str) -> "HistoryResV1":
+        ret = HistoryResV1()
+        ret.type = "error"
+        ret.err_msg = err_msg
+        return ret
+
+    @staticmethod
+    def from_capnp(msg) -> "HistoryResV1":
+        ret = HistoryResV1()
+        if msg.payloadType != msg_capnp.MessageTypes.historyResV1:
+            raise RuntimeError(
+                f"Can not interpret message of type {msg.payloadType} as HistoryResV1!"
+            )
+
+        with msg_capnp.HistoryResV1.from_bytes(msg.payload) as res:
+            which = res.okOrErr.which()
+
+            if which == "err":
+                ret.err_msg = res.okOrErr.err
+                ret.type = "error"
+            else:
+                ret.type = "ok"
+                ret.hist = History.from_capnp(res.okOrErr.ok)
+        return ret
+
+    def is_error(self) -> bool:
+        return self.type == "error"

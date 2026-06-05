@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <optional>
+#include <random>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -33,6 +34,16 @@ struct Uuid
      */
     Uuid(uint64_t upper, uint64_t lower) : upper(upper), lower(lower)
     {
+    }
+
+    /**
+     * Creates a new random UUID
+     */
+    Uuid()
+    {
+        std::mt19937_64 my_rng(std::random_device{}());
+        upper = my_rng();
+        lower = my_rng();
     }
 
     /**
@@ -124,6 +135,12 @@ struct ConnectionId
 struct Address
 {
     /**
+     * Creates a new, random address
+     */
+    Address() : u_(Uuid())
+    {
+    }
+    /**
      * Create an address from the given UUID
      *
      * @param u The UUID
@@ -132,9 +149,31 @@ struct Address
     {
     }
 
+    explicit Address(std::string addr_str) : u_(addr_str)
+    {
+    }
+
+    explicit Address(uint64_t upper, uint64_t lower) : u_(Uuid(upper, lower))
+    {
+    }
+
+    /**
+     * Formats the address as a string, e.g.: "9bd85cd0-ffc0-4af8-a857-939ec98a3048"
+     */
+    std::string as_string() const
+    {
+        return u_.as_string();
+    }
+
+    /**
+     * Returns the address "00000000-0000-0000-0000-0000010ca105"
+     *
+     * For bootstrapping reasons, the locator/naming service is the ONLY component that
+     * can have a pre-defined address.
+     */
     static Address locator()
     {
-        return Address{ { 0, 0x10ca105 } };
+        return Address{ 0, 0x10ca105 };
     }
 
     Uuid u_;
@@ -153,10 +192,6 @@ struct Address
 class Message
 {
 public:
-    explicit Message() : address({ 0, 0 })
-    {
-    }
-
     static Message subscribe(Address addr);
     static Message publish(Address addr, std::pair<uint64_t, std::vector<std::byte>> payload);
     static Message request(Address addr, std::pair<uint64_t, std::vector<std::byte>> payload);

@@ -5,21 +5,25 @@
 Defining a new payload type HOWTO
 =================================
 
-The definition of all payloads is currently contained in the `msg/schemas/msg.capnp <https://gitlab.seanergys.fz-juelich.de/software/seanerbus/-/blob/aa09a489ed810038a6c87b0f077e91143ed742a2/msg/schemas/msg.capnp>`_ Cap'n'Proto schema definition file. The `Cap'n'Proto Schema Language is defined here <https://capnproto.org/language.html>`_.
+Payloads are defined in `msg/schemas/msg.capnp <https://gitlab.seanergys.fz-juelich.de/software/seanerbus/-/blob/aa09a489ed810038a6c87b0f077e91143ed742a2/msg/schemas/msg.capnp>`_. The `Cap'n'Proto Schema Language is defined here <https://capnproto.org/language.html>`_.
 
-As already discussed in the listing of the currently standardized payloads, a payload consists of two parts:
+.. note::
+   For complicated Python packaging reasons, there is a duplicate version of the `msg.capnp` in `bindings/python/src/seanerbus/msg/msg.capnp`. The CI will warn you though if the `msg.capnp` differ, though.
+
+A payload consists of two parts:
 
 1. A unique payload type.
-2. A Cap'n'Proto schema definition of the underlying message.
+2. A Cap'n'Proto schema definition of the payload.
 
 Payload Types
 -------------
 
-The payload type **types** the payload.
-Clients will use this to differentiate between different payload types.
+When sending a payload with the SeanerBUS, a pair of a payload type (an int) and the bytes of the payload is sent.
+
+By checking the payload type, receivers can check what was sent to them and then decode the payload bytes accordingly. 
 
 .. note::
-   In the end, the payload type is the whole contract between sender and receiver. So as long as the client knows what to do with the blob of payload data given a payload type. **Any** encoding is fine. However it is **not** advised to use something else than Cap'n'Proto.
+   In the end, the payload type is the whole contract between sender and receiver. So as long as the client knows what to do with the blob of payload data given some payload type. **Any** encoding is fine. However it is **not** advised to use something else than Cap'n'Proto.
 
 The payload types are listed in the enumeration ``MessageTypes``.
 
@@ -47,16 +51,16 @@ To define a new type, add a new value to this enum:
 
 
 .. note::
-   Cap'n'Proto enforces CamelCase on Types, so myCoolTypeV1, not mycooltypev1 or my_cool_type_v1
+   Cap'n'Proto enforces CamelCase on types, so myCoolTypeV1, not mycooltypev1 or my_cool_type_v1
 
-With regards to the standardization we are pursuing, the added ``V1`` makes it easy to later add a ``myCoolTypeV2`` that fixes a bunch of issues we introduced in the first version.
+In the future, these payloads should be standardized and versioned. The added ``V1`` makes it easy to later add a ``myCoolTypeV2`` that fixes a bunch of issues we introduced in the first version.
 
-In python you can now check for the new payload type:
+With the payload type defined, you can already check for it in, for example, Python code:
 
 .. code-block:: python
 
-   from seanerbus_msg import msg_capnp
-   from seanerbus_client import Connection
+   from seanerbus.msg import msg_capnp
+   from seanerbus.client import Connection
 
    c = Connection.connect("localhost", 5398)
 
@@ -74,10 +78,10 @@ In python you can now check for the new payload type:
 Payload Encoding
 ----------------
 
-Secondly we want to safely and umabiguously encode and decode the data associated with the payload type.
+Secondly we want to safely and unambiguously encode and decode the data associated with the payload type.
 For this, we have in this project opted for Cap'n'Proto.
 
-In `msg/schemas/msg.capnp <https://gitlab.seanergys.fz-juelich.de/software/seanerbus/-/blob/aa09a489ed810038a6c87b0f077e91143ed742a2/msg/schemas/msg.capnp>`_, the associated payload encoding for the ``timeValueV1`` encoding is defined as:
+To give an examples of such a payload encoding, `msg/schemas/msg.capnp <https://gitlab.seanergys.fz-juelich.de/software/seanerbus/-/blob/aa09a489ed810038a6c87b0f077e91143ed742a2/msg/schemas/msg.capnp>`_, for the ``timeValueV1`` payload type the ``TimeValueV1`` payload encoding is defined as:
 
 .. code-block::
 
@@ -89,7 +93,7 @@ In `msg/schemas/msg.capnp <https://gitlab.seanergys.fz-juelich.de/software/seane
 
 (Again, the `Cap'n'Proto Schema Language is defined here <https://capnproto.org/language.html>`_.)
 
-If we want to transport two 64-bit unsigned integers, we would define:
+If we want to send two 64-bit unsigned integers with `MyCoolTypeV1`, we would define:
 
 .. code-block::
 
@@ -99,13 +103,13 @@ If we want to transport two 64-bit unsigned integers, we would define:
        second_field @1 :UInt64;
    }
 
-If we put this into ``msg/schemas/msg.capnp``, the correct code for creating MyCoolTypeV1 payloads is automatically generated, in Python this looks like this:
+If we put this into ``msg/schemas/msg.capnp``, code for handling MyCoolTypeV1 will be automatically generated. To use it from Python, for example:
 
 
 .. code-block:: python
 
-   from seanerbus_msg import msg_capnp
-   from seanerbus_client import Connection
+   from seanerbus.msg import msg_capnp
+   from seanerbus.client import Connection
 
    c = Connection.connect("localhost", 5398)
 
@@ -136,16 +140,17 @@ This is already everything required to send a new payload safely over the Seaner
 Payload Encoding Libraries etc.
 -------------------------------
 
-To ease the use of the payload types, the SeanerBUS does not usually require its users to interact with the raw Cap'n'Proto defined classes.
+The payload encoding, in the end, only defines what bits go into the message, not necessarily what any of those bits mean.
 
-Instead, we have build C++, Rust and Python libraries which ease working with the payload types.
+If for some reason ``MyCoolTypeV1`` requires that ``second_field`` must always be numerically larger than ``first_field``, then this can not be expressed in Cap'n'Proto directly.
 
-Simply have a look at the already defined convenience wrappers in those libraries to get an idea how to define your own.
+Likewise, for more complicated types (dictionaries, multi-level object hierarchies, etc.). Repeating the same code to encode those types in Cap'n'Proto can become tedious fast.
 
-This is also important because the Cap'n'Proto can only carry encoding information, not semantic information.
+For all current SeanerBUS payloads, we have thus additionally defined convenience payload wrapper classes (`for Python, for example <msg_python.html>`_) that hide away all the ugly details
+of the Cap'n'Proto underneath.
 
-If, for MyCoolTypeV1, first_field can never be 0, then there need to be other ways to enforce this.
-This is easiest done with a convenience wrapper class for the type that enforces exactly that.
+Even further, most users of the dataplane probably have no need for interacting with the payloads directly. For more complex use-cases, like time-series database lookups, we have thus built
+full harness function which hide away the whole interaction.
 
 Standardization
 ---------------

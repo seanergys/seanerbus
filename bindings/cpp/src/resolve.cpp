@@ -2,23 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-#pragma once
+#include <seanerbus/helpers/resolve.hpp>
 
-#include <seanerbus/client/connection.hpp>
-#include <seanerbus/client/simple_event_loop.hpp>
-#include <seanerbus/internal/message.hpp>
-#include <seanerbus/msg/register_resolve_req_v1.hpp>
-#include <seanerbus/msg/register_resolve_res_v1.hpp>
-#include <seanerbus/msg/resolve_req_v1.hpp>
-#include <seanerbus/msg/resolve_res_v1.hpp>
-#include <seanerbus/msg/reverse_resolve_req_v1.hpp>
-#include <seanerbus/msg/reverse_resolve_res_v1.hpp>
-#include <seanerbus/msg/unregister_resolve_req_v1.hpp>
-#include <seanerbus/msg/unregister_resolve_res_v1.hpp>
+#include <seanerbus/msg/helpers.hpp>
 
-#include <map>
 #include <stdexcept>
-#include <string>
 
 namespace seanerbus
 {
@@ -26,7 +14,6 @@ namespace helpers
 {
 namespace
 {
-
 void resolve_res_fn(seanerbus::client::Connection* conn, seanerbus::Message msg,
                     std::vector<Address>* res)
 {
@@ -47,18 +34,26 @@ void resolve_res_fn(seanerbus::client::Connection* conn, seanerbus::Message msg,
 }
 } // namespace
 
-inline std::vector<Address> resolve(std::map<std::string, std::string> name)
+std::vector<Address> resolve(std::map<std::string, std::string> name)
 {
-    std::vector<Address> res;
-    auto payload = seanerbus::msg::ResolveReqV1(name).to_capnp();
+    try
+    {
+        std::vector<Address> res;
+        auto payload = seanerbus::msg::ResolveReqV1(name).to_capnp();
 
-    seanerbus::client::Connection conn("localhost", "5398");
+        seanerbus::client::Connection conn("localhost", "5398");
 
-    conn.request(seanerbus::Address::locator(), payload, resolve_res_fn, &res);
+        conn.request(seanerbus::Address::locator(), payload, resolve_res_fn, &res);
 
-    seanerbus::client::SimpleEventLoop loop(conn);
-    loop.run();
-    return res;
+        seanerbus::client::SimpleEventLoop loop(conn);
+        loop.run();
+        return res;
+    }
+    catch (std::exception& e)
+    {
+        throw std::runtime_error(
+            fmt::format("Failed to resolve {}: {}", msg::name_map_to_str(name), e.what()));
+    }
 }
 
 namespace
@@ -83,7 +78,7 @@ void reverse_resolve_res_fn(client::Connection* conn, seanerbus::Message msg,
 }
 } // namespace
 
-inline std::map<std::string, std::string> reverse_resolve(Address addr)
+std::map<std::string, std::string> reverse_resolve(Address addr)
 {
     std::map<std::string, std::string> res;
     auto payload = seanerbus::msg::ReverseResolveReqV1(addr).to_capnp();
@@ -118,16 +113,25 @@ void register_resolve_res_fn(client::Connection* conn, seanerbus::Message msg)
     }
 }
 
-inline void register_resolve(std::map<std::string, std::string> name, Address addr)
+void register_resolve(std::map<std::string, std::string> name, Address addr)
 {
-    auto payload = seanerbus::msg::RegisterResolveReqV1(name, addr).to_capnp();
+    try
+    {
+        auto payload = seanerbus::msg::RegisterResolveReqV1(name, addr).to_capnp();
 
-    seanerbus::client::Connection conn("localhost", "5398");
+        seanerbus::client::Connection conn("localhost", "5398");
 
-    conn.request(seanerbus::Address::locator(), payload, register_resolve_res_fn);
+        conn.request(seanerbus::Address::locator(), payload, register_resolve_res_fn);
 
-    seanerbus::client::SimpleEventLoop loop(conn);
-    loop.run();
+        seanerbus::client::SimpleEventLoop loop(conn);
+        loop.run();
+    }
+    catch (std::exception& e)
+    {
+        throw std::runtime_error(fmt::format("Failed to register name {} for address {}: {}",
+                                             msg::name_map_to_str(name), addr.as_string(),
+                                             e.what()));
+    }
 }
 
 void unregister_resolve_res_fn(client::Connection* conn, seanerbus::Message msg)
@@ -151,7 +155,7 @@ void unregister_resolve_res_fn(client::Connection* conn, seanerbus::Message msg)
     }
 }
 
-inline void unregister_resolve(Address addr)
+void unregister_resolve(Address addr)
 {
     auto payload = seanerbus::msg::UnregisterResolveReqV1(addr).to_capnp();
 

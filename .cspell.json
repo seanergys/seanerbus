@@ -1,0 +1,38 @@
+{
+    "$schema":
+        "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+    "version": "0.2",
+    "dictionaryDefinitions": [
+        {
+            "name": "project-words",
+            "path": "./project-words.txt",
+            "addWords": true
+        }
+    ],
+    "dictionaries": [
+        "project-words"
+    ],
+    "ignorePaths": [
+        "msg/bindings/rust/msg_capnp.rs",
+        "database/lib/hta",
+        "msg/target",
+        "server/target",
+        "cpp_examples/build",
+        "public/",
+        "bindings/cpp/lib",
+        "naming_scheme/target",
+        "internal/internal_schemas/target",
+        "docs/sphinx/crates",
+        "bindings/cpp/Doxyfile",
+        "internal/internal_schemas/schemas/internal.capnp",
+        "internal/internal_schemas/bindings/rust/internal_capnp.rs",
+        "bindings/cpp/xml",
+        "bindings/cpp/build",
+        "database/build",
+        "database/lib/fmt",
+        "client/target",
+        "rust_examples/target",
+        "/project-words.txt",
+        "internal/async/target"
+    ]
+}

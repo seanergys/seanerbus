@@ -5,38 +5,13 @@
 Python Payload Library
 ======================
 
-.. autoclass:: seanerbus.msg::TimeValueV1
-   :members:
-   :undoc-members:
+This python module contains the classes for serializing and deserializing SeanerBUS payloads.
 
-.. autoclass:: seanerbus.msg::HelloWorldReqV1
-   :members:
-   :undoc-members:
+In most practical cases, you will not want to use these payloads directly.
+Instead, there exist convenience function to perform certain tasks associated with these payloads.
 
-.. autoclass:: seanerbus.msg::HelloWorldResV1
-   :members:
-   :undoc-members:
+- For interacting with the naming service, use the `seanerbus.naming <naming_python.html>`_ module.
+- For requesting historic data from the Time-Series Database, use the `seanerbus.time_series <time_series_python.html>`_ module.
 
-.. autoclass:: seanerbus.msg::ResolveResV1
+.. automodule:: seanerbus.msg
    :members:
-   :undoc-members:
-
-.. autoclass:: seanerbus.msg::ResolveReqV1
-   :members:
-   :undoc-members:
-
-.. autoclass:: seanerbus.msg::ReverseResolveReqV1
-   :members:
-   :undoc-members:
-
-.. autoclass:: seanerbus.msg::ReverseResolveResV1
-   :members:
-   :undoc-members:
-
-.. autoclass:: seanerbus.msg::VectorResV1
-   :members:
-   :undoc-members:
-
-.. autoclass:: seanerbus.msg::VectorReqV1
-   :members:
-   :undoc-members:

@@ -15,12 +15,18 @@ echo "server PID is $SERVER_PID"
 
 sleep 1
 
-cd ../contrib/scenario_tests
-timeout 10s ./publisher_test.py &
+cd ../scenario_tests/sub_python_pub_cpp
+
+uv venv --clear --force
+source .venv/bin/activate
+
+uv pip install -r pyproject.toml
+
+python publisher_test.py &
 PUBLISHER_PID=$!
 
-cd build
-sleep 5
+cmake .
+make -j4
 ./scenario_publisher
 
 wait $PUBLISHER_PID
@@ -28,3 +34,5 @@ wait $PUBLISHER_PID
 sleep 5
 kill -int $SERVER_PID
 sleep 5
+
+echo "Subscribing with Python and publishing with C++ works!"

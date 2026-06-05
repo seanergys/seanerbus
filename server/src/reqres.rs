@@ -47,7 +47,7 @@ pub async fn req_res(chans: BrokerChannels, mut rx: mpsc::Receiver<ReqResMsg>) {
                                 msg.from.unwrap(),
                                 msg.address,
                                 seanerbus_schemas::internal_capnp::error_payload::ErrorKind::NoSuchInterface,
-                                "requested interface does not exist!",
+                                "no req/res interface available under this address!",
                             )))
                             .await
                             .is_err()

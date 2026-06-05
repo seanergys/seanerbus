@@ -11,29 +11,29 @@ use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Clone)]
 struct Services {
-    uuid: Uuid,
-    attrs: HashMap<String, String>,
+    address: Uuid,
+    name: HashMap<String, String>,
 }
 
-fn get_matching_addresses(attrs: Vec<(String, String)>, services: &[Services]) -> Vec<Uuid> {
+fn get_matching_addresses(name: Vec<(String, String)>, services: &[Services]) -> Vec<Uuid> {
     let mut services = services.to_owned();
-    for attr in &attrs {
+    for attr in &name {
         services.retain(|s| {
-            if let Some(v) = s.attrs.get(&attr.0) {
+            if let Some(v) = s.name.get(&attr.0) {
                 if attr.1 == "*" { true } else { *v == attr.1 }
             } else {
                 false
             }
         });
     }
-    services.into_iter().map(|s| s.uuid).collect()
+    services.into_iter().map(|s| s.address).collect()
 }
 
 fn get_name_for_address(addr: Uuid, services: &[Services]) -> Vec<(String, String)> {
     for service in services {
-        if service.uuid == addr {
+        if service.address == addr {
             return service
-                .attrs
+                .name
                 .clone()
                 .into_iter()
                 .collect::<Vec<(String, String)>>();
@@ -61,10 +61,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let naming_msg = Message::from_capnp(msg.payload_type, &msg.payload)?;
 
                 match naming_msg {
-                    Message::ResolveReqV1(attrs) => {
-                        println!("Resolving: {:?}", attrs);
+                    Message::ResolveReqV1(name) => {
+                        println!("Resolving: {:?}", name);
 
-                        let uuids = get_matching_addresses(attrs, &services);
+                        let uuids = get_matching_addresses(name, &services);
 
                         println!("Resolved To: {:?}", uuids);
                         let (payload_type, payload) = Message::ResolveResV1(uuids).to_capnp()?;
@@ -77,7 +77,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         conn.respond_to(&msg, payload_type, &payload).await?;
                     }
                     Message::RegisterResolveReqV1(name, addr) => {
-                        if services.iter().any(|service| service.uuid == addr) {
+                        if services.iter().any(|service| service.address == addr) {
                             println!("Can not register {}, already registered!", addr);
                             let (payload_type, payload) = Message::RegisterResolveResV1(
                                 false,
@@ -89,8 +89,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         } else {
                             println!("Registered {:?} to {}", name, addr);
                             services.push(Services {
-                                uuid: addr,
-                                attrs: name.into_iter().collect::<HashMap<String, String>>(),
+                                address: addr,
+                                name: name.into_iter().collect::<HashMap<String, String>>(),
                             });
                             let (payload_type, payload) =
                                 Message::RegisterResolveResV1(true, String::new()).to_capnp()?;
@@ -99,8 +99,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         }
                     }
                     Message::UnregisterResolveReqV1(addr) => {
-                        if services.iter().any(|service| service.uuid == addr) {
-                            services.retain(|service| service.uuid != addr);
+                        if services.iter().any(|service| service.address == addr) {
+                            services.retain(|service| service.address != addr);
 
                             println!("Deregistering {}", addr);
                             let (payload_type, payload) =

@@ -10,7 +10,7 @@ from ..msg import UnregisterResolveReqV1, UnregisterResolveResV1
 import uuid
 
 
-async def resolve(name):
+async def resolve(name: dict[str, str]) -> list[uuid.UUID]:
     """Use the naming service to translate a Name to an Address"""
     c = await Connection.connect("localhost", 5398)
 
@@ -21,7 +21,7 @@ async def resolve(name):
     return msg.uuids
 
 
-async def reverse_resolve(addr):
+async def reverse_resolve(addr: uuid.UUID) -> dict[str, str]:
     """Uses the naming service to translate a Address back to a Name"""
     c = await Connection.connect("localhost", 5398)
 
@@ -32,7 +32,7 @@ async def reverse_resolve(addr):
     return msg.name
 
 
-async def register_resolve(name, addr):
+async def register_resolve(name: dict[str, str], addr: uuid.UUID):
     """Registers a name for the given address with the naming service"""
 
     c = await Connection.connect("localhost", 5398)
@@ -45,7 +45,7 @@ async def register_resolve(name, addr):
     return msg
 
 
-async def unregister_resolve(addr):
+async def unregister_resolve(addr: uuid.UUID):
     """Unregisters an address from the naming service"""
 
     c = await Connection.connect("localhost", 5398)

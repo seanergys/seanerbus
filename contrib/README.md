@@ -16,7 +16,7 @@ Can be used to test the CMake Config scripts.
 
 C++ SeanerBUS example that uses pkg-config to find the SeanerBUS.
 
-Can be used to thest the generated pkg-config files.
+Can be used to test the generated pkg-config files.
 
 ## `scenario_tests`
 
