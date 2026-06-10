@@ -222,6 +222,12 @@ impl Message {
             MessageTypes::HistoryResV1 => {
                 todo!("Implement me!");
             }
+            MessageTypes::FluxClassifyJobReqV1 => {
+                todo!("Implement me!");
+            }
+            MessageTypes::FluxClassifyJobResV1 => {
+                todo!("Implement me!");
+            }
         }
     }
 
