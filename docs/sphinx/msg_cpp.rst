@@ -48,3 +48,6 @@ This includes:
 
 .. doxygenclass:: seanerbus::msg::HistoryResV1
    :members:
+
+.. doxygenclass:: seanerbus::msg::UserDefined
+   :members:

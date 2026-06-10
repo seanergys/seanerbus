@@ -12,6 +12,14 @@ Payload encoding and decoding libraries that hide away the gory Cap'n'Proto deta
 .. note::
    This is the prototype implementation of the data-plane, so no actual standardization has happened yet.
 
+User-Defined Payloads
+---------------------
+
+To send arbitrary data over the SeanerBUS, a user-defined payload can be used.
+A user-defined payload is defined by a payload type larger than ``1 << 63``.
+
+No assumptions are made about the form of payload data in user-defined payloads and no guarantees are given for user-defined payloads.
+
 Payload Types
 -------------
 

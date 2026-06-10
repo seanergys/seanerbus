@@ -15,6 +15,10 @@
 #include <seanerbus/msg/resolve_res_v1.hpp>
 #include <seanerbus/msg/reverse_resolve_req_v1.hpp>
 #include <seanerbus/msg/reverse_resolve_res_v1.hpp>
+#include <seanerbus/msg/user_defined.hpp>
+
+#include <utility>
+#include <vector>
 
 TEST_CASE("ResolveReqV1 enc/dec works")
 {
@@ -168,4 +172,12 @@ TEST_CASE("HistoryResV1 enc/dec works")
     REQUIRE(res3.get_history().get_aggr()[1].count == 14);
     REQUIRE(res3.get_history().get_aggr()[1].integral == 15.0);
     REQUIRE(res3.get_history().get_aggr()[1].activeTime == 16);
+}
+
+TEST_CASE("UserDefined works!")
+{
+    REQUIRE(seanerbus::msg::UserDefined(std::make_pair(1ULL << 63, std::vector<std::byte>()))
+                .payload_type == 1ULL << 63);
+
+    REQUIRE_THROWS(seanerbus::msg::UserDefined(std::make_pair(1, std::vector<std::byte>())));
 }
