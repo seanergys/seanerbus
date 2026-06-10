@@ -25,3 +25,8 @@ RUST_LOG=debug cargo run
 will start a SeanerBUS server with extra debugging information.
 
 
+```sh
+cargo run '0.0.0.0:9000'
+```
+
+will listen on 0.0.0.0:9000 instead of localhost:5398

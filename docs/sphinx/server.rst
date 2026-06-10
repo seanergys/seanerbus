@@ -27,5 +27,7 @@ Use `rustup <rustup.rs>`_ to install Rust or check with your distribution on how
     cargo run
     # This does the same while given much more debug output
     RUST_LOG=trace cargo run
+    # Optionally, you can give it an address, otherwise localhost:5398 is used
+    cargo run '0.0.0.0:9000'
 
 The server can be stopped with Ctrl-C.

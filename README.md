@@ -25,6 +25,8 @@ cd server
 cargo run
 # If more debug info is wanted:
 RUST_LOG=trace cargo run
+# If you want to bind to another address than localhost:5398
+cargo run '0.0.0.0:9000'
 ```
 
 It will listen on `localhost:5398` for incoming connections.
