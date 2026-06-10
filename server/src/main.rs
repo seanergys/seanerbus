@@ -6,12 +6,16 @@ use log::{debug, warn};
 use seanerbus::broker::BrokerError;
 use seanerbus::broker::BrokerOwner;
 use seanerbus_schemas::message::ConnectionId;
+use std::env;
 use uuid::Uuid;
 
 async fn accepter() {
-    let listener = tokio::net::TcpListener::bind("localhost:5398")
-        .await
-        .unwrap();
+    let args: Vec<String> = env::args().collect();
+
+    let listener =
+        tokio::net::TcpListener::bind(args.get(1).unwrap_or(&"localhost:5398".to_string()))
+            .await
+            .unwrap();
     let mut broker = BrokerOwner::new().await;
 
     let mut set = tokio::task::JoinSet::<Result<(), BrokerError>>::new();
