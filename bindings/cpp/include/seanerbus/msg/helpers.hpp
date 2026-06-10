@@ -27,6 +27,11 @@ namespace msg
  */
 inline std::string payload_type_to_str(uint64_t payload_type)
 {
+
+    if (payload_type >= 1ULL << 63)
+    {
+        return fmt::format("user-defined payload ({})", payload_type);
+    }
     switch ((MessageTypes)payload_type)
     {
     case MessageTypes::TIME_VALUE_V1:

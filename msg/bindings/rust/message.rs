@@ -37,6 +37,7 @@ pub enum Message {
     RegisterResolveResV1(bool, String),
     UnregisterResolveReqV1(Uuid),
     UnregisterResolveResV1(bool, String),
+    UserDefined(u64, Vec<u8>)
 }
 
 #[derive(Error, Debug)]
@@ -54,6 +55,13 @@ impl Message {
     ///
     /// Returns Some(Message) if the data is parsable as a Message and None if not.
     pub fn from_capnp(payload_type: u64, data: &[u8]) -> Result<Message, MessageError> {
+
+        if payload_type > 1 << 63
+        {
+            Ok(Message::UserDefined(payload_type, data.to_vec()))
+        }
+        else
+        {
         match MessageTypes::try_from(payload_type as u16).unwrap() {
             MessageTypes::TimeValueV1 => {
                 let reader =
@@ -228,6 +236,8 @@ impl Message {
             MessageTypes::FluxClassifyJobResV1 => {
                 todo!("Implement me!");
             }
+
+        }
         }
     }
 
@@ -450,6 +460,10 @@ impl Message {
                 let mut buffer = vec![];
                 capnp::serialize::write_message(&mut buffer, bld.borrow_inner())?;
                 Ok((MessageTypes::UnregisterResolveReqV1 as u64, buffer))
+            }
+
+            Message::UserDefined(payload_type, payload) => {
+                Ok((*payload_type, payload.to_vec()))
             }
         }
     }

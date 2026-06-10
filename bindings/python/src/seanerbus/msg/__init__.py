@@ -728,3 +728,23 @@ class FluxClassifyJobResV1:
         msg.result = self.result
 
         return (msg_capnp.MessageTypes.fluxClassifyJobResV1, msg.to_bytes())
+
+
+class UserDefinedPayload:
+    def __init__(self, payload_type: int, payload: bytes):
+        """Creates a user defined payload from payload_type and payload bytes"""
+
+        if payload_type < 1 << 63:
+            raise RuntimeError(
+                "Trying to create a user-defined payload with a payload type < 1 << 63"
+            )
+        self.payload: bytes = payload
+        self.payload_type: int = payload_type
+
+    @staticmethod
+    def from_capnp(msg):
+        res = UserDefinedPayload(msg.payload_type, msg.payload)
+        return res
+
+    def to_capnp(self) -> tuple[int, bytes]:
+        return (self.payload_type, self.payload)
