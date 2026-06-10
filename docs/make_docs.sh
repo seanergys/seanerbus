@@ -21,8 +21,11 @@ rm -rf ../public/rust_msg
 rm -rf ../public/rust_client
 rm -rf ../public/rust_naming
 cd ../msg
-cargo doc --no-deps --target-dir ../public/rust_msg
+cargo doc -p seanerbus_msg --no-deps --target-dir ../public/rust_msg
 cd ../client
-cargo doc --no-deps --target-dir ../public/rust_client
+cargo doc -p seanerbus_client  --no-deps --target-dir ../public/rust_client
 cd ../naming_scheme
-cargo doc --no-deps --target-dir ../public/rust_naming
+cargo doc -p naming_scheme --no-deps --target-dir ../public/rust_naming
+rm -rf ../public/rust_msg/debug
+rm -rf ../public/rust_client/debug
+rm -rf ../public/rust_naming_debug
