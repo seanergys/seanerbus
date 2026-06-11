@@ -90,7 +90,7 @@ struct Uuid
             return lhs.lower < rhs.lower;
         }
 
-        return lhs.upper < rhs.lower;
+        return lhs.upper < rhs.upper;
     }
 
     friend bool operator==(const Uuid& lhs, const Uuid& rhs)
