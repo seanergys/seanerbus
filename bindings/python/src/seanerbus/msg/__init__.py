@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-from typing import override
-
 import capnp
 import os
 import uuid
@@ -589,7 +587,6 @@ class Aggregate:
 
         return ret
 
-    @override
     def __str__(self) -> str:
         ret = (
             f"Minimum: {self.minimum}\n"
