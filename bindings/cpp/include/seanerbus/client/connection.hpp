@@ -139,9 +139,15 @@ public:
 
                 auto res = Message::from_buf_capnp(
                     kj::ArrayPtr(reinterpret_cast<capnp::word*>(buffer_), cursor_));
-                cursor_ = cursor_ - res.first;
+
+                if (res.first > cursor_)
+                {
+                    break;
+                }
+
                 handle(res.second);
-                memmove(buffer_, buffer_ + res.first, buffer_size_ - res.first);
+                memmove(buffer_, buffer_ + res.first, cursor_ - res.first);
+                cursor_ = cursor_ - res.first;
             }
         }
         catch (kj::Exception& e)
