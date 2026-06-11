@@ -326,6 +326,10 @@ public:
         shutdown_ = true;
     }
 
+    void reset_shutdown()
+    {
+        shutdown_ = false;
+    }
     /**
      * Checks if the user of the connection has requested a shutdown.
      *

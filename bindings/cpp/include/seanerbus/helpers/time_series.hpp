@@ -28,7 +28,8 @@ namespace helpers
  * @returns The msg::History data pertaining to that query.
  *
  */
-msg::History get_timeline(Address addr, uint64_t start, uint64_t end, uint64_t interval_max = 0);
+msg::History get_timeline(client::Connection& conn, Address addr, uint64_t start, uint64_t end,
+                          uint64_t interval_max = 0);
 
 /**
  * Get ONE aggregate of information about the a metric in the time frame start to end.
@@ -42,6 +43,6 @@ msg::History get_timeline(Address addr, uint64_t start, uint64_t end, uint64_t i
  *
  * @returns msg::Aggregate for the given interval
  */
-msg::Aggregate get_aggregate(Address addr, uint64_t start, uint64_t end);
+msg::Aggregate get_aggregate(client::Connection&, Address addr, uint64_t start, uint64_t end);
 } // namespace helpers
 } // namespace seanerbus

@@ -34,19 +34,18 @@ void resolve_res_fn(seanerbus::client::Connection* conn, seanerbus::Message msg,
 }
 } // namespace
 
-std::vector<Address> resolve(std::map<std::string, std::string> name)
+std::vector<Address> resolve(client::Connection& conn, std::map<std::string, std::string> name)
 {
     try
     {
         std::vector<Address> res;
         auto payload = seanerbus::msg::ResolveReqV1(name).to_capnp();
 
-        seanerbus::client::Connection conn("localhost", "5398");
-
         conn.request(seanerbus::Address::locator(), payload, resolve_res_fn, &res);
 
         seanerbus::client::SimpleEventLoop loop(conn);
         loop.run();
+        conn.reset_shutdown();
         return res;
     }
     catch (std::exception& e)
@@ -78,17 +77,16 @@ void reverse_resolve_res_fn(client::Connection* conn, seanerbus::Message msg,
 }
 } // namespace
 
-std::map<std::string, std::string> reverse_resolve(Address addr)
+std::map<std::string, std::string> reverse_resolve(client::Connection& conn, Address addr)
 {
     std::map<std::string, std::string> res;
     auto payload = seanerbus::msg::ReverseResolveReqV1(addr).to_capnp();
-
-    seanerbus::client::Connection conn("localhost", "5398");
 
     conn.request(seanerbus::Address::locator(), payload, reverse_resolve_res_fn, &res);
 
     seanerbus::client::SimpleEventLoop loop(conn);
     loop.run();
+    conn.reset_shutdown();
     return res;
 }
 
@@ -113,18 +111,18 @@ void register_resolve_res_fn(client::Connection* conn, seanerbus::Message msg)
     }
 }
 
-void register_resolve(std::map<std::string, std::string> name, Address addr)
+void register_resolve(client::Connection& conn, std::map<std::string, std::string> name,
+                      Address addr)
 {
     try
     {
         auto payload = seanerbus::msg::RegisterResolveReqV1(name, addr).to_capnp();
 
-        seanerbus::client::Connection conn("localhost", "5398");
-
         conn.request(seanerbus::Address::locator(), payload, register_resolve_res_fn);
 
         seanerbus::client::SimpleEventLoop loop(conn);
         loop.run();
+        conn.reset_shutdown();
     }
     catch (std::exception& e)
     {
@@ -155,16 +153,15 @@ void unregister_resolve_res_fn(client::Connection* conn, seanerbus::Message msg)
     }
 }
 
-void unregister_resolve(Address addr)
+void unregister_resolve(client::Connection& conn, Address addr)
 {
     auto payload = seanerbus::msg::UnregisterResolveReqV1(addr).to_capnp();
-
-    seanerbus::client::Connection conn("localhost", "5398");
 
     conn.request(seanerbus::Address::locator(), payload, unregister_resolve_res_fn);
 
     seanerbus::client::SimpleEventLoop loop(conn);
     loop.run();
+    conn.reset_shutdown();
 }
 } // namespace helpers
 } // namespace seanerbus

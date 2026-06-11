@@ -37,9 +37,10 @@ void get_timeline_res(seanerbus::client::Connection* conn, seanerbus::Message ms
     conn->shutdown();
 }
 
-msg::History get_timeline(Address addr, uint64_t start, uint64_t end, uint64_t interval_max)
+msg::History get_timeline(client::Connection& conn, Address addr, uint64_t start, uint64_t end,
+                          uint64_t interval_max)
 {
-    auto db_addr = resolve({ { "service", "time_series_db" } });
+    auto db_addr = resolve(conn, { { "service", "time_series_db" } });
 
     if (db_addr.size() != 1)
     {
@@ -48,7 +49,6 @@ msg::History get_timeline(Address addr, uint64_t start, uint64_t end, uint64_t i
     }
 
     msg::History hist;
-    client::Connection conn("localhost", "5398");
 
     conn.request(db_addr[0],
                  msg::HistoryReqV1(addr, start, end, interval_max, msg::HistoryType::FLEX_TIMELINE)
@@ -58,6 +58,7 @@ msg::History get_timeline(Address addr, uint64_t start, uint64_t end, uint64_t i
 
     sel.run();
 
+    conn.reset_shutdown();
     return hist;
 }
 
@@ -88,9 +89,9 @@ void get_aggregate_res(seanerbus::client::Connection* conn, seanerbus::Message m
     conn->shutdown();
 }
 
-msg::Aggregate get_aggregate(Address addr, uint64_t start, uint64_t end)
+msg::Aggregate get_aggregate(client::Connection& conn, Address addr, uint64_t start, uint64_t end)
 {
-    auto db_addr = resolve({ { "service", "time_series_db" } });
+    auto db_addr = resolve(conn, { { "service", "time_series_db" } });
 
     if (db_addr.size() != 1)
     {
@@ -99,7 +100,6 @@ msg::Aggregate get_aggregate(Address addr, uint64_t start, uint64_t end)
     }
 
     msg::Aggregate aggr;
-    client::Connection conn("localhost", "5398");
 
     conn.request(db_addr[0],
                  msg::HistoryReqV1(addr, start, end, 0, msg::HistoryType::AGGREGATE).to_capnp(),
@@ -107,6 +107,8 @@ msg::Aggregate get_aggregate(Address addr, uint64_t start, uint64_t end)
     client::SimpleEventLoop sel(conn);
 
     sel.run();
+
+    conn.reset_shutdown();
 
     return aggr;
 }
