@@ -26,6 +26,8 @@ enum MessageTypes
 
     fluxClassifyJobReqV1 @16;
     fluxClassifyJobResV1 @17;
+
+    fluxLifecycleHeartbeatV1 @18;
 }
 
 struct TimeValueV1

@@ -237,7 +237,10 @@ impl Message {
                 todo!("Implement me!");
             }
 
-        }
+            MessageTypes::FluxLifecycleHeartbeatV1=> {
+                todo!("Implement me!");
+            }
+    }
         }
     }
 
