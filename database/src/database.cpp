@@ -250,7 +250,8 @@ int main(void)
     conn.register_endpoint(history_req_addr, history_req_handler, &dir);
 
     // Register us a {"service" : "time_series_db"} to the naming serve, so that we can be found
-    seanerbus::helpers::register_resolve({ { "service", "time_series_db" } }, history_req_addr);
+    seanerbus::helpers::register_resolve(conn, { { "service", "time_series_db" } },
+                                         history_req_addr);
 
     seanerbus::logging::debug("Entering Main Event Loop!");
     seanerbus::client::SimpleEventLoop sel(conn);
@@ -258,5 +259,6 @@ int main(void)
     sel.run();
     seanerbus::logging::info("Database received SIGINT, shutting down...");
 
-    seanerbus::helpers::unregister_resolve(history_req_addr);
+    conn.reset_shutdown();
+    seanerbus::helpers::unregister_resolve(conn, history_req_addr);
 }

@@ -39,7 +39,7 @@ namespace helpers
  *
  * @returns List of addresses that match the query.
  */
-std::vector<Address> resolve(std::map<std::string, std::string> name);
+std::vector<Address> resolve(client::Connection& conn, std::map<std::string, std::string> name);
 
 /**
  * Does the inverse of resolve: translates an address (e.g. "46703055-ebbb-470a-8d89-6c006fd76ce5")
@@ -50,7 +50,7 @@ std::vector<Address> resolve(std::map<std::string, std::string> name);
  * @param addr Address to get the name of
  * @returns The name belonging to that addr
  */
-std::map<std::string, std::string> reverse_resolve(Address addr);
+std::map<std::string, std::string> reverse_resolve(client::Connection& conn, Address addr);
 
 /**
  * Registers a name to address mapping with the naming server.
@@ -70,7 +70,8 @@ std::map<std::string, std::string> reverse_resolve(Address addr);
  * @param addr The address to associate with the name
  *
  */
-void register_resolve(std::map<std::string, std::string> name, Address addr);
+void register_resolve(client::Connection& conn, std::map<std::string, std::string> name,
+                      Address addr);
 
 /**
  * Unregisters a name -> address mapping.
@@ -80,6 +81,6 @@ void register_resolve(std::map<std::string, std::string> name, Address addr);
  *
  * @param addr The address to unregister.
  */
-void unregister_resolve(Address addr);
+void unregister_resolve(client::Connection& conn, Address addr);
 } // namespace helpers
 } // namespace seanerbus
