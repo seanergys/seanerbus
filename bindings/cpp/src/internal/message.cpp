@@ -93,7 +93,7 @@ void Message::to_fd_capnp(int fd)
 
     auto enc = capnp::messageToFlatArray(message);
 
-    int transferred = 0;
+    size_t transferred = 0;
     while (transferred != enc.size() * sizeof(capnp::word))
     {
         int res = send(fd, reinterpret_cast<std::byte*>(enc.begin()) + transferred,

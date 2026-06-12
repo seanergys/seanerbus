@@ -144,7 +144,7 @@ public:
     {
         auto tds = bld.initTimeDelta(time_delta.size());
 
-        for (int i = 0; i < time_delta.size(); i++)
+        for (size_t i = 0; i < time_delta.size(); i++)
         {
             tds.set(i, time_delta[i]);
         }
@@ -154,7 +154,7 @@ public:
             auto& raw_values = std::get<std::vector<double>>(values);
 
             auto raw_values_bld = bld.getRawOrAgg().initValue(raw_values.size());
-            for (int i = 0; i < raw_values.size(); i++)
+            for (size_t i = 0; i < raw_values.size(); i++)
             {
                 raw_values_bld.set(i, raw_values[i]);
             }
@@ -165,7 +165,7 @@ public:
 
             auto aggr_values_bld = bld.getRawOrAgg().initAggregate(aggr_values.size());
 
-            for (int i = 0; i < aggr_values.size(); i++)
+            for (size_t i = 0; i < aggr_values.size(); i++)
             {
                 aggr_values[i].to_capnp(aggr_values_bld[i]);
             }

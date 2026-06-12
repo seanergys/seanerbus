@@ -33,7 +33,7 @@ public:
      */
     ReverseResolveResV1(std::pair<uint64_t, std::vector<std::byte>> payload)
     {
-        if (!payload.first == (uint64_t)::MessageTypes::REVERSE_RESOLVE_RES_V1)
+        if (payload.first != (uint64_t)::MessageTypes::REVERSE_RESOLVE_RES_V1)
         {
             throw std::runtime_error("Trying to decode a message as a ReverseResolveResV1 that is "
                                      "not a ReverseResolveResV1");

@@ -125,7 +125,7 @@ public:
             }
             shutdown();
         }
-        if (res == buffer_size_ - cursor_)
+        if ((size_t)res == buffer_size_ - cursor_)
         {
             buffer_ = reinterpret_cast<std::byte*>(realloc(buffer_, buffer_size_ * 2));
             buffer_size_ = buffer_size_ * 2;
@@ -385,7 +385,7 @@ private:
 
     template <class F, class... Args, size_t... Indices>
     static void executor_helper(Connection& conn, Message& msg, std::tuple<F, Args...>& t,
-                                std::index_sequence<Indices...> is)
+                                [[maybe_unused]] std::index_sequence<Indices...> is)
     {
         std::invoke(std::move(std::get<0>(t)), &conn, msg, std::move(std::get<Indices + 1>(t))...);
     }
