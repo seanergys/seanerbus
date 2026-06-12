@@ -32,7 +32,7 @@ public:
      */
     RegisterResolveResV1(std::pair<uint64_t, std::vector<std::byte>> payload)
     {
-        if (!payload.first == (uint64_t)::MessageTypes::REGISTER_RESOLVE_RES_V1)
+        if (payload.first != (uint64_t)::MessageTypes::REGISTER_RESOLVE_RES_V1)
         {
             throw std::runtime_error("Trying to decode something as RegisterResolveResV1 that is "
                                      "not RegisterResolveResV1");

@@ -35,7 +35,7 @@ public:
      */
     RegisterResolveReqV1(std::pair<uint64_t, std::vector<std::byte>> payload) : addr(Uuid(0, 0))
     {
-        if (!payload.first == (uint64_t)::MessageTypes::REGISTER_RESOLVE_REQ_V1)
+        if (payload.first != (uint64_t)::MessageTypes::REGISTER_RESOLVE_REQ_V1)
         {
             throw std::runtime_error("Trying to decode a message as a RegisterResolveReqV1 that is "
                                      "not a RegisterResolveReqV1");

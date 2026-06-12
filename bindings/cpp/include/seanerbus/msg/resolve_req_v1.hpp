@@ -33,7 +33,7 @@ public:
      */
     ResolveReqV1(std::pair<uint64_t, std::vector<std::byte>> payload)
     {
-        if (!payload.first == (uint64_t)::MessageTypes::RESOLVE_REQ_V1)
+        if (payload.first != (uint64_t)::MessageTypes::RESOLVE_REQ_V1)
         {
             throw std::runtime_error(
                 "Trying to decode a message as a ResolveReqV1 that is not a ResolveReqV1");

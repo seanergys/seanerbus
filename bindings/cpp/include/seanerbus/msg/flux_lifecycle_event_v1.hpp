@@ -26,7 +26,7 @@ class FluxLifecycleEventV1
 public:
     FluxLifecycleEventV1(std::pair<uint64_t, std::vector<std::byte>> payload)
     {
-        if (!payload.first == (uint64_t)::MessageTypes::FLUX_LIFECYCLE_EVENT_V1)
+        if (payload.first != (uint64_t)::MessageTypes::FLUX_LIFECYCLE_EVENT_V1)
         {
             throw std::runtime_error("Trying to decode a message as a FluxLifecycleEventV1 that is "
                                      "not a FluxLifecycleEventV1");
