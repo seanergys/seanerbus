@@ -12,7 +12,7 @@
 
 #include <unistd.h>
 
-void res_handler(seanerbus::client::Connection* conn, seanerbus::Message msg)
+void res_handler(seanerbus::client::Connection& conn, seanerbus::Message msg)
 {
     if (msg.type != ::Message::MessageType::REQUEST)
     {
@@ -31,7 +31,7 @@ void res_handler(seanerbus::client::Connection* conn, seanerbus::Message msg)
     seanerbus::msg::HelloWorldResV1 res(std::string("Thank you for your \"") + req.str_msg +
                                         std::string("\""));
 
-    conn->respond_to(msg, res.to_capnp());
+    conn.respond_to(msg, res.to_capnp());
 }
 
 int main(int argc, char** argv)
