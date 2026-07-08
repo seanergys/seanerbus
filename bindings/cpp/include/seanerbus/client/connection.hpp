@@ -7,16 +7,12 @@
 #include <seanerbus/internal/message.hpp>
 
 #include <functional>
-#include <iostream>
 #include <map>
-#include <memory>
 #include <stdexcept>
 #include <string>
 #include <tuple>
 #include <utility>
 #include <vector>
-
-#include <cerrno>
 
 #include <kj/exception.h>
 #include <seanerbus/internal/internal.capnp.h>
@@ -210,16 +206,10 @@ public:
 
         msg.to_fd_capnp(fd_);
 
-        sub_cbs_.emplace(std::piecewise_construct, std::forward_as_tuple(subscribe_to),
-                         std::forward_as_tuple(executor<invoke_tuple>));
-
-        void* data = std::unique_ptr<invoke_tuple>(
-                         new invoke_tuple(invoke_tuple(std::move(f), std::forward<Args>(args)...)))
-                         .release();
-        sub_userdata_.emplace(subscribe_to, data);
-
-        deleters_.emplace(std::piecewise_construct, std::forward_as_tuple(data),
-                          std::forward_as_tuple(deleter<invoke_tuple>));
+        sub_cbs_.emplace(
+            std::piecewise_construct, std::forward_as_tuple(subscribe_to),
+            std::forward_as_tuple([f, args...](seanerbus::client::Connection& conn,
+                                               seanerbus::Message msg) { f(conn, msg, args...); }));
     }
 
     /**
@@ -243,15 +233,10 @@ public:
 
         using invoke_tuple = std::tuple<F, Args...>;
 
-        res_cbs_.emplace(std::piecewise_construct, std::forward_as_tuple(msg.matching_id),
-                         std::forward_as_tuple(executor<invoke_tuple>));
-
-        void* data = std::unique_ptr<invoke_tuple>(
-                         new invoke_tuple(invoke_tuple(std::move(f), std::forward<Args>(args)...)))
-                         .release();
-        res_userdata_.emplace(msg.matching_id, data);
-
-        deleters_.emplace(data, deleter<invoke_tuple>);
+        res_cbs_.emplace(
+            std::piecewise_construct, std::forward_as_tuple(msg.matching_id),
+            std::forward_as_tuple([f, args...](seanerbus::client::Connection& conn,
+                                               seanerbus::Message msg) { f(conn, msg, args...); }));
 
         msg.to_fd_capnp(fd_);
     }
@@ -289,17 +274,10 @@ public:
         auto reg_msg = seanerbus::Message::register_endpoint(addr);
         reg_msg.to_fd_capnp(fd_);
 
-        using invoke_tuple = std::tuple<F, Args...>;
-
-        req_cbs_.emplace(std::piecewise_construct, std::forward_as_tuple(addr),
-                         std::forward_as_tuple(executor<invoke_tuple>));
-
-        void* data = std::unique_ptr<invoke_tuple>(
-                         new invoke_tuple(invoke_tuple(std::move(f), std::forward<Args>(args)...)))
-                         .release();
-        req_userdata_.emplace(addr, data);
-
-        deleters_.emplace(data, deleter<invoke_tuple>);
+        req_cbs_.emplace(
+            std::piecewise_construct, std::forward_as_tuple(addr),
+            std::forward_as_tuple([f, args...](seanerbus::client::Connection& conn,
+                                               seanerbus::Message msg) { f(conn, msg, args...); }));
     }
 
     Connection(Connection&) = delete;
@@ -310,10 +288,6 @@ public:
 
     ~Connection()
     {
-        for (auto& elem : deleters_)
-        {
-            elem.second(elem.first);
-        }
         close(fd_);
         free(buffer_);
     }
@@ -342,24 +316,18 @@ public:
     }
 
 private:
-    template <class invoke_tuple>
-    static void deleter(void* arg)
-    {
-        std::unique_ptr<invoke_tuple>{ (invoke_tuple*)arg };
-    }
-
     void handle(seanerbus::Message msg)
     {
         switch (msg.type)
         {
         case ::Message::MessageType::PUBLISH:
-            sub_cbs_.at(msg.address)(*this, msg, sub_userdata_.at(msg.address));
+            sub_cbs_.at(msg.address)(*this, msg);
             break;
         case ::Message::MessageType::REQUEST:
-            req_cbs_.at(msg.address)(*this, msg, req_userdata_.at(msg.address));
+            req_cbs_.at(msg.address)(*this, msg);
             break;
         case ::Message::MessageType::RESPONSE:
-            res_cbs_.at(msg.matching_id)(*this, msg, res_userdata_.at(msg.matching_id));
+            res_cbs_.at(msg.matching_id)(*this, msg);
             break;
         case ::Message::MessageType::ERROR:
         {
@@ -371,34 +339,12 @@ private:
         }
     }
 
-    template <class invoke_tuple>
-    static void* executor(Connection& conn, Message msg, void* arg)
-    {
-        invoke_tuple* func_arg = static_cast<invoke_tuple*>(arg);
-
-        // Tuple is unpacked here. Don't ask how.
-        using indices = std::make_index_sequence<std::tuple_size<invoke_tuple>::value - 1>;
-        executor_helper(conn, msg, *func_arg, indices{});
-
-        return nullptr;
-    }
-
-    template <class F, class... Args, size_t... Indices>
-    static void executor_helper(Connection& conn, Message& msg, std::tuple<F, Args...>& t,
-                                [[maybe_unused]] std::index_sequence<Indices...> is)
-    {
-        std::invoke(std::move(std::get<0>(t)), &conn, msg, std::move(std::get<Indices + 1>(t))...);
-    }
-
     int fd_ = -1;
 
-    std::map<Address, void* (*)(Connection&, Message, void*)> sub_cbs_;
-    std::map<Address, void*> sub_userdata_;
-    std::map<Address, void* (*)(Connection&, Message, void*)> req_cbs_;
-    std::map<Address, void*> req_userdata_;
-    std::map<uint64_t, void* (*)(Connection&, Message, void*)> res_cbs_;
-    std::map<uint64_t, void*> res_userdata_;
-    std::map<void*, void (*)(void*)> deleters_;
+    std::map<Address, std::function<void(Connection&, Message)>> sub_cbs_;
+    std::map<Address, std::function<void(Connection&, Message)>> req_cbs_;
+    std::map<uint64_t, std::function<void(Connection&, Message)>> res_cbs_;
+
     std::byte* buffer_ = nullptr;
     size_t cursor_ = 0;
     size_t buffer_size_ = 1024;

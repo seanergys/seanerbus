@@ -9,7 +9,7 @@
 #include <iostream>
 #include <stdexcept>
 
-void sub_handler(seanerbus::client::Connection* conn, seanerbus::Message message)
+void sub_handler(seanerbus::client::Connection& conn, seanerbus::Message message)
 {
     // Check the payload type if we are really dealing with a TimeValueV1 message.
     //

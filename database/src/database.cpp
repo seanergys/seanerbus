@@ -72,7 +72,7 @@ hta_time_values_to_sean_raws(std::vector<hta::TimeValue> rows)
     return res;
 }
 
-void sub_handler(seanerbus::client::Connection* conn, seanerbus::Message msg, hta::Directory* dir)
+void sub_handler(seanerbus::client::Connection& conn, seanerbus::Message msg, hta::Directory* dir)
 {
     if (msg.payload.first == (uint64_t)::MessageTypes::TIME_VALUE_V1)
     {
@@ -107,7 +107,7 @@ void sub_handler(seanerbus::client::Connection* conn, seanerbus::Message msg, ht
 }
 
 // Handler for HistoryReqV1
-void history_req_handler(seanerbus::client::Connection* conn, seanerbus::Message msg,
+void history_req_handler(seanerbus::client::Connection& conn, seanerbus::Message msg,
                          hta::Directory* dir)
 {
     if (msg.payload.first == (uint64_t)::MessageTypes::HISTORY_REQ_V1)
@@ -134,8 +134,8 @@ void history_req_handler(seanerbus::client::Connection* conn, seanerbus::Message
                     aggr.minimum, aggr.maximum, aggr.sum, aggr.count, aggr.integral,
                     aggr.activeTime);
 
-                conn->respond_to(msg,
-                                 seanerbus::msg::HistoryResV1::make_aggr({}, { aggr }).to_capnp());
+                conn.respond_to(msg,
+                                seanerbus::msg::HistoryResV1::make_aggr({}, { aggr }).to_capnp());
             }
             else
             {
@@ -158,7 +158,7 @@ void history_req_handler(seanerbus::client::Connection* conn, seanerbus::Message
                     seanerbus::logging::debug("Got raw timeline result: {} items",
                                               raw_data.first.size());
 
-                    conn->respond_to(
+                    conn.respond_to(
                         msg, seanerbus::msg::HistoryResV1::make_raw(raw_data.first, raw_data.second)
                                  .to_capnp());
                 }
@@ -169,9 +169,9 @@ void history_req_handler(seanerbus::client::Connection* conn, seanerbus::Message
                     seanerbus::logging::debug("Got aggregated timeline result: {} items",
                                               aggr_data.first.size());
 
-                    conn->respond_to(msg, seanerbus::msg::HistoryResV1::make_aggr(aggr_data.first,
-                                                                                  aggr_data.second)
-                                              .to_capnp());
+                    conn.respond_to(msg, seanerbus::msg::HistoryResV1::make_aggr(aggr_data.first,
+                                                                                 aggr_data.second)
+                                             .to_capnp());
                 }
             }
         }
@@ -179,7 +179,7 @@ void history_req_handler(seanerbus::client::Connection* conn, seanerbus::Message
         {
             seanerbus::logging::warn("Servicing HistoryReqV1 failed: {}", e.what());
 
-            conn->respond_to(
+            conn.respond_to(
                 msg, seanerbus::msg::HistoryResV1::make_error(
                          fmt::format("Got exception from HTA Time-Series Database: {}", e.what()))
                          .to_capnp());
@@ -191,8 +191,8 @@ void history_req_handler(seanerbus::client::Connection* conn, seanerbus::Message
             "Client {}: expected HistoryResV1, got {} instead. Answering with error",
             msg.from->u_.as_string(), seanerbus::msg::payload_type_to_str(msg.payload.first));
 
-        conn->respond_to(
-            msg, seanerbus::msg::HistoryResV1::make_error("Not a HistoryReqV1!").to_capnp());
+        conn.respond_to(msg,
+                        seanerbus::msg::HistoryResV1::make_error("Not a HistoryReqV1!").to_capnp());
     }
 }
 

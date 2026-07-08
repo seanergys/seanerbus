@@ -14,13 +14,13 @@ namespace helpers
 {
 namespace
 {
-void resolve_res_fn(seanerbus::client::Connection* conn, seanerbus::Message msg,
+void resolve_res_fn(seanerbus::client::Connection& conn, seanerbus::Message msg,
                     std::vector<Address>* res)
 {
     if (msg.payload.first != (uint64_t)::MessageTypes::RESOLVE_RES_V1)
     {
         std::cerr << "Expected Resolve Response!";
-        conn->shutdown();
+        conn.shutdown();
 
         return;
     }
@@ -28,7 +28,7 @@ void resolve_res_fn(seanerbus::client::Connection* conn, seanerbus::Message msg,
     seanerbus::msg::ResolveResV1 response(msg.payload);
 
     *res = response.addrs;
-    conn->shutdown();
+    conn.shutdown();
 
     return;
 }
@@ -57,13 +57,13 @@ std::vector<Address> resolve(client::Connection& conn, std::map<std::string, std
 
 namespace
 {
-void reverse_resolve_res_fn(client::Connection* conn, seanerbus::Message msg,
+void reverse_resolve_res_fn(client::Connection& conn, seanerbus::Message msg,
                             std::map<std::string, std::string>* name)
 {
     if (msg.payload.first != (uint64_t)::MessageTypes::REVERSE_RESOLVE_RES_V1)
     {
         std::cerr << "Expected Resolve Response!";
-        conn->shutdown();
+        conn.shutdown();
 
         return;
     }
@@ -71,7 +71,7 @@ void reverse_resolve_res_fn(client::Connection* conn, seanerbus::Message msg,
     seanerbus::msg::ReverseResolveResV1 response(msg.payload);
 
     *name = response.name;
-    conn->shutdown();
+    conn.shutdown();
 
     return;
 }
@@ -90,19 +90,19 @@ std::map<std::string, std::string> reverse_resolve(client::Connection& conn, Add
     return res;
 }
 
-void register_resolve_res_fn(client::Connection* conn, seanerbus::Message msg)
+void register_resolve_res_fn(client::Connection& conn, seanerbus::Message msg)
 {
     if (msg.payload.first != (uint64_t)::MessageTypes::REGISTER_RESOLVE_RES_V1)
     {
         std::cerr << "Expected Register Resolve Response!";
-        conn->shutdown();
+        conn.shutdown();
 
         return;
     }
 
     seanerbus::msg::RegisterResolveResV1 response(msg.payload);
 
-    conn->shutdown();
+    conn.shutdown();
 
     if (!response.success)
     {
@@ -132,19 +132,19 @@ void register_resolve(client::Connection& conn, std::map<std::string, std::strin
     }
 }
 
-void unregister_resolve_res_fn(client::Connection* conn, seanerbus::Message msg)
+void unregister_resolve_res_fn(client::Connection& conn, seanerbus::Message msg)
 {
     if (msg.payload.first != (uint64_t)::MessageTypes::UNREGISTER_RESOLVE_RES_V1)
     {
         std::cerr << "Expected Register Resolve Response!";
-        conn->shutdown();
+        conn.shutdown();
 
         return;
     }
 
     seanerbus::msg::UnregisterResolveResV1 response(msg.payload);
 
-    conn->shutdown();
+    conn.shutdown();
 
     if (!response.success)
     {

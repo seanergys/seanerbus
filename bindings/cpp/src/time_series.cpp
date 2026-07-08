@@ -15,7 +15,7 @@ namespace seanerbus
 namespace helpers
 {
 
-void get_timeline_res(seanerbus::client::Connection* conn, seanerbus::Message msg,
+void get_timeline_res(seanerbus::client::Connection& conn, seanerbus::Message msg,
                       msg::History* hist)
 {
     if (msg.payload.first != (uint64_t)MessageTypes::HISTORY_RES_V1)
@@ -34,7 +34,7 @@ void get_timeline_res(seanerbus::client::Connection* conn, seanerbus::Message ms
     }
 
     *hist = res.get_history();
-    conn->shutdown();
+    conn.shutdown();
 }
 
 msg::History get_timeline(client::Connection& conn, Address addr, uint64_t start, uint64_t end,
@@ -62,7 +62,7 @@ msg::History get_timeline(client::Connection& conn, Address addr, uint64_t start
     return hist;
 }
 
-void get_aggregate_res(seanerbus::client::Connection* conn, seanerbus::Message msg,
+void get_aggregate_res(seanerbus::client::Connection& conn, seanerbus::Message msg,
                        msg::Aggregate* aggr)
 {
     if (msg.payload.first != (uint64_t)MessageTypes::HISTORY_RES_V1)
@@ -86,7 +86,7 @@ void get_aggregate_res(seanerbus::client::Connection* conn, seanerbus::Message m
             "Requested an aggregate, got raw values from Time-Series DB instead!");
     }
     *aggr = res.get_history().get_aggr()[0];
-    conn->shutdown();
+    conn.shutdown();
 }
 
 msg::Aggregate get_aggregate(client::Connection& conn, Address addr, uint64_t start, uint64_t end)
