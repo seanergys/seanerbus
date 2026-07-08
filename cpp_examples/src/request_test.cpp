@@ -5,6 +5,7 @@
 #include <seanerbus/client/connection.hpp>
 #include <seanerbus/client/simple_event_loop.hpp>
 #include <seanerbus/msg/hello_world_req_v1.hpp>
+#include <seanerbus/msg/hello_world_res_v1.hpp>
 
 #include <iostream>
 
@@ -23,7 +24,7 @@ void req_handler(seanerbus::client::Connection& conn, seanerbus::Message msg)
     else
     {
 
-        seanerbus::msg::HelloWorldReqV1 result(msg.payload);
+        seanerbus::msg::HelloWorldResV1 result(msg.payload);
 
         std::cout << "Got answer to request: " << result.str_msg << std::endl;
     }
