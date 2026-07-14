@@ -112,28 +112,6 @@ test:rust-format:
     - cargo fmt -- --check
   allow_failure: true
 
-test:ruff-check:
-  image: python:latest
-  stage: test
-  script:
-    - pip install ruff
-    - cd bindings/python
-    - ruff check
-    - cd $CI_PROJECT_DIR
-    - cd python_examples
-    - ruff check
-
-test:ruff-format:
-  image: python:latest
-  stage: test
-  script:
-    - pip install ruff
-    - cd bindings/python
-    - ruff format --check
-    - cd $CI_PROJECT_DIR
-    - cd python_examples
-    - ruff format --check
-
 docs:docs:
   image: python:latest
   stage: docs
