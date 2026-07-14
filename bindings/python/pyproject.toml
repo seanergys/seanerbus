@@ -22,7 +22,7 @@ include-package-data = true
 where = ["src"]
 
 [tool.setuptools.package-data]
-seanerbus = ["client/internal.capnp", "msg/msg.capnp"]
+seanerbus = ["client/internal.capnp", "msg/schemas/msg.capnp"]
 
 [tool.ruff.lint]
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`) codes by default.
