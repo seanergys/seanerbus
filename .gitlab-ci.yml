@@ -14,13 +14,8 @@ variables:
   CARGO_INCREMENTAL: 0
   DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
   DOCKER_IMAGE_TAG: $CI_COMMIT_SHA
-
-check-differ-capnp:
-  stage: prebuild
-  image: python:latest
-  script:
-    - diff -u --color=always  msg/schemas/msg.capnp bindings/python/src/seanerbus/msg/msg.capnp
-    - diff -u --color=always internal/internal_schemas/schemas/internal.capnp bindings/python/src/seanerbus/client/internal.capnp 
+  GIT_SUBMODULE_FORCE_HTTPS: "true"
+  GIT_SUBMODULE_STRATEGY: recursive
 
 reuse-lint:
   stage: prebuild
@@ -54,7 +49,6 @@ build-cpp:
   stage: build
   script:
     - apt-get update && apt-get install -y catch2 libcatch2-dev cmake capnproto pkg-config libcapnp-dev git build-essential
-    - git submodule update --init --recursive
     - cd bindings/cpp
     - mkdir build
     - cd build
@@ -175,7 +169,6 @@ sub_python_pub_cpp:
   stage: end_to_end
   script:
     - apt-get update && apt-get install -y cmake capnproto pkg-config libcapnp-dev git rustup build-essential
-    - git submodule update --init --recursive
     - rustup default stable
     - pip install uv
     - cd scenario_tests/sub_python_pub_cpp/
@@ -186,7 +179,6 @@ req_python_res_python_array:
   stage: end_to_end
   script:
     - apt-get update && apt-get install -y cmake capnproto pkg-config libcapnp-dev git rustup build-essential
-    - git submodule update --init --recursive
     - rustup default stable
     - pip install uv
     - cd scenario_tests/req_python_res_python_array

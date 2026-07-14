@@ -13,7 +13,9 @@ def uuid_to_u64_pair(uuid: uuid.UUID) -> tuple[int, int]:
     return (upper, lower)
 
 
-msg_capnp = capnp.load(os.path.dirname(os.path.abspath(__file__)) + "/msg.capnp")
+msg_capnp = capnp.load(
+    os.path.dirname(os.path.abspath(__file__)) + "/schemas/msg.capnp"
+)
 
 
 class TimeValueV1:
