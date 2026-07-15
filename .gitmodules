@@ -1,6 +1,3 @@
-[submodule "database/lib/hta"]
-	path = database/lib/hta
-	url = https://github.com/metricq/hta.git
 [submodule "msg/schemas"]
 	path = msg/schemas
 	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbus-msg.git
@@ -13,3 +10,6 @@
 [submodule "bindings/cpp"]
 	path = bindings/cpp
 	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbus-cpp.git
+[submodule "database"]
+	path = database
+	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbus-hta.git
