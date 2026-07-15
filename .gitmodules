@@ -1,6 +1,3 @@
-[submodule "bindings/cpp/lib/fmt"]
-	path = bindings/cpp/lib/fmt
-	url = https://github.com/fmtlib/fmt.git
 [submodule "database/lib/hta"]
 	path = database/lib/hta
 	url = https://github.com/metricq/hta.git
@@ -13,3 +10,6 @@
 [submodule "cli"]
 	path = cli
 	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbus-cli.git
+[submodule "bindings/cpp"]
+	path = bindings/cpp
+	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbus-cpp.git
