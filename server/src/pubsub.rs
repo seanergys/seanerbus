@@ -67,7 +67,7 @@ pub async fn pub_sub(chans: BrokerChannels, mut rx: mpsc::Receiver<PubSubMsg>) {
             },
             PubSubMsg::Disconnect(conn_id) => {
                 debug!("{} disconnected, removing it from subscribers", conn_id);
-                for (_, subs) in subscribers.iter_mut() {
+                for subs in subscribers.values_mut() {
                     subs.remove(&conn_id);
                 }
             }
