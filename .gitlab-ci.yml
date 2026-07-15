@@ -40,8 +40,6 @@ build-rust:
     - rustup default stable
     - cd server
     - cargo build --release
-    - cd ../rust_examples
-    - cargo build --release
   allow_failure: false
 
 test:rust-unit:
@@ -51,8 +49,6 @@ test:rust-unit:
     - apt-get update && apt-get install -y capnproto rustup build-essential
     - rustup default stable
     - cd server
-    - cargo test --verbose
-    - cd ../rust_examples
     - cargo test --verbose
 
 
@@ -65,9 +61,6 @@ test:rust-clippy:
     - rustup component add clippy
     - cd server
     - cargo clippy -- -D warnings
-    - cd ../rust_examples
-    - cargo clippy -- -D warnings
-  allow_failure: true
 
 test:rust-format:
   image: debian:testing-slim
@@ -78,9 +71,6 @@ test:rust-format:
     - rustup component add rustfmt
     - cd server
     - cargo fmt -- --check
-    - cd ../rust_examples
-    - cargo fmt -- --check
-  allow_failure: true
 
 docs:docs:
   image: python:latest

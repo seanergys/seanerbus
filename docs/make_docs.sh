@@ -20,12 +20,13 @@ uv run sphinx-build sphinx ../public
 rm -rf ../public/rust_msg
 rm -rf ../public/rust_client
 rm -rf ../public/rust_naming
-cd ../msg
-cargo doc -p seanerbus_msg --no-deps --target-dir ../public/rust_msg
+cd ../bindings/rust/msg
+cargo doc -p seanerbus_msg --no-deps --target-dir ../../../public/rust_msg
 cd ../client
-cargo doc -p seanerbus_client  --no-deps --target-dir ../public/rust_client
-cd ../naming_scheme
+cargo doc -p seanerbus_client  --no-deps --target-dir ../../public/rust_client
+cd ../../../naming_scheme
 cargo doc -p naming_scheme --no-deps --target-dir ../public/rust_naming
-rm -rf ../public/rust_msg/debug
-rm -rf ../public/rust_client/debug
-rm -rf ../public/rust_naming_debug
+cd ../../
+rm -rf public/rust_msg/debug
+rm -rf public/rust_client/debug
+rm -rf public/rust_naming_debug

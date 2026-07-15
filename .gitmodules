@@ -13,3 +13,6 @@
 [submodule "database"]
 	path = database
 	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbus-hta.git
+[submodule "bindings/rust"]
+	path = bindings/rust
+	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbus-rs
