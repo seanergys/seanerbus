@@ -44,15 +44,6 @@ build-rust:
     - cargo build --release
   allow_failure: false
 
-build-cpp:
-  image: debian:testing-slim
-  stage: build
-  script:
-    - apt-get update && apt-get install -y catch2 libcatch2-dev cmake capnproto pkg-config libcapnp-dev git build-essential
-    - cd database
-    - cmake .
-    - make -j4
-
 test:rust-unit:
   image: debian:testing-slim
   stage: test
