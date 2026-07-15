@@ -12,6 +12,6 @@ tokio = { version = "1.50.0", features = ["full"] }
 tracing = "0.1.44"
 tracing-subscriber = "0.3.22"
 uuid = { version = "1.22.0", features = ["v4"] }
-seanerbus_schemas = {path="../internal/internal_schemas"}
-seanerbus_async = {path="../internal/async"}
+seanerbus_schemas = {path="../bindings/rust/internal/internal_schemas"}
+seanerbus_async = {path="../bindings/rust/internal/async"}
 tokio-test = "0.4.5"

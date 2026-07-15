@@ -13,9 +13,9 @@ path = "src/naming_server/src/main.rs"
 
 [dependencies]
 
-seanerbus_client = { path = '../client' } 
-seanerbus_msg = { path = '../msg' } 
-seanerbus_schemas = { path = '../internal/internal_schemas' } 
+seanerbus_client = { path = '../bindings/rust/client' } 
+seanerbus_msg = { path = '../bindings/rust/msg' } 
+seanerbus_schemas = { path = '../bindings/rust/internal/internal_schemas' } 
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 thiserror = "2.0.18"
