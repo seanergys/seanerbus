@@ -10,3 +10,6 @@
 [submodule "bindings/python"]
 	path = bindings/python
 	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbus-py.git
+[submodule "cli"]
+	path = cli
+	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbus-cli.git
