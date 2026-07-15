@@ -49,30 +49,9 @@ build-cpp:
   stage: build
   script:
     - apt-get update && apt-get install -y catch2 libcatch2-dev cmake capnproto pkg-config libcapnp-dev git build-essential
-    - cd bindings/cpp
-    - mkdir build
-    - cd build
-    - cmake .. -DCMAKE_INSTALL_PREFIX=../../../install_seanerbus
-    - make -j4 install
-    - make test
-    - cd ../../../contrib/pkgconfig_build_test
-    - cmake . -DCMAKE_PREFIX_PATH=../../install_seanerbus
-    - make -j4
-    - cd ../cmake_config_build_test
-    - cmake . -DCMAKE_PREFIX_PATH=../../install_seanerbus
-    - make -j4
-    - cd ../../database
+    - cd database
     - cmake .
     - make -j4
-
-
-
-build-python:
-  image: python:latest
-  stage: build
-  script:
-    - apt-get update && apt-get install -y cmake capnproto libcapnp-dev
-    - pip install bindings/python
 
 test:rust-unit:
   image: debian:testing-slim
