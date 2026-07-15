@@ -26,7 +26,7 @@ cd ../client
 cargo doc -p seanerbus_client  --no-deps --target-dir ../../public/rust_client
 cd ../../../naming_scheme
 cargo doc -p naming_scheme --no-deps --target-dir ../public/rust_naming
-cd ../../
+cd ../
 rm -rf public/rust_msg/debug
 rm -rf public/rust_client/debug
-rm -rf public/rust_naming_debug
+rm -rf public/rust_naming/debug
