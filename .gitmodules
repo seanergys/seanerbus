@@ -7,6 +7,6 @@
 [submodule "msg/schemas"]
 	path = msg/schemas
 	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbus-msg.git
-[submodule "bindings/python/src/seanerbus/msg/schemas"]
-	path = bindings/python/src/seanerbus/msg/schemas
-	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbus-msg.git
+[submodule "bindings/python"]
+	path = bindings/python
+	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbus-py.git
