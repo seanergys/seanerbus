@@ -17,13 +17,13 @@ async def main():
     await c.subscribe(uuid.UUID(int=10))
 
     tv = TimeValueV1.from_capnp(await c.read_msg())
-    if tv.time != 0 or tv.value != 0.0:
-        exit(1)
-    tv = TimeValueV1.from_capnp(await c.read_msg())
     if tv.time != 1 or tv.value != 1.0:
         exit(1)
     tv = TimeValueV1.from_capnp(await c.read_msg())
     if tv.time != 2 or tv.value != 2.0:
+        exit(1)
+    tv = TimeValueV1.from_capnp(await c.read_msg())
+    if tv.time != 3 or tv.value != 3.0:
         exit(1)
     exit(0)
 
