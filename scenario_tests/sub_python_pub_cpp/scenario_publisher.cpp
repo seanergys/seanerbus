@@ -4,8 +4,8 @@
 
 #include <seanerbus/client/connection.hpp>
 #include <seanerbus/client/simple_event_loop.hpp>
+#include <seanerbus/helpers/time_series.hpp>
 #include <seanerbus/internal/message.hpp>
-#include <seanerbus/msg/time_value_v1.hpp>
 
 uint64_t timestamp = 0;
 double value = 0.0;
@@ -21,8 +21,7 @@ void on_publish(seanerbus::client::Connection& conn, seanerbus::client::Connecti
     {
         timestamp++;
         value++;
-        seanerbus::msg::TimeValueV1 tv{ timestamp, value };
-        conn.publish(addr, tv.to_capnp(), on_publish);
+        seanerbus::helpers::publish_time_value(conn, addr, timestamp, value, on_publish);
     }
 }
 
