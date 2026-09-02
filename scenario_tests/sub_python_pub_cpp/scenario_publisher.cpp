@@ -4,14 +4,15 @@
 
 #include <seanerbus/client/connection.hpp>
 #include <seanerbus/client/simple_event_loop.hpp>
+#include <seanerbus/helpers/noexcept.hpp>
 #include <seanerbus/helpers/time_series.hpp>
-#include <seanerbus/internal/message.hpp>
 
 uint64_t timestamp = 0;
 double value = 0.0;
-seanerbus::Address addr;
+seanerbus::msg::Address addr;
 
-void on_publish(seanerbus::client::Connection& conn, seanerbus::client::ConnectionError err)
+void on_publish(seanerbus::client::Connection& conn,
+                seanerbus::Expected<void, seanerbus::Error> err)
 {
     if (timestamp >= 4)
     {
@@ -21,16 +22,16 @@ void on_publish(seanerbus::client::Connection& conn, seanerbus::client::Connecti
     {
         timestamp++;
         value++;
-        seanerbus::helpers::publish_time_value(conn, addr, timestamp, value, on_publish);
+        seanerbus::time_series::publish_time_value(conn, addr, timestamp, value, on_publish);
     }
 }
 
 int main(int argc, char** argv)
 {
-    addr = seanerbus::Address(seanerbus::Uuid(0, 10));
-    seanerbus::client::Connection conn("localhost", "5398");
+    addr = seanerbus::msg::Address(seanerbus::msg::Uuid(0, 10));
+    seanerbus::client::Connection conn("demobus://localhost:5398", "demobus://localhost:5398");
 
-    on_publish(conn, seanerbus::client::ConnectionError::make_ok());
+    on_publish(conn, seanerbus::Expected<void, seanerbus::Error>());
     seanerbus::client::SimpleEventLoop loop(conn);
 
     loop.run();
