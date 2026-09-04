@@ -16,3 +16,6 @@
 [submodule "bindings/rust"]
 	path = bindings/rust
 	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbus-rs
+[submodule "naming_scheme"]
+	path = naming_scheme
+	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbus-naming-service.git
