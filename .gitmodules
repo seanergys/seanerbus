@@ -19,3 +19,6 @@
 [submodule "naming_scheme"]
 	path = naming_scheme
 	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbus-naming-service.git
+[submodule "server"]
+	path = server
+	url = git@gitlab.seanergys.fz-juelich.de:software/demobus.git
