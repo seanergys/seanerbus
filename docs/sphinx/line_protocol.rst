@@ -2,8 +2,8 @@
 ..
 .. SPDX-License-Identifier: MIT
 
-SeanerBUS Line Protocol
-=======================
+DemoBUS Line Protocol
+=====================
 
 .. warning::
    This is the internal line-protocol that you use to communicate with the SeanerBUS itself.

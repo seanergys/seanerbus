@@ -9,3 +9,9 @@ The centerpiece of this API is the Connection class, which holds a single connec
 
 .. automodule:: seanerbus.client
    :members:
+
+.. autoclass:: seanerbus_cpp_py.Connection
+   :members:
+   :undoc-members:
+
+.. autoclass:: seanerbus_cpp_py.Message

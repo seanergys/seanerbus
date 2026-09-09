@@ -2,8 +2,8 @@
 ..
 .. SPDX-License-Identifier: MIT
 
-Server Architecture
-===================
+DemoBUS Architecture
+====================
 
 
 .. caution::

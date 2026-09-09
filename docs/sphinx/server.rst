@@ -2,21 +2,21 @@
 ..
 .. SPDX-License-Identifier: MIT
 
-Server Component
-================
+DemoBUS
+=======
 
 .. toctree::
    server_architecture
    line_protocol
 
-The SeanerBUS prototype uses a single central server component for handling publish, subscribe, request and response communication.
+For testing purposes, there is a simple, centralized, one-binary, req/res and pub/sub backend: The DemoBUS.
 
-This server component is engineered for easy extendability (for testing out Data-Plane) concepts, correctness, but not speed.
+The DemoBUS uses URLs of the form ``demobus://localhost:5398``
 
 Usage
 -----
 
-The Server component is written in Rust.
+The DemoBUS is written in Rust.
 
 Use `rustup <rustup.rs>`_ to install Rust or check with your distribution on how to install the required Rust tooling.
 

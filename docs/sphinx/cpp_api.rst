@@ -19,3 +19,4 @@ The C++ API contains these parts:
    msg_cpp
    naming_cpp
    time_series_cpp
+   helpers_cpp
