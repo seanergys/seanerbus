@@ -5,6 +5,42 @@ stages:
   - docs
   - end_to_end
 
+before_script:
+  ##
+  ## Install ssh-agent if not already installed, it is required by Docker.
+  ## (change apt-get to yum if you use an RPM-based image)
+  ##
+  - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client git -y )'
+
+  ##
+  ## Run ssh-agent (inside the build environment)
+  ##
+  - eval $(ssh-agent -s)
+
+  ##
+  ## Give the right permissions, otherwise ssh-add will refuse to add files
+  ## Add the SSH key stored in SSH_PRIVATE_KEY file type CI/CD variable to the agent store
+  ##
+  - chmod 400 "$SSH_PRIVATE_KEY"
+  - ssh-add "$SSH_PRIVATE_KEY"
+  - chmod 400 "$SSH_PRIVATE_KEY2"
+  - ssh-add "$SSH_PRIVATE_KEY2"
+
+  ##
+  ## Create the SSH directory and give it the right permissions
+  ##
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - cp "$SSH_KNOWN_HOSTS" ~/.ssh/known_hosts
+  - chmod 644 ~/.ssh/known_hosts
+
+  ##
+  ## Optionally, if you use Git commands, set the user name and email.
+  ##
+  - git config --global user.email "user@example.com"
+  - git config --global user.name "User name"
+  - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.seanergys.fz-juelich.de/software/seanerbus-msg.git".insteadOf git@gitlab.seanergys.fz-juelich.de:software/seanerbus-msg.git
+
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
@@ -14,8 +50,8 @@ variables:
   CARGO_INCREMENTAL: 0
   DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
   DOCKER_IMAGE_TAG: $CI_COMMIT_SHA
-  GIT_SUBMODULE_FORCE_HTTPS: "true"
   GIT_SUBMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_FORCE_HTTPS: "true"
 
 reuse-lint:
   stage: prebuild
