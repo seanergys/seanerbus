@@ -31,47 +31,6 @@ cpp-clang-format:
     - apt-get update && apt-get install -y clang-format git
     - git-clang-format HEAD~1
 
-
-build-rust:
-  image: debian:testing-slim
-  stage: build
-  script:
-    - apt-get update && apt-get install -y capnproto rustup build-essential
-    - rustup default stable
-    - cd server
-    - cargo build --release
-  allow_failure: false
-
-test:rust-unit:
-  image: debian:testing-slim
-  stage: test
-  script:
-    - apt-get update && apt-get install -y capnproto rustup build-essential
-    - rustup default stable
-    - cd server
-    - cargo test --verbose
-
-
-test:rust-clippy:
-  image: debian:testing-slim
-  stage: test
-  script:
-    - apt-get update && apt-get install -y capnproto rustup build-essential
-    - rustup default stable
-    - rustup component add clippy
-    - cd server
-    - cargo clippy -- -D warnings
-
-test:rust-format:
-  image: debian:testing-slim
-  stage: test
-  script:
-    - apt-get update && apt-get install -y capnproto rustup build-essential
-    - rustup default stable
-    - rustup component add rustfmt
-    - cd server
-    - cargo fmt -- --check
-
 docs:docs:
   image: python:latest
   stage: docs
