@@ -13,14 +13,14 @@ import sys
 
 async def main():
     # Connect to the SeanerBUS
-    c = await seanerbus.client.Connection.connect("localhost", 5398)
+    c = seanerbus.client.Connection("demobus://localhost:5398", "demobus://localhost:5398")
 
     # Registers as a request-responder with the broker
-    await c.register(uuid.UUID(sys.argv[1]))
+    handle = await c.register_endpoint(sys.argv[1])
 
     while True:
         # Wait for a message
-        msg = await c.read_msg()
+        msg = await handle()
         # Try to decode its payload as a HelloWorldReqV1
         payload = VectorReqV1.from_capnp(msg)
 

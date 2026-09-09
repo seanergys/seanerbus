@@ -13,16 +13,15 @@ import sys
 
 async def main():
     # Connect to the SeanerBUS
-    c = await seanerbus.client.Connection.connect("localhost", 5398)
-    print(c)
+    c = seanerbus.client.Connection("demobus://localhost:5398", "demobus://localhost:5398")
 
     # Send a HelloWorldReqV1 to the UUID given on the command line.
     # Interpret the result as a HelloWorldResV1
-    u = uuid.UUID(sys.argv[1])
     v = VectorReqV1([1.0, 2.0, 3.0]).to_capnp()
-    a = await c.request(u, v)
+    handle = await c.request(sys.argv[1], v)
 
-    print("Received payloadType:", a.payloadType)
+    a = await handle()
+    print("Received payloadType:", a.payload_type_as_int())
 
     msg = VectorResV1.from_capnp(a)
 
