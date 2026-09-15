@@ -7,6 +7,8 @@
 #include <seanerbus/helpers/noexcept.hpp>
 #include <seanerbus/helpers/time_series.hpp>
 
+#include "seanerbus/time/time.hpp"
+
 uint64_t timestamp = 0;
 double value = 0.0;
 seanerbus::msg::Address addr;
@@ -22,7 +24,9 @@ void on_publish(seanerbus::client::Connection& conn,
     {
         timestamp++;
         value++;
-        seanerbus::time_series::publish_time_value(conn, addr, timestamp, value, on_publish);
+        seanerbus::time_series::publish_time_value(
+            conn, addr, seanerbus::time::clock::time_point(std::chrono::nanoseconds(timestamp)),
+            value, on_publish);
     }
 }
 
