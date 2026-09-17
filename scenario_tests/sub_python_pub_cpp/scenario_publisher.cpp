@@ -11,7 +11,7 @@
 
 uint64_t timestamp = 0;
 double value = 0.0;
-seanerbus::msg::Address addr;
+seanerbus::msg::Entity entity;
 
 void on_publish(seanerbus::client::Connection& conn,
                 seanerbus::Expected<void, seanerbus::Error> err)
@@ -25,14 +25,14 @@ void on_publish(seanerbus::client::Connection& conn,
         timestamp++;
         value++;
         seanerbus::time_series::publish_time_value(
-            conn, addr, seanerbus::time::clock::time_point(std::chrono::nanoseconds(timestamp)),
+            conn, entity, seanerbus::time::clock::time_point(std::chrono::nanoseconds(timestamp)),
             value, on_publish);
     }
 }
 
 int main(int argc, char** argv)
 {
-    addr = seanerbus::msg::Address(seanerbus::msg::Uuid(0, 10));
+    entity = seanerbus::msg::Entity(seanerbus::msg::Uuid(0, 10));
     seanerbus::client::Connection conn("demobus://localhost:5398", "demobus://localhost:5398");
 
     on_publish(conn, seanerbus::Expected<void, seanerbus::Error>());
