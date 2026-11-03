@@ -21,4 +21,4 @@
 	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbus-naming-service.git
 [submodule "server"]
 	path = server
-	url = git@gitlab.seanergys.fz-juelich.de:software/demobus.git
+	url = git@gitlab.seanergys.fz-juelich.de:software/seanerbroker.git

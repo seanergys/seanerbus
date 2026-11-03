@@ -11,7 +11,7 @@ DemoBUS
 
 For testing purposes, there is a simple, centralized, one-binary, req/res and pub/sub backend: The DemoBUS.
 
-The DemoBUS uses URLs of the form ``demobus://localhost:5398``
+The DemoBUS uses URLs of the form ``seanerbroker://localhost:5398``
 
 Usage
 -----

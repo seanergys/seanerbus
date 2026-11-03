@@ -12,7 +12,7 @@ import uuid
 
 
 async def main():
-    c = seanerbus.client.Connection("demobus://localhost:5398", "demobus://localhost:5398")
+    c = seanerbus.client.Connection("seanerbroker://localhost:5398", "seanerbroker://localhost:5398")
 
     handle = await c.subscribe(str(uuid.UUID(int=10)))
 

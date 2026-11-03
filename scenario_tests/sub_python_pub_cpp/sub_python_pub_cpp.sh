@@ -8,7 +8,7 @@ set -euo pipefail
 
 cd ../../server
 cargo build
-./target/debug/demobus &
+./target/debug/seanerbroker &
 SERVER_PID=$!
 
 echo "server PID is $SERVER_PID"
