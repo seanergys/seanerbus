@@ -33,7 +33,8 @@ void on_publish(seanerbus::client::Connection& conn,
 int main(int argc, char** argv)
 {
     entity = seanerbus::msg::Entity(seanerbus::msg::Uuid(0, 10));
-    seanerbus::client::Connection conn("seanerbroker://localhost:5398", "seanerbroker://localhost:5398");
+    seanerbus::client::Connection conn("seanerbroker://localhost:5398",
+                                       "seanerbroker://localhost:5398");
 
     on_publish(conn, seanerbus::Expected<void, seanerbus::Error>());
     seanerbus::client::SimpleEventLoop loop(conn);
